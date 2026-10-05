@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "bindings": {
+    "output_capacitor": {
+      "reference": "C1",
+      "applicability": "applicable",
+      "rationale": "Synthetic ceramic output capacitor",
+      "reviewed_by": "Synthetic test fixture"
+    },
+    "regulator": {
+      "reference": "U1",
+      "applicability": "applicable",
+      "rationale": "Synthetic regulator",
+      "reviewed_by": "Synthetic test fixture"
+    }
+  },
+  "components": {
+    "C1": {
+      "dielectric": {
+        "part_number": "DEMO-CAP-1",
+        "status": "verified",
+        "reviewed_by": "Synthetic test fixture",
+        "source": {
+          "locator": "Fictional capacitor specification, table 1"
+        },
+        "conditions": "Synthetic operating envelope only",
+        "conditions_match": true,
+        "value": "X7R",
+        "basis": "manufacturer"
+      },
+      "nominal_capacitance": {
+        "part_number": "DEMO-CAP-1",
+        "status": "verified",
+        "reviewed_by": "Synthetic test fixture",
+        "source": {
+          "locator": "Fictional capacitor specification, table 1"
+        },
+        "conditions": "Synthetic operating envelope only",
+        "conditions_match": true,
+        "min": 2.2,
+        "max": 2.2,
+        "unit": "uF",
+        "basis": "schematic"
+      },
+      "esr": {
+        "part_number": "DEMO-CAP-1",
+        "status": "verified",
+        "reviewed_by": "Synthetic test fixture",
+        "source": {
+          "locator": "Fictional capacitor specification, table 1"
+        },
+        "conditions": "Synthetic operating envelope only",
+        "conditions_match": true,
+        "min": 1,
+        "max": 4,
+        "unit": "mOhm",
+        "basis": "manufacturer"
+      }
+    }
+  }
+}

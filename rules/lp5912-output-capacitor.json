@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "notes": "Reusable draft pack; bind targets and check applicability before use. Effective minimum corrected from original excerpt-only interpretation after reading full section 6.6. Earth-sensor document-based run is in cases/earth-sensor-ldo-v02.",
+  "rules": [
+    {
+      "id": "LDO-COUT-TECH",
+      "status": "draft",
+      "kind": "component_property",
+      "requirement": "Selected ceramic output capacitor uses X5R or X7R dielectric. Alternative technologies require separately reviewed rules.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor",
+      "property": "dielectric",
+      "operator": "one_of",
+      "allowed": [
+        "X5R",
+        "X7R"
+      ],
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-NOMINAL",
+      "status": "draft",
+      "kind": "component_property",
+      "requirement": "Ceramic output capacitor nominal capacitance is within 1–10 uF. This does not establish effective capacitance.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor",
+      "property": "nominal_capacitance",
+      "operator": "range",
+      "min": 1,
+      "max": 10,
+      "unit": "uF",
+      "evidence_basis": "schematic"
+    },
+    {
+      "id": "LDO-COUT-EFFECTIVE",
+      "status": "draft",
+      "kind": "component_property",
+      "requirement": "Output capacitance for stability is 0.7–10 uF per section 6.6. Verify effective capacitance over applicable conditions and assess the complete output network separately. The 1–10 uF application recommendation remains a separate check.",
+      "source": {
+        "document": "TI LP5912-EP SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 6, section 6.6 Output and Input Capacitors",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30"
+      },
+      "target": "output_capacitor",
+      "property": "effective_capacitance",
+      "operator": "range",
+      "min": 0.7,
+      "max": 10,
+      "unit": "uF",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-ESR",
+      "status": "draft",
+      "kind": "component_property",
+      "requirement": "Output capacitor ESR is within 5–500 mOhm under the relevant operating conditions.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor",
+      "property": "esr",
+      "operator": "range",
+      "min": 5,
+      "max": 500,
+      "unit": "mOhm",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-OUT",
+      "status": "draft",
+      "kind": "connected",
+      "requirement": "Selected capacitor terminal connects to the regulator OUT pin; verify terminal mapping before approval.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor",
+      "pin": "1",
+      "other_target": "regulator",
+      "other_pin": "1"
+    },
+    {
+      "id": "LDO-COUT-GND",
+      "status": "draft",
+      "kind": "connected",
+      "requirement": "Selected capacitor return connects to the regulator GND pin; verify terminal mapping before approval.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor",
+      "pin": "2",
+      "other_target": "regulator",
+      "other_pin": "5"
+    },
+    {
+      "id": "LDO-COUT-RETURN",
+      "status": "draft",
+      "kind": "manual",
+      "requirement": "Output capacitor has a good physical return connection to GND. Requires PCB inspection.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor"
+    },
+    {
+      "id": "LDO-COUT-NETWORK",
+      "status": "draft",
+      "kind": "manual",
+      "requirement": "Assess other parallel capacitors and the output network; verify which capacitance and ESR constraints apply to the assembled circuit.",
+      "source": {
+        "document": "LP5912-EP datasheet passage supplied by user",
+        "locator": "Conversation excerpt: output capacitor requirements; page and revision not supplied",
+        "excerpt": "Ceramic X5R or X7R, 1–10 uF; ESR 5–500 mOhm; OUT to GND connection. Minimum capacitance and ESR required for stability."
+      },
+      "target": "output_capacitor"
+    }
+  ]
+}

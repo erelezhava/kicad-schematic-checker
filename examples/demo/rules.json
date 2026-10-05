@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "notes": "Draft interpretation. Verify full source and circuit applicability. Does not evaluate the earth-sensor capacitor.",
+  "rules": [
+    {
+      "id": "LDO-COUT-TECH",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Selected ceramic output capacitor uses X5R or X7R dielectric. Alternative technologies require separately reviewed rules.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor",
+      "property": "dielectric",
+      "operator": "one_of",
+      "allowed": [
+        "X5R",
+        "X7R"
+      ],
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-NOMINAL",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Ceramic output capacitor nominal capacitance is within 1–10 uF. This does not establish effective capacitance.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor",
+      "property": "nominal_capacitance",
+      "operator": "range",
+      "min": 1,
+      "max": 10,
+      "unit": "uF",
+      "evidence_basis": "schematic"
+    },
+    {
+      "id": "LDO-COUT-EFFECTIVE",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Effective output capacitance satisfies the interpreted 1–10 uF range over the applicable operating envelope. Confirm interpretation against the complete datasheet.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor",
+      "property": "effective_capacitance",
+      "operator": "range",
+      "min": 1,
+      "max": 10,
+      "unit": "uF",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-ESR",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Output capacitor ESR is within 5–500 mOhm under the relevant operating conditions.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor",
+      "property": "esr",
+      "operator": "range",
+      "min": 5,
+      "max": 500,
+      "unit": "mOhm",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-OUT",
+      "status": "approved",
+      "kind": "connected",
+      "requirement": "Selected capacitor terminal connects to the regulator OUT pin; verify terminal mapping before approval.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor",
+      "pin": "1",
+      "other_target": "regulator",
+      "other_pin": "1"
+    },
+    {
+      "id": "LDO-COUT-GND",
+      "status": "approved",
+      "kind": "connected",
+      "requirement": "Selected capacitor return connects to the regulator GND pin; verify terminal mapping before approval.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor",
+      "pin": "2",
+      "other_target": "regulator",
+      "other_pin": "5"
+    },
+    {
+      "id": "LDO-COUT-RETURN",
+      "status": "approved",
+      "kind": "manual",
+      "requirement": "Output capacitor has a good physical return connection to GND. Requires PCB inspection.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor"
+    },
+    {
+      "id": "LDO-COUT-NETWORK",
+      "status": "approved",
+      "kind": "manual",
+      "requirement": "Assess other parallel capacitors and the output network; verify which capacitance and ESR constraints apply to the assembled circuit.",
+      "source": {
+        "locator": "Synthetic example specification — not engineering evidence"
+      },
+      "target": "output_capacitor"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<export version="E"><design><source>SYNTHETIC_ONLY</source><tool>Test fixture</tool></design>
+<components>
+<comp ref="C1"><value>2.2 uF</value><property name="PRT.NUM" value="DEMO-CAP-1"/><sheetpath names="/"/><tstamps>demo-cap</tstamps></comp>
+<comp ref="U1"><value>DEMO-LDO</value><property name="PRT.NUM" value="DEMO-LDO"/><sheetpath names="/"/><tstamps>demo-ldo</tstamps></comp>
+</components><nets>
+<net name="VOUT"><node ref="C1" pin="1"/><node ref="U1" pin="1" pinfunction="OUT"/></net>
+<net name="GND"><node ref="C1" pin="2"/><node ref="U1" pin="5" pinfunction="GND"/></net>
+</nets></export>
