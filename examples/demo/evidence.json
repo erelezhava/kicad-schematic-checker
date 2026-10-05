@@ -29,6 +29,7 @@
         "basis": "manufacturer"
       },
       "nominal_capacitance": {
+        "field": "Value",
         "part_number": "DEMO-CAP-1",
         "status": "verified",
         "reviewed_by": "Synthetic test fixture",

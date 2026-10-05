@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "notes": "SYNTHETIC example only; no real manufacturer specification is asserted.",
+  "rules": [{
+    "id": "SYMBOL-PIN-COUNT",
+    "kind": "symbol_pin_count",
+    "status": "approved",
+    "target": "example_ic",
+    "requirement": "The example symbol shall expose the eight numbered terminals of the selected package across its placed units.",
+    "manufacturer": "Synthetic Manufacturer",
+    "part_number": "DEMO-8PIN-S08",
+    "package": "SOIC-8",
+    "expected_count": 8,
+    "expected_pin_numbers": ["1", "2", "3", "4", "5", "6", "7", "8"],
+    "pin_count_convention": "Count all numbered terminals, including NC and power pins; this synthetic package has no exposed pad.",
+    "source": {"locator": "Synthetic pin table fixture, revision A; not an actual datasheet"}
+  }]
+}

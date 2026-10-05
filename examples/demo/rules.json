@@ -23,7 +23,7 @@
       "id": "LDO-COUT-NOMINAL",
       "status": "approved",
       "kind": "component_property",
-      "requirement": "Ceramic output capacitor nominal capacitance is within 1–10 uF. This does not establish effective capacitance.",
+      "requirement": "Schematic-declared nominal capacitance (KiCad Value field) is within 1–10 uF. This does not establish effective capacitance.",
       "source": {
         "locator": "Synthetic example specification — not engineering evidence"
       },
@@ -33,7 +33,8 @@
       "min": 1,
       "max": 10,
       "unit": "uF",
-      "evidence_basis": "schematic"
+      "evidence_basis": "schematic",
+      "schematic_field": "Value"
     },
     {
       "id": "LDO-COUT-EFFECTIVE",

@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "notes": "Case-specific, agent-reviewed rules for U2 and selected C2. Approved means rule interpretation reviewed by Codex, not user approval or circuit pass. No other-device datasheets or capacitor manufacturer data supplied.",
+  "rules": [
+    {
+      "id": "LDO-COUT-TECH",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Selected ceramic output capacitor uses X5R or X7R dielectric. Alternative technologies require separately reviewed rules.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.3 Output Capacitor",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "property": "dielectric",
+      "operator": "one_of",
+      "allowed": [
+        "X5R",
+        "X7R"
+      ],
+      "reviewed_by": "Codex, source PDF visual review",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-NOMINAL",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "The schematic-declared C2 nominal capacitance is within the 1–10 uF application recommendation. Does not verify manufactured value, dielectric or effective capacitance.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.3 Output Capacitor",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "property": "declared_nominal_capacitance",
+      "operator": "range",
+      "min": 1,
+      "max": 10,
+      "unit": "uF",
+      "reviewed_by": "Codex, source PDF visual review",
+      "evidence_basis": "schematic"
+    },
+    {
+      "id": "LDO-COUT-EFFECTIVE",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Output capacitance for stability is 0.7–10 uF over the applicable operating envelope. Verify effective bounds and separately assess the entire output network.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 6, 6.6 Output and Input Capacitors",
+        "authority": "specification",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "property": "effective_capacitance",
+      "operator": "range",
+      "min": 0.7,
+      "max": 10,
+      "unit": "uF",
+      "reviewed_by": "Codex, source PDF visual review",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-ESR",
+      "status": "approved",
+      "kind": "component_property",
+      "requirement": "Output capacitor ESR is within 5–500 mOhm under the relevant operating conditions.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 6, 6.6 Output and Input Capacitors",
+        "authority": "specification",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "property": "esr",
+      "operator": "range",
+      "min": 5,
+      "max": 500,
+      "unit": "mOhm",
+      "reviewed_by": "Codex, source PDF visual review",
+      "evidence_basis": "manufacturer"
+    },
+    {
+      "id": "LDO-COUT-OUT",
+      "status": "approved",
+      "kind": "connected",
+      "requirement": "C2 terminal 2 connects to U2 OUT pin 1.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.3 Output Capacitor",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "pin": "2",
+      "other_target": "regulator",
+      "other_pin": "1",
+      "reviewed_by": "Codex, source PDF visual review"
+    },
+    {
+      "id": "LDO-COUT-GND",
+      "status": "approved",
+      "kind": "connected",
+      "requirement": "C2 terminal 1 connects to U2 GND pin 5.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.3 Output Capacitor",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "pin": "1",
+      "other_target": "regulator",
+      "other_pin": "5",
+      "reviewed_by": "Codex, source PDF visual review"
+    },
+    {
+      "id": "LDO-COUT-RETURN",
+      "status": "approved",
+      "kind": "manual",
+      "requirement": "Verify output capacitor ground return and layout, including remote-capacitor conditions. Schematic connectivity alone does not establish physical return quality.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 21 and 23, 8.2.2.5 and 8.4.1",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "reviewed_by": "Codex, source PDF visual review"
+    },
+    {
+      "id": "LDO-COUT-NETWORK",
+      "status": "approved",
+      "kind": "heuristic",
+      "requirement": "Resolve applicability of the 10-uF output limit to the full output network: populated C1+C2+C5+C44+C98 total 18.0 uF nominal on +3V3/GND. Effective capacitance and parasitics are unknown; do not declare this a proven stability violation.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 6 and 21, 6.6 and 8.2.2.5",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "target": "output_capacitor",
+      "reviewed_by": "Codex, source PDF visual review",
+      "candidate": "The populated capacitors directly on +3V3 sum to 18.0 uF nominal; this may merit comparison with the datasheet 10-uF output capacitance entry, but is not a verified violation.",
+      "method": "Group same-net populated capacitors in the KiCad netlist, sum declared nominal values, compare with datasheet section 6.6, and defer physical/effective-network interpretation."
+    },
+    {
+      "id": "LDO-CIN-IN",
+      "status": "approved",
+      "kind": "connected",
+      "target": "input_capacitor",
+      "requirement": "C37 pin 1 connects to U2 IN pin 6.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.2",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review",
+      "pin": "1",
+      "other_target": "regulator",
+      "other_pin": "6"
+    },
+    {
+      "id": "LDO-CIN-GND",
+      "status": "approved",
+      "kind": "connected",
+      "target": "input_capacitor",
+      "requirement": "C37 pin 2 connects to U2 GND pin 5.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.2",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review",
+      "pin": "2",
+      "other_target": "regulator",
+      "other_pin": "5"
+    },
+    {
+      "id": "LDO-CIN-EFFECTIVE",
+      "status": "approved",
+      "kind": "manual",
+      "target": "input_capacitor",
+      "requirement": "C37 is 2.2 uF nominal. Verify manufacturer data and effective capacitance: 0.7 uF specification minimum in 6.6, with 1-uF nominal application guidance.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 6 and 20, 6.6 and 8.2.2.2",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-CIN-LAYOUT",
+      "status": "approved",
+      "kind": "manual",
+      "target": "input_capacitor",
+      "requirement": "Verify C37 is within 1 cm of U2 IN, with clean low-impedance ground and low input inductance.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20 and 23, 8.2.2.2 and 8.3",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-CIN-LONG-LEADS",
+      "status": "approved",
+      "kind": "manual",
+      "target": "input_capacitor",
+      "requirement": "Assess the conditional recommendation for at least 10 uF input capacitance for long supply leads or inadequate ground/input inductance. Schematic notes a 300-mm cable; actual supply impedance and filter behavior are unknown.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 20, 8.2.2.2 note",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-CIN-ESR-CONFLICT",
+      "status": "approved",
+      "kind": "manual",
+      "target": "input_capacitor",
+      "requirement": "Resolve source wording: Table 8-1 lists input/output ESR 5–500 mOhm, while 8.2.2.2 explicitly says input ESR has no requirement. Do not impose the output ESR limit on C37 automatically.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 19 and 20, Table 8-1 and 8.2.2.2 note",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-TRANSIENT-NETWORK",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "For best fast-load-transient performance, input capacitance should equal or exceed total output capacitance. C37 is 2.2 uF versus 18.0 uF nominal at OUT; establish transient requirements and effective values. This is not automatically a stability failure.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 21, 8.2.2.5",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-EPAD-GND",
+      "status": "approved",
+      "kind": "connected",
+      "target": "regulator",
+      "requirement": "For the selected grounded-pad implementation, U2 exposed pad 7 connects to GND pin 5. The datasheet also permits a floating pad electrically; thermal layout remains separate.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 3, Table 5-1",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review",
+      "pin": "7",
+      "other_target": "regulator",
+      "other_pin": "5"
+    },
+    {
+      "id": "LDO-PG-PULLUP",
+      "status": "approved",
+      "kind": "connected",
+      "target": "pg_pullup",
+      "requirement": "R15 pin 2 connects to U2 PG pin 3.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 17, 7.3.6",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review",
+      "pin": "2",
+      "other_target": "regulator",
+      "other_pin": "3"
+    },
+    {
+      "id": "LDO-PG-RAIL",
+      "status": "approved",
+      "kind": "connected",
+      "target": "pg_pullup",
+      "requirement": "R15 pin 1 connects to U2 OUT pin 1, the chosen pull-up supply. Does not establish receiver voltage compatibility.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 17, 7.3.6",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review",
+      "pin": "1",
+      "other_target": "regulator",
+      "other_pin": "1"
+    },
+    {
+      "id": "LDO-PG-VALUE",
+      "status": "approved",
+      "kind": "component_property",
+      "target": "pg_pullup",
+      "requirement": "The declared R15 nominal value is within the 10–100 kOhm pull-up recommendation; manufacturing tolerance is not established here.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 17, 7.3.6",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review",
+      "property": "declared_nominal_resistance",
+      "operator": "range",
+      "min": 10,
+      "max": 100,
+      "unit": "kOhm",
+      "evidence_basis": "schematic"
+    },
+    {
+      "id": "LDO-PG-USE",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "PG only connects to R15 in this project. Confirm whether PG is intentionally unused; if unused the pull-up may be omitted. If used, validate receiver levels and validity below 1.6-V input.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 17, 7.3.6",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-EN-LEVELS",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "J2 pin 1 drives U2 EN directly. Establish source levels/sequencing: on above 1.35 V, off below 0.25 V; recommended EN range 0 to VIN. Internal 3-MOhm pulldown exists; no external pulldown is automatically required.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 4, 5 and 18, 6.3, 6.5 and 7.4.1",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-SUPPLY-HEADROOM",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "Confirm actual filtered input range 1.6–6.5 V, dropout and transients; 8.3 recommends VIN >= VOUT + 0.5 V for optimum regulation/dynamic performance. Net labels +5V/+3V3 are nominal intent only.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 4, 5, 18 and 23, 6.3, 6.5, 7.4.2 and 8.3",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-LOAD-THERMAL",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "Confirm total load <=500 mA, junction temperature -55 to +125 C, power dissipation and actual PCB thermal path. Do not use current limit or thermal shutdown as continuous operating ratings.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 4, 17 and 21, 6.3, 7.3.4-5 and 8.2.2.6",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-ABSOLUTE-RATINGS",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "Verify IN, OUT, EN and PG remain within -0.3 to 7 V under relevant transients, separately from tighter recommended operating conditions.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 4, 6.1",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-OFF-BACKPOWER",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "Check whether external signals or another supply can hold OUT high with EN low; automatic discharge can sink current even though reverse current to IN is blocked.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 17, 7.3.3",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-OUTPUT-TOLERANCE",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "Verify chosen 3.3-V output option and its tolerance against sensor/interface limits; their datasheets and required operating envelope are not supplied.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 5, 6.5",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    },
+    {
+      "id": "LDO-PIN-MODEL",
+      "status": "approved",
+      "kind": "manual",
+      "target": "regulator",
+      "requirement": "Resolve symbol typing: U2 GND and exposed pad are power_out; OUT is output and IN is input. Pin-function table identifies their real roles. NC pin 2 is explicitly unconnected, which is allowed. Electrical net observations do not validate PCB pad mapping.",
+      "source": {
+        "document": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+        "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+        "revision": "SNVSC57, September 2022",
+        "locator": "lp5912-ep.pdf, PDF/printed page 3, Table 5-1",
+        "authority": "application_guidance",
+        "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf"
+      },
+      "reviewed_by": "Codex, source PDF review"
+    }
+  ]
+}

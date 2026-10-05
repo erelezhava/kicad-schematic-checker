@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- Synthetic example only. Only two pins appear in nets, but all eight are placed. -->
+<export version="E">
+  <design><source>SYNTHETIC_ONLY</source><tool>Test fixture</tool></design>
+  <components>
+    <comp ref="U1">
+      <value>DEMO-8PIN</value>
+      <fields><field name="Manufacturer">Synthetic Manufacturer</field><field name="MPN">DEMO-8PIN-S08</field><field name="Description">SYNTHETIC 8-pin SOIC-8 device (fictional part)</field></fields>
+      <libsource lib="Synthetic" part="DEMO-8PIN"/>
+      <sheetpath names="/"/>
+      <units>
+        <unit name="A"><pins><pin num="1"/><pin num="2"/><pin num="3"/><pin num="4"/><pin num="5"/><pin num="6"/></pins></unit>
+        <unit name="B"><pins><pin num="7"/><pin num="8"/></pins></unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Synthetic" part="DEMO-8PIN"><pins>
+      <pin num="1" name="IN" type="input"/>
+      <pin num="2" name="NC" type="no_connect"/>
+      <pin num="3" name="MODE" type="input"/>
+      <pin num="4" name="OUT" type="output"/>
+      <pin num="5" name="EN" type="input"/>
+      <pin num="6" name="NC" type="no_connect"/>
+      <pin num="7" name="GND" type="power_in"/>
+      <pin num="8" name="VCC" type="power_in"/>
+    </pins></libpart>
+  </libparts>
+  <nets><net name="INPUT"><node ref="U1" pin="1"/></net><net name="VCC"><node ref="U1" pin="8"/></net></nets>
+</export>

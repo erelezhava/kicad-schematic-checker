@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "bindings": {
+    "output_capacitor": {
+      "reference": "C2",
+      "applicability": "applicable",
+      "rationale": "C2 is shown next to U2 OUT and is connected from OUT to GND. Other parallel capacitors require network review.",
+      "reviewed_by": "Codex"
+    },
+    "input_capacitor": {
+      "reference": "C37",
+      "applicability": "applicable",
+      "rationale": "Only direct capacitor between U2 IN and GND in extracted netlist.",
+      "reviewed_by": "Codex"
+    },
+    "regulator": {
+      "reference": "U2",
+      "applicability": "applicable",
+      "rationale": "Part field LP591233MDRVREP and LP5912-EP source match the regulator family.",
+      "reviewed_by": "Codex"
+    },
+    "pg_pullup": {
+      "reference": "R15",
+      "applicability": "applicable",
+      "rationale": "Populated pull-up from U2 PG to +3V3.",
+      "reviewed_by": "Codex"
+    }
+  },
+  "components": {
+    "C2": {
+      "declared_nominal_capacitance": {
+        "part_number": "GCM21BR71E225KA73L",
+        "status": "verified",
+        "reviewed_by": "Codex",
+        "source": {
+          "locator": "/home/erekle/Applications/Agents and Ollama/KiCad schematic checker/runs/earth-sensor-extract-v02/circuit.json: components.C2.value (verified against exported schematic)",
+          "sha256": "ef6e0ff017c8bad0e02ae4eb7af6ebe61f105e5726cb899c8cd5e5a73aab3efb",
+          "path": "/home/erekle/Applications/Agents and Ollama/KiCad schematic checker/runs/earth-sensor-extract-v02/circuit.json"
+        },
+        "conditions": "Schematic-declared nominal value only; no manufacturer tolerance, DC bias, frequency, temperature or actual assembly validation.",
+        "conditions_match": true,
+        "min": 2.2,
+        "max": 2.2,
+        "unit": "uF",
+        "basis": "schematic"
+      }
+    },
+    "R15": {
+      "declared_nominal_resistance": {
+        "part_number": "AF0402FR-0710KL",
+        "status": "verified",
+        "reviewed_by": "Codex",
+        "source": {
+          "locator": "/home/erekle/Applications/Agents and Ollama/KiCad schematic checker/runs/earth-sensor-extract-v02/circuit.json: components.R15.value (verified against exported schematic)",
+          "sha256": "ef6e0ff017c8bad0e02ae4eb7af6ebe61f105e5726cb899c8cd5e5a73aab3efb",
+          "path": "/home/erekle/Applications/Agents and Ollama/KiCad schematic checker/runs/earth-sensor-extract-v02/circuit.json"
+        },
+        "conditions": "Schematic-declared nominal value only; no manufacturer tolerance, DC bias, frequency, temperature or actual assembly validation.",
+        "conditions_match": true,
+        "min": 10,
+        "max": 10,
+        "unit": "kOhm",
+        "basis": "schematic"
+      }
+    }
+  }
+}

@@ -137,7 +137,9 @@ class ReviewTests(unittest.TestCase):
 
     def test_invalid_units_intervals_and_nan_unresolved(self):
         original = copy.deepcopy(self.evidence)
-        for patch in ({"unit": "Ohm"}, {"min": 501, "max": 5}, {"min": float("nan")}, {"min": True}):
+        # Recognized units of the same quantity convert (see test_normalization.py);
+        # unrecognized or incompatible units stay unresolved.
+        for patch in ({"unit": "uF"}, {"unit": "milliohms?"}, {"min": 501, "max": 5}, {"min": float("nan")}, {"min": True}):
             self.evidence = copy.deepcopy(original)
             self.evidence["components"]["C1"]["esr"].update(patch)
             self.assertEqual(self.results()["LDO-COUT-ESR"]["status"], "needs_review")

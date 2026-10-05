@@ -1,0 +1,1148 @@
+{
+  "source": "/home/erekle/GitLab/adcs/earth_sensor/Earth_Sensor_18x40.kicad_sch",
+  "source_sha256": "46dd74956aa714b04fd27ba80dda91f52b2a4a457c03800ed44b1e33f0ef14ac",
+  "kicad_version": "10.0.6",
+  "scope": "Saved schematic baseline; no datasheet verification or PCB review performed.",
+  "components": [
+    {
+      "reference": "A1",
+      "value": "MLX90640ESF-BAA-000-SP",
+      "footprint": "MLX90640ESF-BAA-000-TU:TO292P930H600-4",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PARTREV": "11",
+        "STANDARD": "IPC-7351B",
+        "MAXIMUM_PACKAGE_HEIGHT": "6.0 mm",
+        "MANUFACTURER": "Melexis",
+        "PRT.NUM": "MLX90640ESF-BAA-000-TU",
+        "JLC_PART": "C17380659",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch"
+      }
+    },
+    {
+      "reference": "C1",
+      "value": "4.7 uF",
+      "footprint": "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "GCM21BR71C475KA73L",
+        "JLC_PART": "C90791",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "cap capacitor",
+        "ki_fp_filters": "C_*"
+      }
+    },
+    {
+      "reference": "C2",
+      "value": "2.2 uF",
+      "footprint": "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "GCM21BR71E225KA73L",
+        "JLC_PART": "C126591",
+        "Arrow Part Number": "",
+        "Arrow Price/Stock": "",
+        "Height": "",
+        "Manufacturer_Name": "",
+        "Manufacturer_Part_Number": "",
+        "Mouser Part Number": "",
+        "Mouser Price/Stock": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "cap capacitor",
+        "ki_fp_filters": "C_*"
+      }
+    },
+    {
+      "reference": "C5",
+      "value": "1 uF",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "GCM188R71C105KA64J",
+        "JLC_PART": "C2169902",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "cap capacitor",
+        "ki_fp_filters": "C_*"
+      }
+    },
+    {
+      "reference": "C37",
+      "value": "2.2 uF",
+      "footprint": "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "GCM21BR71E225KA73L",
+        "JLC_PART": "C126591",
+        "Arrow Part Number": "",
+        "Arrow Price/Stock": "",
+        "Height": "",
+        "Manufacturer_Name": "",
+        "Manufacturer_Part_Number": "",
+        "Mouser Part Number": "",
+        "Mouser Price/Stock": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "cap capacitor",
+        "ki_fp_filters": "C_*"
+      }
+    },
+    {
+      "reference": "C44",
+      "value": "100 nF",
+      "footprint": "Capacitor_SMD:C_0402_1005Metric",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "GCM155R71C104KA55J",
+        "JLC_PART": "C2655418",
+        "Arrow Part Number": "",
+        "Arrow Price/Stock": "",
+        "Height": "",
+        "Manufacturer_Name": "",
+        "Manufacturer_Part_Number": "",
+        "Mouser Part Number": "",
+        "Mouser Price/Stock": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "cap capacitor",
+        "ki_fp_filters": "C_*"
+      }
+    },
+    {
+      "reference": "C98",
+      "value": "10 uF",
+      "footprint": "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "GCM21BR71A106KE22L",
+        "JLC_PART": "C126586",
+        "Arrow Part Number": "",
+        "Arrow Price/Stock": "",
+        "Height": "",
+        "Manufacturer_Name": "",
+        "Manufacturer_Part_Number": "",
+        "Mouser Part Number": "",
+        "Mouser Price/Stock": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "cap capacitor",
+        "ki_fp_filters": "C_*"
+      }
+    },
+    {
+      "reference": "H1",
+      "value": "MountingHole_Pad",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "exclude_from_bom": true,
+        "ki_keywords": "mounting hole",
+        "ki_fp_filters": "MountingHole*Pad*"
+      }
+    },
+    {
+      "reference": "H2",
+      "value": "MountingHole_Pad",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "exclude_from_bom": true,
+        "ki_keywords": "mounting hole",
+        "ki_fp_filters": "MountingHole*Pad*"
+      }
+    },
+    {
+      "reference": "H3",
+      "value": "MountingHole_Pad",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "exclude_from_bom": true,
+        "ki_keywords": "mounting hole",
+        "ki_fp_filters": "MountingHole*Pad*"
+      }
+    },
+    {
+      "reference": "H4",
+      "value": "MountingHole_Pad",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "exclude_from_bom": true,
+        "ki_keywords": "mounting hole",
+        "ki_fp_filters": "MountingHole*Pad*"
+      }
+    },
+    {
+      "reference": "J2",
+      "value": "5040500691",
+      "footprint": "5040500691:MOLEX_5040500691",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PARTREV": "B",
+        "STANDARD": "Manufacturer Recommendations",
+        "MAXIMUM_PACKAGE_HEIGHT": "2.15 mm",
+        "MANUFACTURER": "Molex",
+        "PRT.NUM": "5040500691",
+        "JLC_PART": "C563981",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch"
+      }
+    },
+    {
+      "reference": "R1",
+      "value": "620 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "ERJ-2RKF6200X",
+        "JLC_PART": "C413077",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R2",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R3",
+      "value": "620 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "ERJ-2RKF6200X",
+        "JLC_PART": "C413077",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R4",
+      "value": "2.7 kOhm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "ERJ-2RKF2701X",
+        "JLC_PART": "C413089",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R5",
+      "value": "2.7 kOhm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "ERJ-2RKF2701X",
+        "JLC_PART": "C413089",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R6",
+      "value": "10 K",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "AF0402FR-0710KL",
+        "JLC_PART": "C723353",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R7",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R8",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R9",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R10",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": true,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "dnp": true,
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R11",
+      "value": "10 K",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "AF0402FR-0710KL",
+        "JLC_PART": "C723353",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R12",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R13",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": true,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "dnp": true,
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R14",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R15",
+      "value": "10 K",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "AF0402FR-0710KL",
+        "JLC_PART": "C723353",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R27",
+      "value": "110Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": null,
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "ERJ-2RKF1100X",
+        "JLC_PART": "C413064",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "R28",
+      "value": "0 Ohm",
+      "footprint": "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder",
+      "datasheet": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "CRCW04020000Z0ED",
+        "JLC_PART": "C190119",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "R res resistor",
+        "ki_fp_filters": "R_*"
+      }
+    },
+    {
+      "reference": "U1",
+      "value": "LTC4331HUFD-PBF",
+      "footprint": "LTC4331HUFD_PBF:QFN20_LTC4331HUFD-PBF_ADI",
+      "datasheet": "https://www.analog.com/media/en/technical-documentation/data-sheets/LTC4331.pdf",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "LTC4331HUFD#PBF",
+        "JLC_PART": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "LTC4331HUFD#PBF",
+        "ki_fp_filters": "QFN20_LTC4331HUFD-PBF_ADI QFN20_LTC4331HUFD-PBF_ADI-M QFN20_LTC4331HUFD-PBF_ADI-L"
+      }
+    },
+    {
+      "reference": "U2",
+      "value": "LP591233MDRVREP",
+      "footprint": "LP591233MDRVREP:WSON6_DRV_TEX",
+      "datasheet": "https://www.ti.com/lit/gpn/lp5912-ep",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "LP591233MDRVREP",
+        "JLC_PART": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "LP591233MDRVREP",
+        "ki_fp_filters": "WSON6_DRV_TEX WSON6_DRV_TEX-M WSON6_DRV_TEX-L"
+      }
+    },
+    {
+      "reference": "U3",
+      "value": "SBSPP1000472MXT",
+      "footprint": "SBSPP1000472MXT:SBSPP1000472MXT",
+      "datasheet": "SBSPP1000472MXT",
+      "dnp": false,
+      "properties": {
+        "PRT.NUM": "SBSPP1000472MXT",
+        "JLC_PART": "",
+        "Sheetname": "Earth_Sensor_18x40",
+        "Sheetfile": "Earth_Sensor_18x40.kicad_sch",
+        "ki_keywords": "SBSPP1000472MXT",
+        "ki_fp_filters": "CHIP_0473MXT_SYF CHIP_0473MXT_SYF-M CHIP_0473MXT_SYF-L"
+      }
+    }
+  ],
+  "nets": [
+    {
+      "name": "+3V3",
+      "nodes": [
+        {
+          "ref": "A1",
+          "pin": "2",
+          "pinfunction": "VDD_2",
+          "pintype": "power_in"
+        },
+        {
+          "ref": "C1",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C2",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C44",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C5",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C98",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R10",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R11",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R13",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R15",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R3",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R4",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R5",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R6",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "1",
+          "pinfunction": "Vcc_1",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "17",
+          "pinfunction": "SLO_17",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "2",
+          "pinfunction": "VL_2",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "3",
+          "pinfunction": "On_3",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "4",
+          "pinfunction": "Remote_4",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U2",
+          "pin": "1",
+          "pinfunction": "OUT_1",
+          "pintype": "output"
+        }
+      ]
+    },
+    {
+      "name": "+5V",
+      "nodes": [
+        {
+          "ref": "J2",
+          "pin": "6",
+          "pinfunction": "6_6",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U3",
+          "pin": "1",
+          "pinfunction": "1_1",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "+5V FLTR",
+      "nodes": [
+        {
+          "ref": "C37",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U2",
+          "pin": "6",
+          "pinfunction": "IN_6",
+          "pintype": "input"
+        },
+        {
+          "ref": "U3",
+          "pin": "2",
+          "pinfunction": "2_2",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "/LDO_Enable",
+      "nodes": [
+        {
+          "ref": "J2",
+          "pin": "1",
+          "pinfunction": "1_1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U2",
+          "pin": "4",
+          "pinfunction": "EN_4",
+          "pintype": "input"
+        }
+      ]
+    },
+    {
+      "name": "/SCL",
+      "nodes": [
+        {
+          "ref": "A1",
+          "pin": "4",
+          "pinfunction": "SCL_4",
+          "pintype": "input"
+        },
+        {
+          "ref": "R5",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "7",
+          "pinfunction": "SCL_7",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "/SDA",
+      "nodes": [
+        {
+          "ref": "A1",
+          "pin": "1",
+          "pinfunction": "SDA_1",
+          "pintype": "bidirectional"
+        },
+        {
+          "ref": "R4",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "8",
+          "pinfunction": "SDA_8",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "/Sig_N",
+      "nodes": [
+        {
+          "ref": "J2",
+          "pin": "4",
+          "pinfunction": "4_4",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R1",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R27",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "19",
+          "pinfunction": "B_19",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "/Sig_P",
+      "nodes": [
+        {
+          "ref": "J2",
+          "pin": "3",
+          "pinfunction": "3_3",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R27",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R3",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "18",
+          "pinfunction": "A_18",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "GND",
+      "nodes": [
+        {
+          "ref": "A1",
+          "pin": "3",
+          "pinfunction": "GND_3",
+          "pintype": "power_in"
+        },
+        {
+          "ref": "C1",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C2",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C37",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C44",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C5",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "C98",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "J2",
+          "pin": "2",
+          "pinfunction": "2_2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "J2",
+          "pin": "5",
+          "pinfunction": "5_5",
+          "pintype": "passive"
+        },
+        {
+          "ref": "J2",
+          "pin": "S1",
+          "pinfunction": "SHIELD1_S1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "J2",
+          "pin": "S2",
+          "pinfunction": "SHIELD2_S2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R1",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R12",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R14",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R2",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R28",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R7",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R8",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R9",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "15",
+          "pinfunction": "SPEED2_15",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "16",
+          "pinfunction": "GND_16",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "20",
+          "pinfunction": "NC_20",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "21",
+          "pinfunction": "21_21",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U1",
+          "pin": "9",
+          "pinfunction": "NC_9",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U2",
+          "pin": "5",
+          "pinfunction": "GND_5",
+          "pintype": "power_out"
+        },
+        {
+          "ref": "U2",
+          "pin": "7",
+          "pinfunction": "EPAD_7",
+          "pintype": "power_out"
+        },
+        {
+          "ref": "U3",
+          "pin": "3",
+          "pinfunction": "3_3",
+          "pintype": "unspecified"
+        },
+        {
+          "ref": "U3",
+          "pin": "4",
+          "pinfunction": "4_4",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "Net-(H1-Pad1)",
+      "nodes": [
+        {
+          "ref": "H1",
+          "pin": "1",
+          "pinfunction": "1_1",
+          "pintype": "input"
+        },
+        {
+          "ref": "R8",
+          "pin": "1",
+          "pintype": "passive"
+        }
+      ]
+    },
+    {
+      "name": "Net-(H2-Pad1)",
+      "nodes": [
+        {
+          "ref": "H2",
+          "pin": "1",
+          "pinfunction": "1_1",
+          "pintype": "input"
+        },
+        {
+          "ref": "R7",
+          "pin": "1",
+          "pintype": "passive"
+        }
+      ]
+    },
+    {
+      "name": "Net-(H3-Pad1)",
+      "nodes": [
+        {
+          "ref": "H3",
+          "pin": "1",
+          "pinfunction": "1_1",
+          "pintype": "input"
+        },
+        {
+          "ref": "R2",
+          "pin": "1",
+          "pintype": "passive"
+        }
+      ]
+    },
+    {
+      "name": "Net-(H4-Pad1)",
+      "nodes": [
+        {
+          "ref": "H4",
+          "pin": "1",
+          "pinfunction": "1_1",
+          "pintype": "input"
+        },
+        {
+          "ref": "R28",
+          "pin": "1",
+          "pintype": "passive"
+        }
+      ]
+    },
+    {
+      "name": "Net-(U1-A1)",
+      "nodes": [
+        {
+          "ref": "R13",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R14",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "11",
+          "pinfunction": "A1_11",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "Net-(U1-A2)",
+      "nodes": [
+        {
+          "ref": "R10",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "R12",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "12",
+          "pinfunction": "A2_12",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "Net-(U1-ALERT)",
+      "nodes": [
+        {
+          "ref": "R11",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "10",
+          "pinfunction": "ALERT_10",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "Net-(U1-Link)",
+      "nodes": [
+        {
+          "ref": "R6",
+          "pin": "1",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "5",
+          "pinfunction": "Link_5",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "Net-(U1-SPEED1)",
+      "nodes": [
+        {
+          "ref": "R9",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U1",
+          "pin": "14",
+          "pinfunction": "SPEED1_14",
+          "pintype": "unspecified"
+        }
+      ]
+    },
+    {
+      "name": "Net-(U2-PG)",
+      "nodes": [
+        {
+          "ref": "R15",
+          "pin": "2",
+          "pintype": "passive"
+        },
+        {
+          "ref": "U2",
+          "pin": "3",
+          "pinfunction": "PG_3",
+          "pintype": "output"
+        }
+      ]
+    },
+    {
+      "name": "unconnected-(U1-CTRL-Pad13)",
+      "nodes": [
+        {
+          "ref": "U1",
+          "pin": "13",
+          "pinfunction": "CTRL_13",
+          "pintype": "unspecified+no_connect"
+        }
+      ]
+    },
+    {
+      "name": "unconnected-(U1-RDY-Pad6)",
+      "nodes": [
+        {
+          "ref": "U1",
+          "pin": "6",
+          "pinfunction": "RDY_6",
+          "pintype": "unspecified+no_connect"
+        }
+      ]
+    },
+    {
+      "name": "unconnected-(U2-NC-Pad2)",
+      "nodes": [
+        {
+          "ref": "U2",
+          "pin": "2",
+          "pinfunction": "NC_2",
+          "pintype": "no_connect"
+        }
+      ]
+    }
+  ]
+}

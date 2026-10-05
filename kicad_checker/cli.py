@@ -5,6 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from .description import description_audit, description_markdown, owner_actions, owner_actions_markdown
 from .core import digest, erc_summary, identification, identification_markdown, markdown, parse_netlist, read_json, review, write_json
 
 
@@ -22,10 +23,23 @@ def run_kicad(executable, args):
 
 
 def write_identification(circuit, out):
+    """Default metadata audits written by extract/import: identification, description, owner actions."""
     report = identification(circuit)
     write_json(out / "identification.json", report)
     (out / "identification.md").write_text(identification_markdown(report), encoding="utf-8")
+    described = description_audit(circuit)
+    write_json(out / "description.json", described)
+    (out / "description.md").write_text(description_markdown(described), encoding="utf-8")
     print("Component identification: " + ", ".join(f"{s}={n}" for s, n in report["coverage"].items()))
+    print("Component description: " + ", ".join(f"{s}={n}" for s, n in described["coverage"].items()))
+    write_owner_actions(report, described, out)
+
+
+def write_owner_actions(identified, described, out):
+    actions = owner_actions(identified, described)
+    (out / "owner-actions.md").write_text(owner_actions_markdown(actions), encoding="utf-8")
+    if actions:
+        print(f"Owner actions: {len(actions)} components need fields filled or corrected — see {out / 'owner-actions.md'}")
 
 
 def extract(args):
@@ -82,6 +96,7 @@ def main(argv=None):
     command.add_argument("--evidence", required=True)
     command.add_argument("--output", required=True)
     command.add_argument("--snapshot", action="store_true", help="Explicitly review a saved snapshot without verifying live project hashes")
+    command.add_argument("--docs-root", help="Resolve relative source.path values against this folder instead of the rules/evidence file folders")
     args = parser.parse_args(argv)
     try:
         if args.command == "extract":
@@ -102,7 +117,15 @@ def main(argv=None):
             for path, sha in hashes.items():
                 if not Path(path).is_file() or digest(path) != sha:
                     raise ValueError(f"Project input changed or is unavailable: {path}. Extract again or explicitly use --snapshot")
-        report = review(circuit, read_json(args.rules), read_json(args.evidence))
+        # Relative source.path values resolve against the folder of the file that
+        # contains them, unless --docs-root names one shared document folder.
+        docs_root = Path(args.docs_root).resolve() if args.docs_root else None
+        if docs_root is not None and not docs_root.is_dir():
+            raise ValueError(f"--docs-root is not a directory: {docs_root}")
+        rules_base = docs_root or Path(args.rules).resolve().parent
+        evidence_base = docs_root or Path(args.evidence).resolve().parent
+        report = review(circuit, read_json(args.rules), read_json(args.evidence), rules_base, evidence_base)
+        report["source_base"] = {"rules": str(rules_base), "evidence": str(evidence_base)}
         report["snapshot_review"] = args.snapshot
         report["input_hashes"] = {str(Path(p).resolve()): digest(p) for p in (args.circuit, args.rules, args.evidence)}
         if args.snapshot:
@@ -112,10 +135,15 @@ def main(argv=None):
         (out / "report.md").write_text(markdown(report), encoding="utf-8")
         print("Coverage: " + ", ".join(f"{s}={n}" for s, n in report["coverage"].items()))
         print("Component identification: " + ", ".join(f"{s}={n}" for s, n in report["identification"]["coverage"].items()))
+        print("Component description: " + ", ".join(f"{s}={n}" for s, n in report["description"]["coverage"].items()))
+        write_owner_actions(report["identification"], report["description"], out)
+        approvals = report["approval_summary"]
+        print(f"Passes approved by a human: {approvals['pass_human_approved']}; agent review only: {approvals['pass_agent_only']}")
         print(f"Report: {out / 'report.md'}")
-        if report["coverage"]["fail"]:
+        if report["coverage"]["fail"] or report["description"]["coverage"]["fail"]:
             return 1
-        if not report["results"] or report["coverage"]["needs_review"] or report["coverage"]["not_checked"] or report["identification"]["coverage"]["needs_review"]:
+        if (not report["results"] or report["coverage"]["needs_review"] or report["coverage"]["not_checked"]
+                or report["identification"]["coverage"]["needs_review"] or report["description"]["coverage"]["needs_review"]):
             return 2
         return 0
     except (OSError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as error:

@@ -1,0 +1,39 @@
+{
+  "documents": [
+    {
+      "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.md",
+      "sha256": "e5d2dba2cd3f4a3fd096b8782d9815bdd621796d0b078e1ab93d1468ce017bed",
+      "bytes": 105199
+    },
+    {
+      "path": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+      "sha256": "d6211ad43a9824875ecd29c9d8f2ee3f0c5df14df9b5496ce853de33d9330e30",
+      "bytes": 3514969
+    }
+  ],
+  "pair": {
+    "pdf": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.pdf",
+    "markdown": "/home/erekle/GitLab/adcs/earth_sensor/Docs/LDO/lp5912-ep.md",
+    "identity": "TI LP5912-EP SNVSC57, September 2022, initial release",
+    "verification": "Matching identity and key sections checked in both files. Key original PDF pages visually inspected; not a full conversion-fidelity certification.",
+    "verified_pdf_pages": [
+      3,
+      4,
+      5,
+      6,
+      17,
+      18,
+      19,
+      20,
+      21,
+      23
+    ],
+    "conversion_observations": [
+      "Prose is searchable.",
+      "Page 6 capacitance table appears as plain text, so columns require PDF verification.",
+      "Multi-column front-page text is interleaved.",
+      "Schematics and plots become disconnected labels/numbers; use original page images."
+    ],
+    "printed_page_mapping": "Reviewed PDF page numbers (1-based) equal printed page numbers."
+  }
+}

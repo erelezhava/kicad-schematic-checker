@@ -1,0 +1,1394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>/home/erekle/GitLab/adcs/earth_sensor/Earth_Sensor_18x40.kicad_sch</source>
+    <date>2026-09-21T20:56:21</date>
+    <tool>Eeschema 10.0.6-10.0.6~ubuntu26.04.1</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title/>
+        <company/>
+        <rev/>
+        <date/>
+        <source>Earth_Sensor_18x40.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="A1">
+      <value>MLX90640ESF-BAA-000-SP</value>
+      <footprint>MLX90640ESF-BAA-000-TU:TO292P930H600-4</footprint>
+      <fields>
+        <field name="PARTREV">11</field>
+        <field name="STANDARD">IPC-7351B</field>
+        <field name="MAXIMUM_PACKAGE_HEIGHT">6.0 mm</field>
+        <field name="MANUFACTURER">Melexis</field>
+        <field name="PRT.NUM">MLX90640ESF-BAA-000-TU</field>
+        <field name="JLC_PART">C17380659</field>
+        <field name="Footprint">MLX90640ESF-BAA-000-TU:TO292P930H600-4</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="MLX90640ESF-BAA-000-TU" part="MLX90640ESF-BAA-000-TU" description=""/>
+      <property name="PARTREV" value="11"/>
+      <property name="STANDARD" value="IPC-7351B"/>
+      <property name="MAXIMUM_PACKAGE_HEIGHT" value="6.0 mm"/>
+      <property name="MANUFACTURER" value="Melexis"/>
+      <property name="PRT.NUM" value="MLX90640ESF-BAA-000-TU"/>
+      <property name="JLC_PART" value="C17380659"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>71dadbe2-ba7a-4f4b-af92-c5ae8a24e99a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="4"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C1">
+      <value>4.7 uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <description>4.7 µF ±10% 16V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</description>
+      <fields>
+        <field name="PRT.NUM">GCM21BR71C475KA73L</field>
+        <field name="JLC_PART">C90791</field>
+        <field name="Footprint">Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">4.7 µF ±10% 16V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="PRT.NUM" value="GCM21BR71C475KA73L"/>
+      <property name="JLC_PART" value="C90791"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>815086d7-d9b8-4e61-8d47-3c21975b897e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C2">
+      <value>2.2 uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <description>2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</description>
+      <fields>
+        <field name="PRT.NUM">GCM21BR71E225KA73L</field>
+        <field name="JLC_PART">C126591</field>
+        <field name="Arrow Part Number"/>
+        <field name="Arrow Price/Stock"/>
+        <field name="Height"/>
+        <field name="Manufacturer_Name"/>
+        <field name="Manufacturer_Part_Number"/>
+        <field name="Mouser Part Number"/>
+        <field name="Mouser Price/Stock"/>
+        <field name="Footprint">Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="PRT.NUM" value="GCM21BR71E225KA73L"/>
+      <property name="JLC_PART" value="C126591"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value=""/>
+      <property name="Manufacturer_Part_Number" value=""/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1e8285c0-a863-4a32-8c4c-724c5525ac6c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C5">
+      <value>1 uF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder</footprint>
+      <description>1 µF ±10% 16V Ceramic Capacitor X7R 0603 (1608 Metric)  AEC-Q200</description>
+      <fields>
+        <field name="PRT.NUM">GCM188R71C105KA64J</field>
+        <field name="JLC_PART">C2169902</field>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">1 µF ±10% 16V Ceramic Capacitor X7R 0603 (1608 Metric)  AEC-Q200</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="PRT.NUM" value="GCM188R71C105KA64J"/>
+      <property name="JLC_PART" value="C2169902"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>290e091b-9018-4256-968a-9406bea053c2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C37">
+      <value>2.2 uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <description>2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</description>
+      <fields>
+        <field name="PRT.NUM">GCM21BR71E225KA73L</field>
+        <field name="JLC_PART">C126591</field>
+        <field name="Arrow Part Number"/>
+        <field name="Arrow Price/Stock"/>
+        <field name="Height"/>
+        <field name="Manufacturer_Name"/>
+        <field name="Manufacturer_Part_Number"/>
+        <field name="Mouser Part Number"/>
+        <field name="Mouser Price/Stock"/>
+        <field name="Footprint">Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="PRT.NUM" value="GCM21BR71E225KA73L"/>
+      <property name="JLC_PART" value="C126591"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value=""/>
+      <property name="Manufacturer_Part_Number" value=""/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e4f7f7c6-b811-4012-86e8-e625471dc16e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C44">
+      <value>100 nF</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <description>0.1 µF ±10% 16V Ceramic Capacitor X7R 0402 (1005 Metric) AEC-Q200</description>
+      <fields>
+        <field name="PRT.NUM">GCM155R71C104KA55J</field>
+        <field name="JLC_PART">C2655418</field>
+        <field name="Arrow Part Number"/>
+        <field name="Arrow Price/Stock"/>
+        <field name="Height"/>
+        <field name="Manufacturer_Name"/>
+        <field name="Manufacturer_Part_Number"/>
+        <field name="Mouser Part Number"/>
+        <field name="Mouser Price/Stock"/>
+        <field name="Footprint">Capacitor_SMD:C_0402_1005Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description">0.1 µF ±10% 16V Ceramic Capacitor X7R 0402 (1005 Metric) AEC-Q200</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="PRT.NUM" value="GCM155R71C104KA55J"/>
+      <property name="JLC_PART" value="C2655418"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value=""/>
+      <property name="Manufacturer_Part_Number" value=""/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4ae8bb9b-619c-47da-b2d0-7c660d795ae0</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C98">
+      <value>10 uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <description>10 µF ±10% 10V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</description>
+      <fields>
+        <field name="PRT.NUM">GCM21BR71A106KE22L</field>
+        <field name="JLC_PART">C126586</field>
+        <field name="Arrow Part Number"/>
+        <field name="Arrow Price/Stock"/>
+        <field name="Height"/>
+        <field name="Manufacturer_Name"/>
+        <field name="Manufacturer_Part_Number"/>
+        <field name="Mouser Part Number"/>
+        <field name="Mouser Price/Stock"/>
+        <field name="Footprint">Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">10 µF ±10% 10V Ceramic Capacitor X7R 0805 (2012 Metric) AEC-Q200</field>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="PRT.NUM" value="GCM21BR71A106KE22L"/>
+      <property name="JLC_PART" value="C126586"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value=""/>
+      <property name="Manufacturer_Part_Number" value=""/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b61720cc-8d7f-43d1-9144-c3d050ed015e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H1">
+      <value>MountingHole_Pad</value>
+      <footprint>MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</footprint>
+      <description>Mounting Hole with connection</description>
+      <fields>
+        <field name="Footprint">MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting Hole with connection</field>
+      </fields>
+      <libsource lib="Mechanical" part="MountingHole_Pad" description="Mounting Hole with connection"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <property name="ki_keywords" value="mounting hole"/>
+      <property name="ki_fp_filters" value="MountingHole*Pad*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>29edef76-3bdc-4d38-b5a4-5b696ee9cfde</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H2">
+      <value>MountingHole_Pad</value>
+      <footprint>MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</footprint>
+      <description>Mounting Hole with connection</description>
+      <fields>
+        <field name="Footprint">MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting Hole with connection</field>
+      </fields>
+      <libsource lib="Mechanical" part="MountingHole_Pad" description="Mounting Hole with connection"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <property name="ki_keywords" value="mounting hole"/>
+      <property name="ki_fp_filters" value="MountingHole*Pad*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1e28c23f-6688-4b92-852e-43975453c51e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H3">
+      <value>MountingHole_Pad</value>
+      <footprint>MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</footprint>
+      <description>Mounting Hole with connection</description>
+      <fields>
+        <field name="Footprint">MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting Hole with connection</field>
+      </fields>
+      <libsource lib="Mechanical" part="MountingHole_Pad" description="Mounting Hole with connection"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <property name="ki_keywords" value="mounting hole"/>
+      <property name="ki_fp_filters" value="MountingHole*Pad*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>99908ddd-450d-4041-9851-a1c53681355b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H4">
+      <value>MountingHole_Pad</value>
+      <footprint>MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</footprint>
+      <description>Mounting Hole with connection</description>
+      <fields>
+        <field name="Footprint">MountingHole:MountingHole_2.2mm_M2_DIN965_Pad_TopBottom</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting Hole with connection</field>
+      </fields>
+      <libsource lib="Mechanical" part="MountingHole_Pad" description="Mounting Hole with connection"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <property name="ki_keywords" value="mounting hole"/>
+      <property name="ki_fp_filters" value="MountingHole*Pad*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b9114d25-8552-4265-9e4a-f8b60524da6b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J2">
+      <value>5040500691</value>
+      <footprint>5040500691:MOLEX_5040500691</footprint>
+      <fields>
+        <field name="PARTREV">B</field>
+        <field name="STANDARD">Manufacturer Recommendations</field>
+        <field name="MAXIMUM_PACKAGE_HEIGHT">2.15 mm</field>
+        <field name="MANUFACTURER">Molex</field>
+        <field name="PRT.NUM">5040500691</field>
+        <field name="JLC_PART">C563981</field>
+        <field name="Footprint">5040500691:MOLEX_5040500691</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="5040500691" part="5040500691" description=""/>
+      <property name="PARTREV" value="B"/>
+      <property name="STANDARD" value="Manufacturer Recommendations"/>
+      <property name="MAXIMUM_PACKAGE_HEIGHT" value="2.15 mm"/>
+      <property name="MANUFACTURER" value="Molex"/>
+      <property name="PRT.NUM" value="5040500691"/>
+      <property name="JLC_PART" value="C563981"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>196a3bb9-7e0e-4a55-bf38-96f737c67f90</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="S1"/>
+            <pin num="S2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R1">
+      <value>620 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>620 Ohms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">ERJ-2RKF6200X</field>
+        <field name="JLC_PART">C413077</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">620 Ohms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="ERJ-2RKF6200X"/>
+      <property name="JLC_PART" value="C413077"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d185eadf-12fb-4c6a-9b3f-4e0cb8f481f7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R2">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5cf9f75b-2051-4163-844e-204fa616b141</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R3">
+      <value>620 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>620 Ohms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">ERJ-2RKF6200X</field>
+        <field name="JLC_PART">C413077</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">620 Ohms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="ERJ-2RKF6200X"/>
+      <property name="JLC_PART" value="C413077"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4cf489ba-8da8-49c9-9682-fad8df45525d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R4">
+      <value>2.7 kOhm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>2.7 kOhms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">ERJ-2RKF2701X</field>
+        <field name="JLC_PART">C413089</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">2.7 kOhms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="ERJ-2RKF2701X"/>
+      <property name="JLC_PART" value="C413089"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7642ca92-a1c9-4594-9d7b-5250e131d2da</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R5">
+      <value>2.7 kOhm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>2.7 kOhms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">ERJ-2RKF2701X</field>
+        <field name="JLC_PART">C413089</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">2.7 kOhms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="ERJ-2RKF2701X"/>
+      <property name="JLC_PART" value="C413089"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4fa336dd-7bed-4402-bb36-25630f8579a3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R6">
+      <value>10 K</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">AF0402FR-0710KL</field>
+        <field name="JLC_PART">C723353</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="AF0402FR-0710KL"/>
+      <property name="JLC_PART" value="C723353"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3d3903ee-f8ea-445f-8e59-fb7aec66e161</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R7">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4c78d23d-4440-4d9b-bb79-c9ebe5f2d55b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R8">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2c8cb9f3-1714-4109-b2d9-76d3a51d9cf2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R9">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>30dfe162-fd07-4da1-978b-db210288090b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R10">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fe7144d6-2f12-414a-a5db-3d283fe893ed</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R11">
+      <value>10 K</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">AF0402FR-0710KL</field>
+        <field name="JLC_PART">C723353</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="AF0402FR-0710KL"/>
+      <property name="JLC_PART" value="C723353"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d619100f-5d3e-4606-a51c-e951a5ff5b9b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R12">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>6085d451-05e1-42d3-bc01-b2f50c4c3dee</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R13">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>6a7a9759-b0ad-48fd-9844-63eabe9e7251</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R14">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e7ecdc4c-ba74-4dd2-bfdc-299b0d36dc18</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R15">
+      <value>10 K</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">AF0402FR-0710KL</field>
+        <field name="JLC_PART">C723353</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="AF0402FR-0710KL"/>
+      <property name="JLC_PART" value="C723353"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fa287668-9e95-4945-9300-b72748019e10</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R27">
+      <value>110Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <description>110 Ohms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">ERJ-2RKF1100X</field>
+        <field name="JLC_PART">C413064</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet"/>
+        <field name="Description">110 Ohms ±1% 0.1W, 1/10W Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="ERJ-2RKF1100X"/>
+      <property name="JLC_PART" value="C413064"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ff6e4f00-45b6-4dd4-aa93-c09e662a1f4d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R28">
+      <value>0 Ohm</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</footprint>
+      <datasheet>https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</datasheet>
+      <description>0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</description>
+      <fields>
+        <field name="PRT.NUM">CRCW04020000Z0ED</field>
+        <field name="JLC_PART">C190119</field>
+        <field name="Footprint">Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder</field>
+        <field name="Datasheet">https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588909358948495360</field>
+        <field name="Description">0 Ohms Jumper Chip Resistor 0402 (1005 Metric) Automotive AEC-Q200 Thick Film</field>
+      </fields>
+      <libsource lib="MBRS410LT3G" part="R" description="Resistor"/>
+      <property name="PRT.NUM" value="CRCW04020000Z0ED"/>
+      <property name="JLC_PART" value="C190119"/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d00f2c04-69a5-4e1a-8f33-74af3529dc1b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U1">
+      <value>LTC4331HUFD-PBF</value>
+      <footprint>LTC4331HUFD_PBF:QFN20_LTC4331HUFD-PBF_ADI</footprint>
+      <datasheet>https://www.analog.com/media/en/technical-documentation/data-sheets/LTC4331.pdf</datasheet>
+      <fields>
+        <field name="PRT.NUM">LTC4331HUFD#PBF</field>
+        <field name="JLC_PART"/>
+        <field name="Footprint">LTC4331HUFD_PBF:QFN20_LTC4331HUFD-PBF_ADI</field>
+        <field name="Datasheet">https://www.analog.com/media/en/technical-documentation/data-sheets/LTC4331.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="LTC4331HUFD_PBF" part="LTC4331HUFD-PBF" description=""/>
+      <property name="PRT.NUM" value="LTC4331HUFD#PBF"/>
+      <property name="JLC_PART" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="LTC4331HUFD#PBF"/>
+      <property name="ki_fp_filters" value="QFN20_LTC4331HUFD-PBF_ADI QFN20_LTC4331HUFD-PBF_ADI-M QFN20_LTC4331HUFD-PBF_ADI-L"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a790ebaf-b81e-4c50-bd98-c6f4e961029b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="21"/>
+            <pin num="20"/>
+            <pin num="19"/>
+            <pin num="18"/>
+            <pin num="17"/>
+            <pin num="16"/>
+            <pin num="15"/>
+            <pin num="14"/>
+            <pin num="13"/>
+            <pin num="12"/>
+            <pin num="11"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U2">
+      <value>LP591233MDRVREP</value>
+      <footprint>LP591233MDRVREP:WSON6_DRV_TEX</footprint>
+      <datasheet>https://www.ti.com/lit/gpn/lp5912-ep</datasheet>
+      <fields>
+        <field name="PRT.NUM">LP591233MDRVREP</field>
+        <field name="JLC_PART"/>
+        <field name="Footprint">LP591233MDRVREP:WSON6_DRV_TEX</field>
+        <field name="Datasheet">https://www.ti.com/lit/gpn/lp5912-ep</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="LP591233MDRVREP" part="LP591233MDRVREP" description=""/>
+      <property name="PRT.NUM" value="LP591233MDRVREP"/>
+      <property name="JLC_PART" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="LP591233MDRVREP"/>
+      <property name="ki_fp_filters" value="WSON6_DRV_TEX WSON6_DRV_TEX-M WSON6_DRV_TEX-L"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>47a12a60-d573-440f-b9be-fac5d6c1b815</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="7"/>
+            <pin num="6"/>
+            <pin num="5"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U3">
+      <value>SBSPP1000472MXT</value>
+      <footprint>SBSPP1000472MXT:SBSPP1000472MXT</footprint>
+      <datasheet>SBSPP1000472MXT</datasheet>
+      <description>LC (Pi) EMI Filter 3rd Order Low Pass 1 Channel C = 4700pF 1 A 1206 (3216 Metric), 3 PC Pad</description>
+      <fields>
+        <field name="PRT.NUM">SBSPP1000472MXT</field>
+        <field name="JLC_PART"/>
+        <field name="Footprint">SBSPP1000472MXT:SBSPP1000472MXT</field>
+        <field name="Datasheet">SBSPP1000472MXT</field>
+        <field name="Description">LC (Pi) EMI Filter 3rd Order Low Pass 1 Channel C = 4700pF 1 A 1206 (3216 Metric), 3 PC Pad</field>
+      </fields>
+      <libsource lib="SBSPP1000472MXT" part="SBSPP1000472MXT" description=""/>
+      <property name="PRT.NUM" value="SBSPP1000472MXT"/>
+      <property name="JLC_PART" value=""/>
+      <property name="Sheetname" value="Earth_Sensor_18x40"/>
+      <property name="Sheetfile" value="Earth_Sensor_18x40.kicad_sch"/>
+      <property name="ki_keywords" value="SBSPP1000472MXT"/>
+      <property name="ki_fp_filters" value="CHIP_0473MXT_SYF CHIP_0473MXT_SYF-M CHIP_0473MXT_SYF-L"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d855b8f6-9f10-48ee-84d9-dd90da1a56b3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="5040500691" part="5040500691">
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">5040500691</field>
+        <field name="Footprint">5040500691:MOLEX_5040500691</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+        <field name="PARTREV">B</field>
+        <field name="STANDARD">Manufacturer Recommendations</field>
+        <field name="MAXIMUM_PACKAGE_HEIGHT">2.15 mm</field>
+        <field name="MANUFACTURER">Molex</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+        <pin num="5" name="5" type="passive"/>
+        <pin num="6" name="6" type="passive"/>
+        <pin num="S1" name="SHIELD1" type="passive"/>
+        <pin num="S2" name="SHIELD2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="LP591233MDRVREP" part="LP591233MDRVREP">
+      <docs>https://www.ti.com/lit/gpn/lp5912-ep</docs>
+      <footprints>
+        <fp>WSON6_DRV_TEX</fp>
+        <fp>WSON6_DRV_TEX-M</fp>
+        <fp>WSON6_DRV_TEX-L</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LP591233MDRVREP</field>
+        <field name="Footprint">WSON6_DRV_TEX</field>
+        <field name="Datasheet">https://www.ti.com/lit/gpn/lp5912-ep</field>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="OUT" type="output"/>
+        <pin num="2" name="NC" type="no_connect"/>
+        <pin num="3" name="PG" type="output"/>
+        <pin num="4" name="EN" type="input"/>
+        <pin num="5" name="GND" type="power_out"/>
+        <pin num="6" name="IN" type="input"/>
+        <pin num="7" name="EPAD" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="LTC4331HUFD_PBF" part="LTC4331HUFD-PBF">
+      <docs>https://www.analog.com/media/en/technical-documentation/data-sheets/LTC4331.pdf</docs>
+      <footprints>
+        <fp>QFN20_LTC4331HUFD-PBF_ADI</fp>
+        <fp>QFN20_LTC4331HUFD-PBF_ADI-M</fp>
+        <fp>QFN20_LTC4331HUFD-PBF_ADI-L</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U1</field>
+        <field name="Value">LTC4331HUFD-PBF</field>
+        <field name="Footprint">QFN20_LTC4331HUFD-PBF_ADI</field>
+        <field name="Datasheet">https://www.analog.com/media/en/technical-documentation/data-sheets/LTC4331.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="Vcc" type="unspecified"/>
+        <pin num="2" name="VL" type="unspecified"/>
+        <pin num="3" name="On" type="unspecified"/>
+        <pin num="4" name="Remote" type="unspecified"/>
+        <pin num="5" name="Link" type="unspecified"/>
+        <pin num="6" name="RDY" type="unspecified"/>
+        <pin num="7" name="SCL" type="unspecified"/>
+        <pin num="8" name="SDA" type="unspecified"/>
+        <pin num="9" name="NC" type="unspecified"/>
+        <pin num="10" name="ALERT" type="unspecified"/>
+        <pin num="11" name="A1" type="unspecified"/>
+        <pin num="12" name="A2" type="unspecified"/>
+        <pin num="13" name="CTRL" type="unspecified"/>
+        <pin num="14" name="SPEED1" type="unspecified"/>
+        <pin num="15" name="SPEED2" type="unspecified"/>
+        <pin num="16" name="GND" type="unspecified"/>
+        <pin num="17" name="SLO" type="unspecified"/>
+        <pin num="18" name="A" type="unspecified"/>
+        <pin num="19" name="B" type="unspecified"/>
+        <pin num="20" name="NC" type="unspecified"/>
+        <pin num="21" name="21" type="unspecified"/>
+      </pins>
+    </libpart>
+    <libpart lib="MBRS410LT3G" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="MLX90640ESF-BAA-000-TU" part="MLX90640ESF-BAA-000-TU">
+      <fields>
+        <field name="Reference">A</field>
+        <field name="Value">MLX90640ESF-BAA-000-TU</field>
+        <field name="Footprint">MLX90640ESF-BAA-000-TU:TO292P930H600-4</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+        <field name="PARTREV">11</field>
+        <field name="STANDARD">IPC-7351B</field>
+        <field name="MAXIMUM_PACKAGE_HEIGHT">6.0 mm</field>
+        <field name="MANUFACTURER">Melexis</field>
+      </fields>
+      <pins>
+        <pin num="1" name="SDA" type="bidirectional"/>
+        <pin num="2" name="VDD" type="power_in"/>
+        <pin num="3" name="GND" type="power_in"/>
+        <pin num="4" name="SCL" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="Mechanical" part="MountingHole_Pad">
+      <description>Mounting Hole with connection</description>
+      <footprints>
+        <fp>MountingHole*Pad*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">H</field>
+        <field name="Value">MountingHole_Pad</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting Hole with connection</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="SBSPP1000472MXT" part="SBSPP1000472MXT">
+      <docs>SBSPP1000472MXT</docs>
+      <footprints>
+        <fp>CHIP_0473MXT_SYF</fp>
+        <fp>CHIP_0473MXT_SYF-M</fp>
+        <fp>CHIP_0473MXT_SYF-L</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">SBSPP1000472MXT</field>
+        <field name="Footprint">CHIP_0473MXT_SYF</field>
+        <field name="Datasheet">SBSPP1000472MXT</field>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="unspecified"/>
+        <pin num="2" name="2" type="unspecified"/>
+        <pin num="3" name="3" type="unspecified"/>
+        <pin num="4" name="4" type="unspecified"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Device">
+      <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
+    </library>
+    <library logical="Mechanical">
+      <uri>${KICAD10_SYMBOL_DIR}/Mechanical.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3V3" class="Default">
+      <node ref="A1" pin="2" pinfunction="VDD_2" pintype="power_in"/>
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C44" pin="2" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="C98" pin="1" pintype="passive"/>
+      <node ref="R10" pin="1" pintype="passive"/>
+      <node ref="R11" pin="2" pintype="passive"/>
+      <node ref="R13" pin="1" pintype="passive"/>
+      <node ref="R15" pin="1" pintype="passive"/>
+      <node ref="R3" pin="2" pintype="passive"/>
+      <node ref="R4" pin="1" pintype="passive"/>
+      <node ref="R5" pin="1" pintype="passive"/>
+      <node ref="R6" pin="2" pintype="passive"/>
+      <node ref="U1" pin="1" pinfunction="Vcc_1" pintype="unspecified"/>
+      <node ref="U1" pin="17" pinfunction="SLO_17" pintype="unspecified"/>
+      <node ref="U1" pin="2" pinfunction="VL_2" pintype="unspecified"/>
+      <node ref="U1" pin="3" pinfunction="On_3" pintype="unspecified"/>
+      <node ref="U1" pin="4" pinfunction="Remote_4" pintype="unspecified"/>
+      <node ref="U2" pin="1" pinfunction="OUT_1" pintype="output"/>
+    </net>
+    <net code="2" name="+5V" class="Default">
+      <node ref="J2" pin="6" pinfunction="6_6" pintype="passive"/>
+      <node ref="U3" pin="1" pinfunction="1_1" pintype="unspecified"/>
+    </net>
+    <net code="3" name="+5V FLTR" class="Default">
+      <node ref="C37" pin="1" pintype="passive"/>
+      <node ref="U2" pin="6" pinfunction="IN_6" pintype="input"/>
+      <node ref="U3" pin="2" pinfunction="2_2" pintype="unspecified"/>
+    </net>
+    <net code="4" name="/LDO_Enable" class="Default">
+      <node ref="J2" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="U2" pin="4" pinfunction="EN_4" pintype="input"/>
+    </net>
+    <net code="5" name="/SCL" class="Default">
+      <node ref="A1" pin="4" pinfunction="SCL_4" pintype="input"/>
+      <node ref="R5" pin="2" pintype="passive"/>
+      <node ref="U1" pin="7" pinfunction="SCL_7" pintype="unspecified"/>
+    </net>
+    <net code="6" name="/SDA" class="Default">
+      <node ref="A1" pin="1" pinfunction="SDA_1" pintype="bidirectional"/>
+      <node ref="R4" pin="2" pintype="passive"/>
+      <node ref="U1" pin="8" pinfunction="SDA_8" pintype="unspecified"/>
+    </net>
+    <net code="7" name="/Sig_N" class="Diff,Default">
+      <node ref="J2" pin="4" pinfunction="4_4" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="R27" pin="1" pintype="passive"/>
+      <node ref="U1" pin="19" pinfunction="B_19" pintype="unspecified"/>
+    </net>
+    <net code="8" name="/Sig_P" class="Diff,Default">
+      <node ref="J2" pin="3" pinfunction="3_3" pintype="passive"/>
+      <node ref="R27" pin="2" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
+      <node ref="U1" pin="18" pinfunction="A_18" pintype="unspecified"/>
+    </net>
+    <net code="9" name="GND" class="Default">
+      <node ref="A1" pin="3" pinfunction="GND_3" pintype="power_in"/>
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="C37" pin="2" pintype="passive"/>
+      <node ref="C44" pin="1" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C98" pin="2" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="2_2" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="5_5" pintype="passive"/>
+      <node ref="J2" pin="S1" pinfunction="SHIELD1_S1" pintype="passive"/>
+      <node ref="J2" pin="S2" pinfunction="SHIELD2_S2" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="R12" pin="1" pintype="passive"/>
+      <node ref="R14" pin="1" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+      <node ref="R28" pin="2" pintype="passive"/>
+      <node ref="R7" pin="2" pintype="passive"/>
+      <node ref="R8" pin="2" pintype="passive"/>
+      <node ref="R9" pin="1" pintype="passive"/>
+      <node ref="U1" pin="15" pinfunction="SPEED2_15" pintype="unspecified"/>
+      <node ref="U1" pin="16" pinfunction="GND_16" pintype="unspecified"/>
+      <node ref="U1" pin="20" pinfunction="NC_20" pintype="unspecified"/>
+      <node ref="U1" pin="21" pinfunction="21_21" pintype="unspecified"/>
+      <node ref="U1" pin="9" pinfunction="NC_9" pintype="unspecified"/>
+      <node ref="U2" pin="5" pinfunction="GND_5" pintype="power_out"/>
+      <node ref="U2" pin="7" pinfunction="EPAD_7" pintype="power_out"/>
+      <node ref="U3" pin="3" pinfunction="3_3" pintype="unspecified"/>
+      <node ref="U3" pin="4" pinfunction="4_4" pintype="unspecified"/>
+    </net>
+    <net code="10" name="Net-(H1-Pad1)" class="Default">
+      <node ref="H1" pin="1" pinfunction="1_1" pintype="input"/>
+      <node ref="R8" pin="1" pintype="passive"/>
+    </net>
+    <net code="11" name="Net-(H2-Pad1)" class="Default">
+      <node ref="H2" pin="1" pinfunction="1_1" pintype="input"/>
+      <node ref="R7" pin="1" pintype="passive"/>
+    </net>
+    <net code="12" name="Net-(H3-Pad1)" class="Default">
+      <node ref="H3" pin="1" pinfunction="1_1" pintype="input"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+    </net>
+    <net code="13" name="Net-(H4-Pad1)" class="Default">
+      <node ref="H4" pin="1" pinfunction="1_1" pintype="input"/>
+      <node ref="R28" pin="1" pintype="passive"/>
+    </net>
+    <net code="14" name="Net-(U1-A1)" class="Default">
+      <node ref="R13" pin="2" pintype="passive"/>
+      <node ref="R14" pin="2" pintype="passive"/>
+      <node ref="U1" pin="11" pinfunction="A1_11" pintype="unspecified"/>
+    </net>
+    <net code="15" name="Net-(U1-A2)" class="Default">
+      <node ref="R10" pin="2" pintype="passive"/>
+      <node ref="R12" pin="2" pintype="passive"/>
+      <node ref="U1" pin="12" pinfunction="A2_12" pintype="unspecified"/>
+    </net>
+    <net code="16" name="Net-(U1-ALERT)" class="Default">
+      <node ref="R11" pin="1" pintype="passive"/>
+      <node ref="U1" pin="10" pinfunction="ALERT_10" pintype="unspecified"/>
+    </net>
+    <net code="17" name="Net-(U1-Link)" class="Default">
+      <node ref="R6" pin="1" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="Link_5" pintype="unspecified"/>
+    </net>
+    <net code="18" name="Net-(U1-SPEED1)" class="Default">
+      <node ref="R9" pin="2" pintype="passive"/>
+      <node ref="U1" pin="14" pinfunction="SPEED1_14" pintype="unspecified"/>
+    </net>
+    <net code="19" name="Net-(U2-PG)" class="Default">
+      <node ref="R15" pin="2" pintype="passive"/>
+      <node ref="U2" pin="3" pinfunction="PG_3" pintype="output"/>
+    </net>
+    <net code="20" name="unconnected-(U1-CTRL-Pad13)" class="Default">
+      <node ref="U1" pin="13" pinfunction="CTRL_13" pintype="unspecified+no_connect"/>
+    </net>
+    <net code="21" name="unconnected-(U1-RDY-Pad6)" class="Default">
+      <node ref="U1" pin="6" pinfunction="RDY_6" pintype="unspecified+no_connect"/>
+    </net>
+    <net code="22" name="unconnected-(U2-NC-Pad2)" class="Default">
+      <node ref="U2" pin="2" pinfunction="NC_2" pintype="no_connect"/>
+    </net>
+  </nets>
+</export>

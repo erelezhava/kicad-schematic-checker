@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "bindings": {
+    "example_ic": {
+      "reference": "U1",
+      "applicability": "applicable",
+      "package": "SOIC-8",
+      "rationale": "Synthetic fixture selects DEMO-8PIN-S08 in the SOIC-8 package.",
+      "reviewed_by": "Synthetic test fixture"
+    }
+  },
+  "components": {}
+}
