@@ -1,0 +1,356 @@
+{
+ "status": 200,
+ "body": {
+  "ProductsCount": 1,
+  "ExactMatches": [
+   {
+    "Description": {
+     "ProductDescription": "RES SMD 10K OHM 1% 1/16W 0402",
+     "DetailedDescription": "10 kOhms ±1% 0.063W, 1/16W Chip Resistor 0402 (1005 Metric) Anti-Sulfur, Automotive AEC-Q200 Thick Film"
+    },
+    "Manufacturer": {
+     "Id": 13,
+     "Name": "YAGEO"
+    },
+    "ManufacturerProductNumber": "AF0402FR-0710KL",
+    "UnitPrice": 0.1,
+    "ProductUrl": "https://www.digikey.com/en/products/detail/yageo/AF0402FR-0710KL/5900400",
+    "DatasheetUrl": "https://yageogroup.com/content/datasheet/asset/file/PYU-AF_51_ROHS_L",
+    "ProductVariations": [
+     {
+      "DigiKeyProductNumber": "13-AF0402FR-0710KLTR-ND",
+      "PackageType": {
+       "Id": 1,
+       "Name": "Tape & Reel (TR)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 10000,
+        "UnitPrice": 0.00872,
+        "TotalPrice": 87.2
+       },
+       {
+        "BreakQuantity": 20000,
+        "UnitPrice": 0.00799,
+        "TotalPrice": 159.8
+       },
+       {
+        "BreakQuantity": 30000,
+        "UnitPrice": 0.00764,
+        "TotalPrice": 229.2
+       },
+       {
+        "BreakQuantity": 50000,
+        "UnitPrice": 0.00725,
+        "TotalPrice": 362.5
+       },
+       {
+        "BreakQuantity": 70000,
+        "UnitPrice": 0.00703,
+        "TotalPrice": 492.1
+       },
+       {
+        "BreakQuantity": 100000,
+        "UnitPrice": 0.00682,
+        "TotalPrice": 682.0
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 13,
+       "Name": "YAGEO"
+      },
+      "QuantityAvailableforPackageType": 60000,
+      "MinimumOrderQuantity": 10000,
+      "DigiReelFee": 0.0
+     },
+     {
+      "DigiKeyProductNumber": "13-AF0402FR-0710KLCT-ND",
+      "PackageType": {
+       "Id": 2,
+       "Name": "Cut Tape (CT)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 0.1,
+        "TotalPrice": 0.1
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 0.042,
+        "TotalPrice": 0.42
+       },
+       {
+        "BreakQuantity": 25,
+        "UnitPrice": 0.032,
+        "TotalPrice": 0.8
+       },
+       {
+        "BreakQuantity": 50,
+        "UnitPrice": 0.0262,
+        "TotalPrice": 1.31
+       },
+       {
+        "BreakQuantity": 100,
+        "UnitPrice": 0.0218,
+        "TotalPrice": 2.18
+       },
+       {
+        "BreakQuantity": 250,
+        "UnitPrice": 0.01732,
+        "TotalPrice": 4.33
+       },
+       {
+        "BreakQuantity": 500,
+        "UnitPrice": 0.0148,
+        "TotalPrice": 7.4
+       },
+       {
+        "BreakQuantity": 1000,
+        "UnitPrice": 0.0128,
+        "TotalPrice": 12.8
+       },
+       {
+        "BreakQuantity": 5000,
+        "UnitPrice": 0.00963,
+        "TotalPrice": 48.15
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 13,
+       "Name": "YAGEO"
+      },
+      "QuantityAvailableforPackageType": 60564,
+      "MaxQuantityForDistribution": 999999999,
+      "MinimumOrderQuantity": 1,
+      "StandardPackage": 1,
+      "DigiReelFee": 0.0
+     },
+     {
+      "DigiKeyProductNumber": "13-AF0402FR-0710KLDKR-ND",
+      "PackageType": {
+       "Id": 243,
+       "Name": "Digi-Reel®"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 0.1,
+        "TotalPrice": 0.1
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 0.042,
+        "TotalPrice": 0.42
+       },
+       {
+        "BreakQuantity": 25,
+        "UnitPrice": 0.032,
+        "TotalPrice": 0.8
+       },
+       {
+        "BreakQuantity": 50,
+        "UnitPrice": 0.0262,
+        "TotalPrice": 1.31
+       },
+       {
+        "BreakQuantity": 100,
+        "UnitPrice": 0.0218,
+        "TotalPrice": 2.18
+       },
+       {
+        "BreakQuantity": 250,
+        "UnitPrice": 0.01732,
+        "TotalPrice": 4.33
+       },
+       {
+        "BreakQuantity": 500,
+        "UnitPrice": 0.0148,
+        "TotalPrice": 7.4
+       },
+       {
+        "BreakQuantity": 1000,
+        "UnitPrice": 0.0128,
+        "TotalPrice": 12.8
+       },
+       {
+        "BreakQuantity": 5000,
+        "UnitPrice": 0.00963,
+        "TotalPrice": 48.15
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 13,
+       "Name": "YAGEO"
+      },
+      "QuantityAvailableforPackageType": 60564,
+      "MaxQuantityForDistribution": 999999999,
+      "MinimumOrderQuantity": 1,
+      "StandardPackage": 1,
+      "DigiReelFee": 7.0
+     }
+    ],
+    "QuantityAvailable": 60564,
+    "ProductStatus": {
+     "Id": 0,
+     "Status": "Active"
+    },
+    "BackOrderNotAllowed": false,
+    "NormallyStocking": true,
+    "Discontinued": false,
+    "EndOfLife": false,
+    "Ncnr": false,
+    "Parameters": [
+     {
+      "ParameterId": 2085,
+      "ParameterText": "Resistance",
+      "ParameterType": "UnitOfMeasure",
+      "ValueId": "10 kOhms",
+      "ValueText": "10 kOhms"
+     },
+     {
+      "ParameterId": 3,
+      "ParameterText": "Tolerance",
+      "ParameterType": "String",
+      "ValueId": "1131",
+      "ValueText": "±1%"
+     },
+     {
+      "ParameterId": 2,
+      "ParameterText": "Power (Watts)",
+      "ParameterType": "String",
+      "ValueId": "7854",
+      "ValueText": "0.063W, 1/16W"
+     },
+     {
+      "ParameterId": 174,
+      "ParameterText": "Composition",
+      "ParameterType": "String",
+      "ValueId": "411742",
+      "ValueText": "Thick Film"
+     },
+     {
+      "ParameterId": 5,
+      "ParameterText": "Features",
+      "ParameterType": "String",
+      "ValueId": "314227",
+      "ValueText": "Anti-Sulfur, Automotive AEC-Q200"
+     },
+     {
+      "ParameterId": 17,
+      "ParameterText": "Temperature Coefficient",
+      "ParameterType": "String",
+      "ValueId": "1378",
+      "ValueText": "±100ppm/°C"
+     },
+     {
+      "ParameterId": 252,
+      "ParameterText": "Operating Temperature",
+      "ParameterType": "String",
+      "ValueId": "242934",
+      "ValueText": "-55°C ~ 155°C"
+     },
+     {
+      "ParameterId": 16,
+      "ParameterText": "Package / Case",
+      "ParameterType": "String",
+      "ValueId": "39158",
+      "ValueText": "0402 (1005 Metric)"
+     },
+     {
+      "ParameterId": 1291,
+      "ParameterText": "Supplier Device Package",
+      "ParameterType": "String",
+      "ValueId": "39157",
+      "ValueText": "0402"
+     },
+     {
+      "ParameterId": 707,
+      "ParameterText": "Ratings",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 46,
+      "ParameterText": "Size / Dimension",
+      "ParameterType": "String",
+      "ValueId": "6310",
+      "ValueText": "0.039\" L x 0.020\" W (1.00mm x 0.50mm)"
+     },
+     {
+      "ParameterId": 1500,
+      "ParameterText": "Height - Seated (Max)",
+      "ParameterType": "String",
+      "ValueId": "4857",
+      "ValueText": "0.015\" (0.37mm)"
+     },
+     {
+      "ParameterId": 1127,
+      "ParameterText": "Number of Terminations",
+      "ParameterType": "Double",
+      "ValueId": "2",
+      "ValueText": "2"
+     },
+     {
+      "ParameterId": 1531,
+      "ParameterText": "Failure Rate",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     }
+    ],
+    "BaseProductNumber": {},
+    "Category": {
+     "CategoryId": 2,
+     "ParentId": 0,
+     "Name": "Resistors",
+     "ProductCount": 0,
+     "NewProductCount": 0,
+     "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/639/316/FVT%20SERIES_tmb%2864x64%29.jpg",
+     "SeoDescription": "Products within this category include fixed-value (non-adjustable) resistors and related mounting accessories, organized according to their physical form factor or the method by which they are physically and electrically connected within an end application. Adjustable or variable-value resistors (also known as potentiometers or rheostats) are found separately, in a category of their own.",
+     "ChildCategories": [
+      {
+       "CategoryId": 52,
+       "ParentId": 2,
+       "Name": "Chip Resistor - Surface Mount",
+       "ProductCount": 0,
+       "NewProductCount": 0,
+       "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/683/989/MFG_RMC%20SERIES_tmb%2864x64%29.jpg",
+       "SeoDescription": "Resistors provide opposition to current flow, in a manner that is proportional to the electric potential (voltage) imposed across them, and which is ideally unaffected by signal frequency or changes in temperature. Resistors described as surface mount chip types are designed to be affixed to the surface of a printed circuit board and incorporate a single resistor per device package.",
+       "ChildCategories": []
+      }
+     ]
+    },
+    "ManufacturerLeadWeeks": "20",
+    "ManufacturerPublicQuantity": 0,
+    "Series": {
+     "Id": 20167,
+     "Name": "AF"
+    },
+    "Classifications": {
+     "ReachStatus": "REACH Unaffected",
+     "RohsStatus": "ROHS3 Compliant",
+     "MoistureSensitivityLevel": "1  (Unlimited)",
+     "ExportControlClassNumber": "EAR99",
+     "HtsusCode": "8533.21.0030"
+    },
+    "OtherNames": [
+     "AF0402FR-0710KL-ND",
+     "13-AF0402FR-0710KLCT",
+     "13-AF0402FR-0710KLTR",
+     "13-AF0402FR-0710KLDKR"
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,425 @@
+{
+ "status": 200,
+ "body": {
+  "ProductsCount": 1,
+  "ExactMatches": [
+   {
+    "Description": {
+     "ProductDescription": "CONN HEADER SMD R/A 6POS 1.5MM",
+     "DetailedDescription": "Connector Header Surface Mount, Right Angle 6 position 0.059\" (1.50mm)"
+    },
+    "Manufacturer": {
+     "Id": 23,
+     "Name": "Molex"
+    },
+    "ManufacturerProductNumber": "5040500691",
+    "UnitPrice": 1.57,
+    "ProductUrl": "https://www.digikey.com/en/products/detail/molex/5040500691/4357148",
+    "DatasheetUrl": "https://www.molex.com/pdm_docs/as/AS-504051-002.pdf",
+    "ProductVariations": [
+     {
+      "DigiKeyProductNumber": "WM10143TR-ND",
+      "PackageType": {
+       "Id": 1,
+       "Name": "Tape & Reel (TR)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 2700,
+        "UnitPrice": 0.89642,
+        "TotalPrice": 2420.334
+       },
+       {
+        "BreakQuantity": 5400,
+        "UnitPrice": 0.85367,
+        "TotalPrice": 4609.818
+       },
+       {
+        "BreakQuantity": 8100,
+        "UnitPrice": 0.82962,
+        "TotalPrice": 6719.922
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 900,
+       "Name": "Molex"
+      },
+      "QuantityAvailableforPackageType": 21600,
+      "MaxQuantityForDistribution": 999999999,
+      "MinimumOrderQuantity": 2700,
+      "StandardPackage": 2700,
+      "DigiReelFee": 0.0
+     },
+     {
+      "DigiKeyProductNumber": "WM10143CT-ND",
+      "PackageType": {
+       "Id": 2,
+       "Name": "Cut Tape (CT)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 1.57,
+        "TotalPrice": 1.57
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 1.331,
+        "TotalPrice": 13.31
+       },
+       {
+        "BreakQuantity": 100,
+        "UnitPrice": 1.1312,
+        "TotalPrice": 113.12
+       },
+       {
+        "BreakQuantity": 500,
+        "UnitPrice": 1.00968,
+        "TotalPrice": 504.84
+       },
+       {
+        "BreakQuantity": 1000,
+        "UnitPrice": 0.96147,
+        "TotalPrice": 961.47
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 900,
+       "Name": "Molex"
+      },
+      "QuantityAvailableforPackageType": 22298,
+      "MinimumOrderQuantity": 1,
+      "DigiReelFee": 0.0
+     },
+     {
+      "DigiKeyProductNumber": "WM10143DKR-ND",
+      "PackageType": {
+       "Id": 243,
+       "Name": "Digi-Reel®"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 1.57,
+        "TotalPrice": 1.57
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 1.331,
+        "TotalPrice": 13.31
+       },
+       {
+        "BreakQuantity": 100,
+        "UnitPrice": 1.1312,
+        "TotalPrice": 113.12
+       },
+       {
+        "BreakQuantity": 500,
+        "UnitPrice": 1.00968,
+        "TotalPrice": 504.84
+       },
+       {
+        "BreakQuantity": 1000,
+        "UnitPrice": 0.96147,
+        "TotalPrice": 961.47
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 900,
+       "Name": "Molex"
+      },
+      "QuantityAvailableforPackageType": 22298,
+      "MaxQuantityForDistribution": 999999999,
+      "MinimumOrderQuantity": 1,
+      "StandardPackage": 1,
+      "DigiReelFee": 7.0
+     }
+    ],
+    "QuantityAvailable": 22298,
+    "ProductStatus": {
+     "Id": 0,
+     "Status": "Active"
+    },
+    "BackOrderNotAllowed": false,
+    "NormallyStocking": true,
+    "Discontinued": false,
+    "EndOfLife": false,
+    "Ncnr": false,
+    "Parameters": [
+     {
+      "ParameterId": 28,
+      "ParameterText": "Connector Type",
+      "ParameterType": "String",
+      "ValueId": "353507",
+      "ValueText": "Header"
+     },
+     {
+      "ParameterId": 512,
+      "ParameterText": "Contact Type",
+      "ParameterType": "String",
+      "ValueId": "371331",
+      "ValueText": "Male Blade"
+     },
+     {
+      "ParameterId": 1790,
+      "ParameterText": "Pitch - Mating",
+      "ParameterType": "String",
+      "ValueId": "7385",
+      "ValueText": "0.059\" (1.50mm)"
+     },
+     {
+      "ParameterId": 88,
+      "ParameterText": "Number of Positions",
+      "ParameterType": "String",
+      "ValueId": "249730",
+      "ValueText": "6"
+     },
+     {
+      "ParameterId": 90,
+      "ParameterText": "Number of Rows",
+      "ParameterType": "String",
+      "ValueId": "39665",
+      "ValueText": "1"
+     },
+     {
+      "ParameterId": 2024,
+      "ParameterText": "Row Spacing - Mating",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 564,
+      "ParameterText": "Number of Positions Loaded",
+      "ParameterType": "String",
+      "ValueId": "312745",
+      "ValueText": "All"
+     },
+     {
+      "ParameterId": 91,
+      "ParameterText": "Style",
+      "ParameterType": "String",
+      "ValueId": "321623",
+      "ValueText": "Board to Cable/Wire"
+     },
+     {
+      "ParameterId": 2021,
+      "ParameterText": "Shrouding",
+      "ParameterType": "String",
+      "ValueId": "402177",
+      "ValueText": "Shrouded - 4 Wall"
+     },
+     {
+      "ParameterId": 69,
+      "ParameterText": "Mounting Type",
+      "ParameterType": "String",
+      "ValueId": "409420",
+      "ValueText": "Surface Mount, Right Angle"
+     },
+     {
+      "ParameterId": 589,
+      "ParameterText": "Termination",
+      "ParameterType": "String",
+      "ValueId": "405002",
+      "ValueText": "Solder"
+     },
+     {
+      "ParameterId": 518,
+      "ParameterText": "Fastening Type",
+      "ParameterType": "String",
+      "ValueId": "338245",
+      "ValueText": "Detent Lock"
+     },
+     {
+      "ParameterId": 2025,
+      "ParameterText": "Contact Length - Mating",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 2012,
+      "ParameterText": "Contact Length - Post",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 2022,
+      "ParameterText": "Overall Contact Length",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 2018,
+      "ParameterText": "Insulation Height",
+      "ParameterType": "String",
+      "ValueId": "8489",
+      "ValueText": "0.079\" (2.00mm)"
+     },
+     {
+      "ParameterId": 2011,
+      "ParameterText": "Contact Shape",
+      "ParameterType": "String",
+      "ValueId": "393544",
+      "ValueText": "Rectangular"
+     },
+     {
+      "ParameterId": 1791,
+      "ParameterText": "Contact Finish - Mating",
+      "ParameterType": "String",
+      "ValueId": "350796",
+      "ValueText": "Gold"
+     },
+     {
+      "ParameterId": 1792,
+      "ParameterText": "Contact Finish Thickness - Mating",
+      "ParameterType": "String",
+      "ValueId": "179760",
+      "ValueText": "3.94µin (0.100µm)"
+     },
+     {
+      "ParameterId": 1795,
+      "ParameterText": "Contact Finish - Post",
+      "ParameterType": "String",
+      "ValueId": "350796",
+      "ValueText": "Gold"
+     },
+     {
+      "ParameterId": 1084,
+      "ParameterText": "Contact Material",
+      "ParameterType": "String",
+      "ValueId": "333922",
+      "ValueText": "Copper Alloy"
+     },
+     {
+      "ParameterId": 2023,
+      "ParameterText": "Insulation Material",
+      "ParameterType": "String",
+      "ValueId": "388351",
+      "ValueText": "Polyamide (PA), Nylon"
+     },
+     {
+      "ParameterId": 5,
+      "ParameterText": "Features",
+      "ParameterType": "String",
+      "ValueId": "405044",
+      "ValueText": "Solder Retention"
+     },
+     {
+      "ParameterId": 252,
+      "ParameterText": "Operating Temperature",
+      "ParameterType": "String",
+      "ValueId": "212434",
+      "ValueText": "-40°C ~ 105°C"
+     },
+     {
+      "ParameterId": 697,
+      "ParameterText": "Ingress Protection",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 903,
+      "ParameterText": "Material Flammability Rating",
+      "ParameterType": "String",
+      "ValueId": "417627",
+      "ValueText": "UL94 V-0"
+     },
+     {
+      "ParameterId": 1693,
+      "ParameterText": "Insulation Color",
+      "ParameterType": "String",
+      "ValueId": "319929",
+      "ValueText": "Black"
+     },
+     {
+      "ParameterId": 66,
+      "ParameterText": "Current Rating (Amps)",
+      "ParameterType": "String",
+      "ValueId": "419333",
+      "ValueText": "Varies by Wire Gauge"
+     },
+     {
+      "ParameterId": 63,
+      "ParameterText": "Voltage Rating",
+      "ParameterType": "String",
+      "ValueId": "100671",
+      "ValueText": "150V"
+     }
+    ],
+    "BaseProductNumber": {
+     "Id": 140809,
+     "Name": "504050"
+    },
+    "Category": {
+     "CategoryId": 20,
+     "ParentId": 0,
+     "Name": "Connectors, Interconnects",
+     "ProductCount": 0,
+     "NewProductCount": 0,
+     "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/279/043/204507-1_tmb%2864x64%29.jpg",
+     "SeoDescription": "Connector and interconnect products facilitate the joining of electrical or fiber optic conductors & cables. An enormous variety of styles are available, to accommodate most any application; banana plugs for lab equipment, coaxial connectors for RF, modular plugs for network and phone systems, spade and ring terminals for connecting discrete wires to terminal blocks, terminal blocks, sockets for transistors and integrated circuits, standard AC power connectors, headphone plugs and jacks, high-voltage connectors, USB connectors, and many, many more.",
+     "ChildCategories": [
+      {
+       "CategoryId": 2027,
+       "ParentId": 20,
+       "Name": "Rectangular Connectors",
+       "ProductCount": 0,
+       "NewProductCount": 0,
+       "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/244/550/C-Grid-III-90131%282-POS%29tin_tmb%2864x64%29.jpg",
+       "SeoDescription": "Rectangular Connectors include a wide variety of connector solutions for power, data, and signal applications. As the name implies, they are rectangular in shape and can provide ease to the design process. Many of the most commonly found connectors and connector accessories fall into this category.",
+       "ChildCategories": [
+        {
+         "CategoryId": 314,
+         "ParentId": 2027,
+         "Name": "Headers, Male Pins",
+         "ProductCount": 0,
+         "NewProductCount": 0,
+         "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/300/507/986/45212-600230_tmb.jpg",
+         "SeoDescription": "This type of header contains male pins within a plastic base and is meant to be mated with a rectangular cable connector or a female socket header for board-to-board connection. These come in a variety of position and pitch options, with some having a breakaway option to manually change position count with ease. Some are shrouded with 1 to 4 walls or unshrouded. Mounting types include panel mount, board edge, stacking, surface mount, and through-hole.",
+         "ChildCategories": []
+        }
+       ]
+      }
+     ]
+    },
+    "ManufacturerLeadWeeks": "18",
+    "ManufacturerPublicQuantity": 0,
+    "Series": {
+     "Id": 41077,
+     "Name": "Pico-Lock 504050"
+    },
+    "Classifications": {
+     "ReachStatus": "REACH Unaffected",
+     "RohsStatus": "ROHS3 Compliant",
+     "MoistureSensitivityLevel": "1  (Unlimited)",
+     "ExportControlClassNumber": "EAR99",
+     "HtsusCode": "8536.69.4040"
+    },
+    "OtherNames": [
+     "WM10143DKR",
+     "2992-5040500691",
+     "0504050-0691",
+     "WM10143TR",
+     "504050-0691",
+     "WM10143CT",
+     "2266-5040500691-23",
+     "05040500691",
+     "884982939837"
+    ]
+   }
+  ]
+ }
+}

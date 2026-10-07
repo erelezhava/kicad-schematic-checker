@@ -1,0 +1,175 @@
+{
+ "status": 200,
+ "body": {
+  "ProductsCount": 1,
+  "ExactMatches": [
+   {
+    "Description": {
+     "ProductDescription": "IC DIFFERENTIAL LINK 20-QFN",
+     "DetailedDescription": "Differential Link 20-QFN (4x5)"
+    },
+    "Manufacturer": {
+     "Id": 505,
+     "Name": "Analog Devices Inc."
+    },
+    "ManufacturerProductNumber": "LTC4331HUFD#PBF",
+    "UnitPrice": 11.67,
+    "ProductUrl": "https://www.digikey.com/en/products/detail/analog-devices-inc/LTC4331HUFD-PBF/9658993",
+    "DatasheetUrl": "http://www.analog.com/media/en/technical-documentation/data-sheets/LTC4331.pdf",
+    "ProductVariations": [
+     {
+      "DigiKeyProductNumber": "505-LTC4331HUFD#PBF-ND",
+      "PackageType": {
+       "Id": 6,
+       "Name": "Tube"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 11.67,
+        "TotalPrice": 11.67
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 9.141,
+        "TotalPrice": 91.41
+       },
+       {
+        "BreakQuantity": 73,
+        "UnitPrice": 7.95027,
+        "TotalPrice": 580.36971
+       },
+       {
+        "BreakQuantity": 146,
+        "UnitPrice": 7.66842,
+        "TotalPrice": 1119.58932
+       },
+       {
+        "BreakQuantity": 292,
+        "UnitPrice": 7.43647,
+        "TotalPrice": 2171.44924
+       },
+       {
+        "BreakQuantity": 511,
+        "UnitPrice": 7.27951,
+        "TotalPrice": 3719.82961
+       },
+       {
+        "BreakQuantity": 1022,
+        "UnitPrice": 7.11638,
+        "TotalPrice": 7272.94036
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 505,
+       "Name": "Analog Devices Inc."
+      },
+      "QuantityAvailableforPackageType": 4136,
+      "MinimumOrderQuantity": 1,
+      "DigiReelFee": 0.0
+     }
+    ],
+    "QuantityAvailable": 4136,
+    "ProductStatus": {
+     "Id": 0,
+     "Status": "Active"
+    },
+    "BackOrderNotAllowed": false,
+    "NormallyStocking": true,
+    "Discontinued": false,
+    "EndOfLife": false,
+    "Ncnr": false,
+    "Parameters": [
+     {
+      "ParameterId": 2697,
+      "ParameterText": "DigiKey Programmable",
+      "ParameterType": "String",
+      "ValueId": "750491",
+      "ValueText": "Not Verified"
+     },
+     {
+      "ParameterId": 183,
+      "ParameterText": "Type",
+      "ParameterType": "String",
+      "ValueId": "338626",
+      "ValueText": "Differential Link"
+     },
+     {
+      "ParameterId": 405,
+      "ParameterText": "Applications",
+      "ParameterType": "String",
+      "ValueId": "358642",
+      "ValueText": "Industrial, Lighting"
+     },
+     {
+      "ParameterId": 69,
+      "ParameterText": "Mounting Type",
+      "ParameterType": "String",
+      "ValueId": "409393",
+      "ValueText": "Surface Mount"
+     },
+     {
+      "ParameterId": 16,
+      "ParameterText": "Package / Case",
+      "ParameterType": "String",
+      "ValueId": "143955",
+      "ValueText": "20-WFQFN Exposed Pad"
+     },
+     {
+      "ParameterId": 1291,
+      "ParameterText": "Supplier Device Package",
+      "ParameterType": "String",
+      "ValueId": "443808",
+      "ValueText": "20-QFN (4x5)"
+     }
+    ],
+    "BaseProductNumber": {
+     "Id": 322348,
+     "Name": "LTC4331"
+    },
+    "Category": {
+     "CategoryId": 32,
+     "ParentId": 0,
+     "Name": "Integrated Circuits (ICs)",
+     "ProductCount": 0,
+     "NewProductCount": 0,
+     "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/010/153/598/8-SOIC%2CM8_tmb.jpg",
+     "SeoDescription": "Integrated circuits combine a large number of transistors and other elementary electronic components in miniaturized form into a single physical device, that is designed for a specific purpose or function and characterized by its performance of that function rather than by the behavior of its component pieces. Examples include microcontrollers, battery monitors and charge controllers, analog to digital converters, operational amplifiers, logic gates, voltage regulators, gate drivers, motro controllers, and others.",
+     "ChildCategories": [
+      {
+       "CategoryId": 686,
+       "ParentId": 32,
+       "Name": "Specialized ICs",
+       "ProductCount": 0,
+       "NewProductCount": 0,
+       "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/798/028/MFG_NTE1561_tmb%2864x64%29.jpg",
+       "SeoDescription": "Specialized integrated circuits (ICs) or chips are designed to carry out specific functions. This category is where you'll find addressable switches, air core gauge drivers, audio video switches, authentication chips, automatic discharge, clock generators, color scanners, and many other miscellaneous types of integrated circuits that are used for various applications.",
+       "ChildCategories": []
+      }
+     ]
+    },
+    "ManufacturerLeadWeeks": "14",
+    "ManufacturerPublicQuantity": 0,
+    "Series": {
+     "Id": 818,
+     "Name": "-"
+    },
+    "Classifications": {
+     "ReachStatus": "REACH Unaffected",
+     "RohsStatus": "ROHS3 Compliant",
+     "MoistureSensitivityLevel": "1  (Unlimited)",
+     "ExportControlClassNumber": "EAR99",
+     "HtsusCode": "8542.39.0070"
+    },
+    "OtherNames": [
+     "-2735-LTC4331HUFD#PBF",
+     "505-LTC4331HUFD#PBF",
+     "LTC4331HUFD#PBF-ND"
+    ]
+   }
+  ]
+ }
+}

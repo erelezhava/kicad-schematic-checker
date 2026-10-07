@@ -1,0 +1,186 @@
+{
+ "status": 200,
+ "body": {
+  "ProductsCount": 1,
+  "ExactMatches": [
+   {
+    "Description": {
+     "ProductDescription": "SENSOR DGTL -40C-85C TO39",
+     "DetailedDescription": "Thermal Image Sensor 32H x 24V TO-39"
+    },
+    "Manufacturer": {
+     "Id": 413,
+     "Name": "Melexis Technologies NV"
+    },
+    "ManufacturerProductNumber": "MLX90640ESF-BAA-000-TU",
+    "UnitPrice": 38.52,
+    "ProductUrl": "https://www.digikey.com/en/products/detail/melexis-technologies-nv/MLX90640ESF-BAA-000-TU/8638463",
+    "DatasheetUrl": "https://www.melexis.com/-/media/files/documents/datasheets/mlx90640-datasheet-melexis.pdf",
+    "ProductVariations": [
+     {
+      "DigiKeyProductNumber": "MLX90640ESF-BAA-000-TU-ND",
+      "PackageType": {
+       "Id": 6,
+       "Name": "Tube"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 38.52,
+        "TotalPrice": 38.52
+       },
+       {
+        "BreakQuantity": 5,
+        "UnitPrice": 35.392,
+        "TotalPrice": 176.96
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 34.228,
+        "TotalPrice": 342.28
+       },
+       {
+        "BreakQuantity": 45,
+        "UnitPrice": 32.024,
+        "TotalPrice": 1441.08
+       },
+       {
+        "BreakQuantity": 90,
+        "UnitPrice": 31.13878,
+        "TotalPrice": 2802.4902
+       },
+       {
+        "BreakQuantity": 135,
+        "UnitPrice": 30.65511,
+        "TotalPrice": 4138.43985
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": true,
+      "Supplier": {
+       "Id": 413,
+       "Name": "Melexis Technologies NV"
+      },
+      "QuantityAvailableforPackageType": 1235,
+      "MinimumOrderQuantity": 1,
+      "DigiReelFee": 0.0
+     }
+    ],
+    "QuantityAvailable": 1235,
+    "ProductStatus": {
+     "Id": 0,
+     "Status": "Active"
+    },
+    "BackOrderNotAllowed": false,
+    "NormallyStocking": true,
+    "Discontinued": false,
+    "EndOfLife": false,
+    "Ncnr": false,
+    "Parameters": [
+     {
+      "ParameterId": 183,
+      "ParameterText": "Type",
+      "ParameterType": "String",
+      "ValueId": "411556",
+      "ValueText": "Thermal"
+     },
+     {
+      "ParameterId": 470,
+      "ParameterText": "Pixel Size",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 471,
+      "ParameterText": "Active Pixel Array",
+      "ParameterType": "String",
+      "ValueId": "188363",
+      "ValueText": "32H x 24V"
+     },
+     {
+      "ParameterId": 276,
+      "ParameterText": "Voltage - Supply",
+      "ParameterType": "String",
+      "ValueId": "137441",
+      "ValueText": "2.9V ~ 3.6V"
+     },
+     {
+      "ParameterId": 16,
+      "ParameterText": "Package / Case",
+      "ParameterType": "String",
+      "ValueId": "413043",
+      "ValueText": "TO-205AD, TO-39-3 Metal Can"
+     },
+     {
+      "ParameterId": 1291,
+      "ParameterText": "Supplier Device Package",
+      "ParameterType": "String",
+      "ValueId": "413608",
+      "ValueText": "TO-39"
+     },
+     {
+      "ParameterId": 252,
+      "ParameterText": "Operating Temperature",
+      "ParameterType": "String",
+      "ValueId": "212617",
+      "ValueText": "-40°C ~ 85°C"
+     }
+    ],
+    "BaseProductNumber": {
+     "Id": 325660,
+     "Name": "MLX90640"
+    },
+    "Category": {
+     "CategoryId": 25,
+     "ParentId": 0,
+     "Name": "Sensors, Transducers",
+     "ProductCount": 0,
+     "NewProductCount": 0,
+     "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/003/103/177/MFG_TE-M32Mx-A11x_side_tmb%2864x64%29.jpg",
+     "SeoDescription": "Sensor and transducer products facilitate the measurement or detection of physical processes and phenomena, often though not always by transforming them into an electrical signal of some format. Among others, products are available for the measurement of color, fluid level or flow, gas concentration, image detection, magnetic field, linear acceleration or rotation, vibration, light intensity, object presence, distance, temperature, mechanical strain, and others.",
+     "ChildCategories": [
+      {
+       "CategoryId": 2071,
+       "ParentId": 25,
+       "Name": "Optical Sensors",
+       "ProductCount": 0,
+       "NewProductCount": 0,
+       "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/300/257/540/OPL560-OCA_tmb.jpg",
+       "SeoDescription": "Optical Sensors are components that detect light and convert it into an electronic signal. Devices in this category include ambient light sensors, IR sensors, UV sensors, camera modules, distance measuring sensors, image and camera sensors, photo detectors (CdS cells, logic output, remote receivers), photodiodes, industrial photoelectric, photointerrupters (slot type - logic output, transistor output), photonics (counters, detectors, single photon counting modules), phototransistors, reflective (analog output, logic output), and more.",
+       "ChildCategories": [
+        {
+         "CategoryId": 532,
+         "ParentId": 2071,
+         "Name": "Image Sensors, Camera",
+         "ProductCount": 0,
+         "NewProductCount": 0,
+         "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/300/260/222/MFG_397_tmb%2864x64%29.jpg",
+         "SeoDescription": "Products in the image sensor and camera family are component or module-level devices used to electronically capture visual information in the visible and/or infrared spectrums. Consisting of an array of photosensitive elements connected to a shared control and interface mechanism, available products include those adapted to common still image and video capture as well as more specialized applications such as thermal and spatial imaging.",
+         "ChildCategories": []
+        }
+       ]
+      }
+     ]
+    },
+    "ManufacturerLeadWeeks": "20",
+    "ManufacturerPublicQuantity": 0,
+    "Series": {
+     "Id": 818,
+     "Name": "-"
+    },
+    "Classifications": {
+     "ReachStatus": "REACH Unaffected",
+     "RohsStatus": "ROHS3 Compliant",
+     "MoistureSensitivityLevel": "Not Applicable",
+     "ExportControlClassNumber": "EAR99",
+     "HtsusCode": "8541.49.9500"
+    },
+    "OtherNames": [
+     "Q12052439"
+    ]
+   }
+  ]
+ }
+}

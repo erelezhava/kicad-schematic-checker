@@ -1,0 +1,526 @@
+{
+ "status": 200,
+ "body": {
+  "ProductsCount": 2,
+  "ExactMatches": [
+   {
+    "Description": {
+     "ProductDescription": "CAP CER 2.2UF 25V X7R 0805",
+     "DetailedDescription": "2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"
+    },
+    "Manufacturer": {
+     "Id": 490,
+     "Name": "Murata Electronics"
+    },
+    "ManufacturerProductNumber": "GCM21BR71E225KA73L",
+    "UnitPrice": 0.44,
+    "ProductUrl": "https://www.digikey.com/en/products/detail/murata-electronics/GCM21BR71E225KA73L/1641661",
+    "DatasheetUrl": "https://pim.murata.com/asset/pim4/ceramicCapacitorSMD/GCM21BR71E225KA73-01A-EN_PDF_CERAMICCAPACITORSMD",
+    "ProductVariations": [
+     {
+      "DigiKeyProductNumber": "490-4787-2-ND",
+      "PackageType": {
+       "Id": 1,
+       "Name": "Tape & Reel (TR)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 3000,
+        "UnitPrice": 0.10568,
+        "TotalPrice": 317.04
+       },
+       {
+        "BreakQuantity": 9000,
+        "UnitPrice": 0.09648,
+        "TotalPrice": 868.32
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": false,
+      "Supplier": {
+       "Id": 490,
+       "Name": "Murata Electronics"
+      },
+      "QuantityAvailableforPackageType": 201000,
+      "MaxQuantityForDistribution": 100000,
+      "MinimumOrderQuantity": 3000,
+      "StandardPackage": 3000,
+      "DigiReelFee": 0.0
+     },
+     {
+      "DigiKeyProductNumber": "490-4787-1-ND",
+      "PackageType": {
+       "Id": 2,
+       "Name": "Cut Tape (CT)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 0.44,
+        "TotalPrice": 0.44
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 0.263,
+        "TotalPrice": 2.63
+       },
+       {
+        "BreakQuantity": 50,
+        "UnitPrice": 0.195,
+        "TotalPrice": 9.75
+       },
+       {
+        "BreakQuantity": 100,
+        "UnitPrice": 0.1739,
+        "TotalPrice": 17.39
+       },
+       {
+        "BreakQuantity": 500,
+        "UnitPrice": 0.13842,
+        "TotalPrice": 69.21
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": false,
+      "Supplier": {
+       "Id": 490,
+       "Name": "Murata Electronics"
+      },
+      "QuantityAvailableforPackageType": 202368,
+      "MinimumOrderQuantity": 1,
+      "DigiReelFee": 0.0
+     },
+     {
+      "DigiKeyProductNumber": "490-4787-6-ND",
+      "PackageType": {
+       "Id": 243,
+       "Name": "Digi-Reel®"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 1,
+        "UnitPrice": 0.44,
+        "TotalPrice": 0.44
+       },
+       {
+        "BreakQuantity": 10,
+        "UnitPrice": 0.263,
+        "TotalPrice": 2.63
+       },
+       {
+        "BreakQuantity": 50,
+        "UnitPrice": 0.195,
+        "TotalPrice": 9.75
+       },
+       {
+        "BreakQuantity": 100,
+        "UnitPrice": 0.1739,
+        "TotalPrice": 17.39
+       },
+       {
+        "BreakQuantity": 500,
+        "UnitPrice": 0.13842,
+        "TotalPrice": 69.21
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": false,
+      "TariffActive": false,
+      "Supplier": {
+       "Id": 490,
+       "Name": "Murata Electronics"
+      },
+      "QuantityAvailableforPackageType": 202368,
+      "MaxQuantityForDistribution": 100000,
+      "MinimumOrderQuantity": 1,
+      "StandardPackage": 1,
+      "DigiReelFee": 7.0
+     }
+    ],
+    "QuantityAvailable": 202368,
+    "ProductStatus": {
+     "Id": 0,
+     "Status": "Active"
+    },
+    "BackOrderNotAllowed": false,
+    "NormallyStocking": true,
+    "Discontinued": false,
+    "EndOfLife": false,
+    "Ncnr": false,
+    "Parameters": [
+     {
+      "ParameterId": 2049,
+      "ParameterText": "Capacitance",
+      "ParameterType": "UnitOfMeasure",
+      "ValueId": "2.2 µF",
+      "ValueText": "2.2 µF"
+     },
+     {
+      "ParameterId": 3,
+      "ParameterText": "Tolerance",
+      "ParameterType": "String",
+      "ValueId": "1340",
+      "ValueText": "±10%"
+     },
+     {
+      "ParameterId": 14,
+      "ParameterText": "Voltage - Rated",
+      "ParameterType": "String",
+      "ValueId": "159247",
+      "ValueText": "25V"
+     },
+     {
+      "ParameterId": 17,
+      "ParameterText": "Temperature Coefficient",
+      "ParameterType": "String",
+      "ValueId": "422415",
+      "ValueText": "X7R"
+     },
+     {
+      "ParameterId": 252,
+      "ParameterText": "Operating Temperature",
+      "ParameterType": "String",
+      "ValueId": "242918",
+      "ValueText": "-55°C ~ 125°C"
+     },
+     {
+      "ParameterId": 5,
+      "ParameterText": "Features",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 707,
+      "ParameterText": "Ratings",
+      "ParameterType": "String",
+      "ValueId": "312105",
+      "ValueText": "AEC-Q200"
+     },
+     {
+      "ParameterId": 405,
+      "ParameterText": "Applications",
+      "ParameterType": "String",
+      "ValueId": "316912",
+      "ValueText": "Automotive"
+     },
+     {
+      "ParameterId": 1531,
+      "ParameterText": "Failure Rate",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 69,
+      "ParameterText": "Mounting Type",
+      "ParameterType": "String",
+      "ValueId": "409416",
+      "ValueText": "Surface Mount, MLCC"
+     },
+     {
+      "ParameterId": 16,
+      "ParameterText": "Package / Case",
+      "ParameterType": "String",
+      "ValueId": "39329",
+      "ValueText": "0805 (2012 Metric)"
+     },
+     {
+      "ParameterId": 46,
+      "ParameterText": "Size / Dimension",
+      "ParameterType": "String",
+      "ValueId": "8569",
+      "ValueText": "0.079\" L x 0.049\" W (2.00mm x 1.25mm)"
+     },
+     {
+      "ParameterId": 1500,
+      "ParameterText": "Height - Seated (Max)",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 1501,
+      "ParameterText": "Thickness (Max)",
+      "ParameterType": "String",
+      "ValueId": "7241",
+      "ValueText": "0.055\" (1.40mm)"
+     },
+     {
+      "ParameterId": 508,
+      "ParameterText": "Lead Spacing",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 4,
+      "ParameterText": "Lead Style",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     }
+    ],
+    "BaseProductNumber": {
+     "Id": 179032,
+     "Name": "GCM21BR71E"
+    },
+    "Category": {
+     "CategoryId": 3,
+     "ParentId": 0,
+     "Name": "Capacitors",
+     "ProductCount": 0,
+     "NewProductCount": 0,
+     "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/640/398/BCAP0350%20E270%20T11_tmb%2864x64%29.jpg",
+     "SeoDescription": "Capacitor products, also known as \"condensers\", are generally named and organized in reference to the dielectric material incorporated within. Along with variations in construction methods, the choice of dielectric material has strong influence on a given device's relative cost, size, parametric stability, and suitability for a particular application.",
+     "ChildCategories": [
+      {
+       "CategoryId": 60,
+       "ParentId": 3,
+       "Name": "Ceramic Capacitors",
+       "ProductCount": 0,
+       "NewProductCount": 0,
+       "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/300/365/960/CGA-Series-0402-%281005-Metric%29_tmb.jpg",
+       "SeoDescription": "A capacitor is a passive electronic device that stores electric charge. Ceramic capacitors consist of two or more alternating layers of ceramic material as the dielectric and metal layers acting as the non-polarized electrodes. Applications include automotive, bypass, decoupling, filtering, RF, and ESD protection. Through-hole versions are often disc or \"blob\" shaped with two wire leads.",
+       "ChildCategories": []
+      }
+     ]
+    },
+    "ManufacturerLeadWeeks": "21",
+    "ManufacturerPublicQuantity": 0,
+    "Series": {
+     "Id": 5680,
+     "Name": "GCM"
+    },
+    "Classifications": {
+     "ReachStatus": "REACH Unaffected",
+     "RohsStatus": "ROHS3 Compliant",
+     "MoistureSensitivityLevel": "1  (Unlimited)",
+     "ExportControlClassNumber": "EAR99",
+     "HtsusCode": "8532.24.0020"
+    },
+    "OtherNames": [
+     "490-4787-6",
+     "490-4787-2",
+     "490-4787-1"
+    ]
+   },
+   {
+    "Description": {
+     "ProductDescription": "CAP CER 2.2UF 25V X7R 0805",
+     "DetailedDescription": "2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"
+    },
+    "Manufacturer": {
+     "Id": 811,
+     "Name": "Murata Power Solutions Inc."
+    },
+    "ManufacturerProductNumber": "GCM21BR71E225KA73L",
+    "UnitPrice": 0.12,
+    "ProductUrl": "https://www.digikey.com/en/products/detail/wec/GCM21BR71E225KA73L/26462254",
+    "DatasheetUrl": "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GCM21BR71E225KA73-01.pdf",
+    "ProductVariations": [
+     {
+      "DigiKeyProductNumber": "2266-GCM21BR71E225KA73LTR-ND",
+      "PackageType": {
+       "Id": 1,
+       "Name": "Tape & Reel (TR)"
+      },
+      "StandardPricing": [
+       {
+        "BreakQuantity": 12000,
+        "UnitPrice": 0.12,
+        "TotalPrice": 1440.0
+       },
+       {
+        "BreakQuantity": 36000,
+        "UnitPrice": 0.116,
+        "TotalPrice": 4176.0
+       },
+       {
+        "BreakQuantity": 108000,
+        "UnitPrice": 0.11,
+        "TotalPrice": 11880.0
+       }
+      ],
+      "MyPricing": [],
+      "MarketPlace": true,
+      "TariffActive": false,
+      "Supplier": {
+       "Id": 2266,
+       "Name": "WEC"
+      },
+      "QuantityAvailableforPackageType": 756000,
+      "MaxQuantityForDistribution": 999999999,
+      "MinimumOrderQuantity": 12000,
+      "StandardPackage": 12000,
+      "DigiReelFee": 0.0
+     }
+    ],
+    "QuantityAvailable": 756000,
+    "ProductStatus": {
+     "Id": 0,
+     "Status": "Active"
+    },
+    "BackOrderNotAllowed": true,
+    "NormallyStocking": true,
+    "Discontinued": false,
+    "EndOfLife": false,
+    "Ncnr": false,
+    "Parameters": [
+     {
+      "ParameterId": 2049,
+      "ParameterText": "Capacitance",
+      "ParameterType": "UnitOfMeasure",
+      "ValueId": "2.2 µF",
+      "ValueText": "2.2 µF"
+     },
+     {
+      "ParameterId": 3,
+      "ParameterText": "Tolerance",
+      "ParameterType": "String",
+      "ValueId": "1340",
+      "ValueText": "±10%"
+     },
+     {
+      "ParameterId": 14,
+      "ParameterText": "Voltage - Rated",
+      "ParameterType": "String",
+      "ValueId": "159247",
+      "ValueText": "25V"
+     },
+     {
+      "ParameterId": 17,
+      "ParameterText": "Temperature Coefficient",
+      "ParameterType": "String",
+      "ValueId": "422415",
+      "ValueText": "X7R"
+     },
+     {
+      "ParameterId": 252,
+      "ParameterText": "Operating Temperature",
+      "ParameterType": "String",
+      "ValueId": "242918",
+      "ValueText": "-55°C ~ 125°C"
+     },
+     {
+      "ParameterId": 5,
+      "ParameterText": "Features",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 707,
+      "ParameterText": "Ratings",
+      "ParameterType": "String",
+      "ValueId": "312105",
+      "ValueText": "AEC-Q200"
+     },
+     {
+      "ParameterId": 405,
+      "ParameterText": "Applications",
+      "ParameterType": "String",
+      "ValueId": "316912",
+      "ValueText": "Automotive"
+     },
+     {
+      "ParameterId": 1531,
+      "ParameterText": "Failure Rate",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 69,
+      "ParameterText": "Mounting Type",
+      "ParameterType": "String",
+      "ValueId": "409416",
+      "ValueText": "Surface Mount, MLCC"
+     },
+     {
+      "ParameterId": 16,
+      "ParameterText": "Package / Case",
+      "ParameterType": "String",
+      "ValueId": "39329",
+      "ValueText": "0805 (2012 Metric)"
+     },
+     {
+      "ParameterId": 46,
+      "ParameterText": "Size / Dimension",
+      "ParameterType": "String",
+      "ValueId": "8569",
+      "ValueText": "0.079\" L x 0.049\" W (2.00mm x 1.25mm)"
+     },
+     {
+      "ParameterId": 1500,
+      "ParameterText": "Height - Seated (Max)",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 1501,
+      "ParameterText": "Thickness (Max)",
+      "ParameterType": "String",
+      "ValueId": "7241",
+      "ValueText": "0.055\" (1.40mm)"
+     },
+     {
+      "ParameterId": 508,
+      "ParameterText": "Lead Spacing",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     },
+     {
+      "ParameterId": 4,
+      "ParameterText": "Lead Style",
+      "ParameterType": "String",
+      "ValueId": "1",
+      "ValueText": "-"
+     }
+    ],
+    "BaseProductNumber": {},
+    "Category": {
+     "CategoryId": 3,
+     "ParentId": 0,
+     "Name": "Capacitors",
+     "ProductCount": 0,
+     "NewProductCount": 0,
+     "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/002/640/398/BCAP0350%20E270%20T11_tmb%2864x64%29.jpg",
+     "SeoDescription": "Capacitor products, also known as \"condensers\", are generally named and organized in reference to the dielectric material incorporated within. Along with variations in construction methods, the choice of dielectric material has strong influence on a given device's relative cost, size, parametric stability, and suitability for a particular application.",
+     "ChildCategories": [
+      {
+       "CategoryId": 60,
+       "ParentId": 3,
+       "Name": "Ceramic Capacitors",
+       "ProductCount": 0,
+       "NewProductCount": 0,
+       "ImageUrl": "https://mm.digikey.com/Volume0/opasdata/d220001/derivates/3/300/365/960/CGA-Series-0402-%281005-Metric%29_tmb.jpg",
+       "SeoDescription": "A capacitor is a passive electronic device that stores electric charge. Ceramic capacitors consist of two or more alternating layers of ceramic material as the dielectric and metal layers acting as the non-polarized electrodes. Applications include automotive, bypass, decoupling, filtering, RF, and ESD protection. Through-hole versions are often disc or \"blob\" shaped with two wire leads.",
+       "ChildCategories": []
+      }
+     ]
+    },
+    "ManufacturerLeadWeeks": "0",
+    "ManufacturerPublicQuantity": 0,
+    "Series": {
+     "Id": 5680,
+     "Name": "GCM"
+    },
+    "Classifications": {
+     "ReachStatus": "REACH Unknown",
+     "RohsStatus": "RoHS Compliant",
+     "MoistureSensitivityLevel": "",
+     "ExportControlClassNumber": "EAR99",
+     "HtsusCode": "8532.24.0020"
+    },
+    "OtherNames": [
+     "2266-GCM21BR71E225KA73LTR"
+    ]
+   }
+  ]
+ }
+}

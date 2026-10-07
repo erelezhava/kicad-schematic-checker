@@ -11,6 +11,7 @@ Requires Python 3.10+ and KiCad CLI for project extraction. No Python packages o
 - Preserve full placed-symbol pin inventories from KiCad 10, including unconnected pins and multiple units.
 - Save full ERC findings separately, including disabled checks.
 - Audit component identification by default: manufacturer, MPN, supplier codes, conflicts, DNP parts, and documented exemptions.
+- Optionally cross-check every MPN against cached DigiKey catalog data: existence, manufacturer, lifecycle, category, value, ratings and package.
 - Audit component descriptions by default: every part needs a Description; for R/C/L it must state value and package and is cross-checked against Value, footprint and declared ratings. Owner to-dos are collected in `owner-actions.md`.
 - Track every supplied requirement as pass, fail, needs_review, not_checked, or not_applicable.
 - Check direct pin connectivity and component properties against reviewed evidence.
@@ -91,6 +92,45 @@ For resistors, capacitors and inductors (references `R<n>`, `C<n>`, `L<n>`), the
 Distributor text works as-is, e.g. `2.2 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)` or `CAP CER 2.2UF 25V X7R 0805`. Generic library text such as `Unpolarized capacitor` has no value, so it stays `needs_review`. Anything the parser cannot read stays `needs_review`; it never becomes a `fail`. For example, all-caps `MOHM` could mean milliohm or megaohm. Other component classes only need a filled Description.
 
 Extraction, import and review write `description.json`/`description.md` and **`owner-actions.md`**. That file is one list per component of the fields the owner must fill or correct (identification and description). The checker never edits the schematic: the owner fills the fields in KiCad, saves, and re-runs extraction, and the cross-check then runs on the new text.
+
+## Credentials
+
+External sources need **your own** keys. They live only on your machine:
+
+1. `cp .env.example .env` in the checker folder.
+2. Fill in your keys. `.env` is git-ignored; `.env.example` is the shared, empty template.
+3. Alternatively use `~/.config/kicad_checker/credentials.env` for every checkout on the machine, or environment variables (these win; use them in CI as masked variables).
+
+Each engineer creates their own DigiKey app instead of sharing one: keys are personal, and the daily API quota is per app. The tool never prints or stores credentials; error messages name the files it looked in, not values. If a key was ever committed or pasted somewhere public, revoke it in the DigiKey developer portal and create a new one.
+
+## Optional check: DigiKey cross-check
+
+Looks up every declared MPN on DigiKey (Product Information API v4, exact-MPN keyword search) and compares the catalog data with the saved schematic. Fetching and checking are separate steps, so reviews run offline from a cache and give the same result every time.
+
+```sh
+# once: your own free app at developer.digikey.com with "Product Information V4" enabled,
+# then: cp .env.example .env  and fill in DIGIKEY_CLIENT_ID / DIGIKEY_CLIENT_SECRET (see "Credentials")
+python3 -m kicad_checker digikey-fetch runs/board-001/circuit.json          # network; one call per unique MPN
+python3 -m kicad_checker digikey-check runs/board-001/circuit.json --output runs/board-001-digikey   # offline
+# or include it in a review:
+python3 -m kicad_checker review ... --digikey-cache ~/.cache/kicad_checker/digikey
+```
+
+The cache defaults to `~/.cache/kicad_checker/digikey`, one JSON file per MPN, outside the repo and shared by every project. `--cache DIR` changes it, and `--refresh` queries the API again. Cached entries keep exact matches only, with photos and account identifiers removed, plus the fetch date. Credentials are never written by the tool.
+
+| Check | Compared | Result |
+| --- | --- | --- |
+| Found | exact MPN on DigiKey | not found → `needs_review` (DigiKey doesn't list every part) |
+| Manufacturer | declared vs DigiKey, with legal suffixes and common aliases ignored (TI, ADI/Linear, ST…) | differs → `needs_review`; empty → owner suggestion with DigiKey's name |
+| Match | several listings of one MPN (e.g. Murata Electronics / Murata Power Solutions) | identical data → checked once; different data → `needs_review` until the Manufacturer field picks one |
+| Lifecycle | `ProductStatus` | anything but Active, or discontinued/end-of-life flags → `needs_review` |
+| Category | R/C/L reference vs DigiKey category | contradiction → `fail` |
+| Value | R/C/L Value vs DigiKey capacitance/resistance/inductance | contradiction → `fail` |
+| Ratings | voltage, tolerance, power, dielectric vs Description text and rating fields | contradiction → `fail` |
+| Package | footprint size code vs DigiKey `Package / Case` | contradiction → `fail`; IC packages are reported, not judged |
+| Pin-count hint | leading count in DigiKey package name (e.g. `6-WDFN Exposed Pad`) vs placed symbol pins | report only; package names can be wrong (e.g. `TO-39-3`), so use a datasheet `symbol_pin_count` rule for a verdict |
+
+DigiKey data is distributor catalog data (`observation_class: distributor_catalog`), not manufacturer-authored evidence; a pass does not establish suitability. Owner suggestions and conflicts are added to `owner-actions.md`. `digikey-check` exit codes: 0 all pass, 1 a conflict, 2 something to review. `digikey-fetch` returns 3 if any lookup failed.
 
 ## Run the synthetic example
 

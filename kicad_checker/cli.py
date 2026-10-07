@@ -5,6 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from . import digikey
 from .description import description_audit, description_markdown, owner_actions, owner_actions_markdown
 from .core import digest, erc_summary, identification, identification_markdown, markdown, parse_netlist, read_json, review, write_json
 
@@ -35,8 +36,8 @@ def write_identification(circuit, out):
     write_owner_actions(report, described, out)
 
 
-def write_owner_actions(identified, described, out):
-    actions = owner_actions(identified, described)
+def write_owner_actions(identified, described, out, digikey_report=None):
+    actions = owner_actions(identified, described, digikey_report)
     (out / "owner-actions.md").write_text(owner_actions_markdown(actions), encoding="utf-8")
     if actions:
         print(f"Owner actions: {len(actions)} components need fields filled or corrected — see {out / 'owner-actions.md'}")
@@ -97,6 +98,15 @@ def main(argv=None):
     command.add_argument("--output", required=True)
     command.add_argument("--snapshot", action="store_true", help="Explicitly review a saved snapshot without verifying live project hashes")
     command.add_argument("--docs-root", help="Resolve relative source.path values against this folder instead of the rules/evidence file folders")
+    command.add_argument("--digikey-cache", help="Also cross-check against cached DigiKey data in this folder (run digikey-fetch first)")
+    command = sub.add_parser("digikey-fetch", help="Look up every MPN of a circuit on DigiKey and cache the results (needs credentials)")
+    command.add_argument("circuit")
+    command.add_argument("--cache", default=str(digikey.DEFAULT_CACHE), help=f"Cache folder (default {digikey.DEFAULT_CACHE})")
+    command.add_argument("--refresh", action="store_true", help="Query again even when a cached entry exists")
+    command = sub.add_parser("digikey-check", help="Compare cached DigiKey data with the schematic (offline)")
+    command.add_argument("circuit")
+    command.add_argument("--cache", default=str(digikey.DEFAULT_CACHE))
+    command.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "extract":
@@ -109,6 +119,22 @@ def main(argv=None):
             write_identification(circuit, out)
             print(f"Imported {len(circuit['components'])} components to {out}")
             return 0
+        if args.command == "digikey-fetch":
+            circuit = read_json(args.circuit)
+            client = digikey.DigiKeyClient(*digikey.load_credentials())
+            summary = digikey.fetch(circuit, Path(args.cache), client, refresh=args.refresh)
+            print(f"DigiKey: fetched={summary['fetched']}, already cached={summary['cached']}, errors={summary['errors']}; cache {Path(args.cache).resolve()}")
+            return 3 if summary["errors"] else 0
+        if args.command == "digikey-check":
+            circuit = read_json(args.circuit)
+            report = digikey.digikey_audit(circuit, Path(args.cache))
+            out = new_output(args.output)
+            write_json(out / "digikey.json", report)
+            (out / "digikey.md").write_text(digikey.digikey_markdown(report), encoding="utf-8")
+            write_owner_actions(identification(circuit), description_audit(circuit), out, report)
+            print("DigiKey: " + ", ".join(f"{s}={n}" for s, n in report["coverage"].items()))
+            print(f"Report: {out / 'digikey.md'}")
+            return 1 if report["coverage"]["fail"] else 2 if report["coverage"]["needs_review"] else 0
         circuit = read_json(args.circuit)
         hashes = circuit.get("project_inputs", {})
         if not args.snapshot:
@@ -130,20 +156,29 @@ def main(argv=None):
         report["input_hashes"] = {str(Path(p).resolve()): digest(p) for p in (args.circuit, args.rules, args.evidence)}
         if args.snapshot:
             report["scope"] += " Offline snapshot review; current project was not verified."
+        if args.digikey_cache:
+            report["digikey"] = digikey.digikey_audit(circuit, Path(args.digikey_cache))
         out = new_output(args.output)
         write_json(out / "report.json", report)
-        (out / "report.md").write_text(markdown(report), encoding="utf-8")
+        text = markdown(report)
+        if report.get("digikey"):
+            text += "\n" + digikey.digikey_markdown(report["digikey"], heading=2)
+        (out / "report.md").write_text(text, encoding="utf-8")
         print("Coverage: " + ", ".join(f"{s}={n}" for s, n in report["coverage"].items()))
         print("Component identification: " + ", ".join(f"{s}={n}" for s, n in report["identification"]["coverage"].items()))
         print("Component description: " + ", ".join(f"{s}={n}" for s, n in report["description"]["coverage"].items()))
-        write_owner_actions(report["identification"], report["description"], out)
+        if report.get("digikey"):
+            print("DigiKey: " + ", ".join(f"{s}={n}" for s, n in report["digikey"]["coverage"].items()))
+        write_owner_actions(report["identification"], report["description"], out, report.get("digikey"))
         approvals = report["approval_summary"]
         print(f"Passes approved by a human: {approvals['pass_human_approved']}; agent review only: {approvals['pass_agent_only']}")
         print(f"Report: {out / 'report.md'}")
-        if report["coverage"]["fail"] or report["description"]["coverage"]["fail"]:
+        dk = (report.get("digikey") or {}).get("coverage", {})
+        if report["coverage"]["fail"] or report["description"]["coverage"]["fail"] or dk.get("fail"):
             return 1
         if (not report["results"] or report["coverage"]["needs_review"] or report["coverage"]["not_checked"]
-                or report["identification"]["coverage"]["needs_review"] or report["description"]["coverage"]["needs_review"]):
+                or report["identification"]["coverage"]["needs_review"] or report["description"]["coverage"]["needs_review"]
+                or dk.get("needs_review")):
             return 2
         return 0
     except (OSError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as error:

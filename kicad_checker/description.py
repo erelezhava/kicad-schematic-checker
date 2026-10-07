@@ -275,7 +275,7 @@ def description_markdown(report, heading=1):
     return "\n".join(lines) + "\n"
 
 
-def owner_actions(identification_report, description_report):
+def owner_actions(identification_report, description_report, digikey_report=None):
     """One list, per component, of what the design owner must fill or correct."""
     actions = {}
     for item in identification_report["results"]:
@@ -285,6 +285,19 @@ def owner_actions(identification_report, description_report):
         if item["status"] in ("fail", "needs_review"):
             label = "Description conflict" if item["status"] == "fail" else "Description"
             actions.setdefault(item["reference"], []).append(f"{label}: {item.get('reason', '')}")
+    for item in (digikey_report or {}).get("results", []):
+        if item.get("reason", "").startswith("No cached DigiKey data"):
+            continue  # a tool step (run digikey-fetch), not an owner action
+        lines = [f"DigiKey suggestion: {s}" for s in item.get("suggestions", [])]
+        if item["status"] in ("fail", "needs_review"):
+            label = "DigiKey conflict" if item["status"] == "fail" else "DigiKey"
+            checks = item.get("checks") or []
+            problems = ([c["reason"] for c in checks if c["status"] in ("fail", "needs_review")
+                         and not (c["check"] == "manufacturer" and item.get("suggestions"))]
+                        if checks else [item.get("reason", "")])
+            lines.extend(f"{label}: {text}" for text in problems)
+        if lines:
+            actions.setdefault(item["reference"], []).extend(lines)
     return actions
 
 
@@ -292,7 +305,7 @@ def owner_actions_markdown(actions):
     lines = ["# Owner actions", "",
              "Fill or correct these schematic fields in KiCad, save, then re-run extraction. The checker never edits the design.", ""]
     if not actions:
-        lines.append("Nothing to fill: identification and descriptions are complete.")
+        lines.append("Nothing to fill: no open identification, description or DigiKey items.")
     for ref in sorted(actions, key=lambda r: (re.sub(r"\d+", "", r), int(re.sub(r"\D", "", r) or 0))):
         lines.append(f"- **{ref}**")
         lines.extend(f"  - {text}" for text in actions[ref])
