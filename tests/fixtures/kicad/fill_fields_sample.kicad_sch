@@ -1,0 +1,114 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(uuid "11111111-1111-1111-1111-111111111111")
+	(paper "A4")
+	(lib_symbols
+		(symbol "Device:C"
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 100.33 50.8 0)
+		(unit 1)
+		(uuid "aaaaaaaa-0000-0000-0000-000000000002")
+		(property "Reference" "C2"
+			(at 102.87 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "2.2 uF"
+			(at 102.87 52.07 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer_Name" ""
+			(at 100.33 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "p1")
+		)
+		(instances
+			(project "board"
+				(path "/11111111-1111-1111-1111-111111111111"
+					(reference "C2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 120 50.8 0)
+		(unit 1)
+		(uuid "aaaaaaaa-0000-0000-0000-000000000037")
+		(property "Reference" "C37"
+			(at 122 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "2.2 µF \"quoted\" X7R"
+			(at 120 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "board"
+				(path "/11111111-1111-1111-1111-111111111111"
+					(reference "C37")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Conn:J")
+		(at 140 50.8 0)
+		(unit 1)
+		(uuid "aaaaaaaa-0000-0000-0000-0000000000j2")
+		(property "Reference" "J2"
+			(at 142 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Molex"
+			(at 140 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+)
