@@ -62,7 +62,8 @@ class DigiKeyClient:
             with self.opener(request, timeout=30) as response:
                 return response.status, json.load(response)
         except urllib.error.HTTPError as error:
-            text = error.read().decode(errors="replace")
+            with error:
+                text = error.read().decode(errors="replace")
             try:
                 body = json.loads(text)
             except json.JSONDecodeError:
@@ -351,7 +352,7 @@ def compare_ratings(checks, cls, component, product, description):
 
 def audit_component(ref, component, cache_dir):
     item = {"reference": ref, "sheet_path": component.get("sheet_path"), "observation_class": "distributor_catalog",
-            "mpn": None, "digikey": None, "checks": [], "suggestions": []}
+            "mpn": None, "digikey": None, "checks": [], "suggestions": [], "suggested_fields": {}}
     exemption = component_exemption(ref, component)
     if exemption:
         item.update(status="not_applicable", **exemption)
@@ -386,6 +387,7 @@ def audit_component(ref, component, cache_dir):
     elif not declared:
         checks.add("manufacturer", "needs_review", f"Manufacturer field is empty; DigiKey lists {' or '.join(names)}")
         item["suggestions"].append(f"Set Manufacturer = {' or '.join(repr(n) for n in names)} (from DigiKey)")
+        item["suggested_fields"]["Manufacturer"] = names  # several names = owner must choose
     if len(products) > 1:
         if not same_parameters(products):
             checks.add("match", "needs_review", f"{len(products)} DigiKey listings with different data ({', '.join(names)}); set the Manufacturer field to choose one")
