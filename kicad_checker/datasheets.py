@@ -19,6 +19,7 @@ import json
 import re
 import shutil
 import subprocess
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -33,6 +34,8 @@ from .paths import CACHE_ROOT
 DEFAULT_CACHE = CACHE_ROOT / "datasheets"
 DOC_FOLDER_NAMES = {"docs", "doc", "documents", "documentation", "datasheets", "datasheet"}
 MAX_BYTES = 60 * 1024 * 1024
+READ_TIMEOUT = 20   # seconds without any data
+TOTAL_SECONDS = 60  # hard limit per file
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) kicad-checker datasheet fetch"
 
 
@@ -152,40 +155,67 @@ def cached(cache_dir, mpn):
     return None
 
 
-def download(url, cache_dir, mpn, opener=urllib.request.urlopen):
+def _fetch(url, partial, opener, deadline, total_seconds):
+    """Stream one URL into `partial`; a stalling or slow site is cut off at the deadline."""
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/pdf,*/*"})
+    timeout = max(1.0, min(READ_TIMEOUT, deadline - time.monotonic()))
+    with opener(request, timeout=timeout) as response, open(partial, "wb") as handle:
+        total = 0
+        for block in iter(lambda: response.read(1 << 16), b""):
+            total += len(block)
+            if total > MAX_BYTES:
+                raise ValueError(f"larger than {MAX_BYTES // (1024 * 1024)} MB")
+            if time.monotonic() > deadline:
+                raise ValueError(f"took longer than {total_seconds:g} s")
+            handle.write(block)
+        return getattr(response, "url", url)
+
+
+def candidate_urls(url):
+    """https first for an http:// link (many sites stall or block plain http), then the original."""
+    if url.startswith("//"):
+        return ["https:" + url]
+    if url.startswith("http://"):
+        return ["https://" + url[len("http://"):], url]
+    return [url]
+
+
+def download(url, cache_dir, mpn, opener=urllib.request.urlopen, total_seconds=TOTAL_SECONDS):
     """Download a PDF into the cache. Returns (entry, None) or (None, reason)."""
     if not url:
         return None, "DigiKey lists no datasheet URL"
-    if url.startswith("//"):
-        url = "https:" + url
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/pdf,*/*"})
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     partial = cache_dir / f".download-{hashlib.sha256(url.encode()).hexdigest()[:12]}.part"
-    try:
-        with opener(request, timeout=60) as response, open(partial, "wb") as handle:
-            total = 0
-            for block in iter(lambda: response.read(1 << 16), b""):
-                total += len(block)
-                if total > MAX_BYTES:
-                    raise ValueError(f"larger than {MAX_BYTES // (1024 * 1024)} MB")
-                handle.write(block)
-            final_url = getattr(response, "url", url)
-    except (urllib.error.URLError, OSError, ValueError) as error:
-        partial.unlink(missing_ok=True)
-        return None, f"download failed: {error}"
-    if not is_pdf(partial):
-        partial.unlink(missing_ok=True)
-        return None, "the URL returned a web page, not a PDF (download it manually)"
-    sha = sha256_file(partial)
-    target = cache_dir / f"{sha}.pdf"
-    partial.replace(target)
-    entry = {"mpn": mpn, "file": target.name, "sha256": sha, "url": url, "final_url": final_url,
-             "bytes": target.stat().st_size, "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
-    path = manifest_path(cache_dir, mpn)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(entry, indent=1) + "\n", encoding="utf-8")
-    return entry, None
+    errors, deadline = [], time.monotonic() + total_seconds  # one budget for all attempts of this file
+    for attempt in candidate_urls(url):
+        if errors and time.monotonic() > deadline:
+            errors.append(f"{attempt.split(':', 1)[0]}: skipped, time limit reached")
+            continue
+        try:
+            final_url = _fetch(attempt, partial, opener, deadline, total_seconds)
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            partial.unlink(missing_ok=True)
+            errors.append(f"{attempt.split(':', 1)[0]}: {error}")
+            continue
+        if not is_pdf(partial):
+            partial.unlink(missing_ok=True)
+            errors.append(f"{attempt.split(':', 1)[0]}: the URL returned a web page, not a PDF (download it manually)")
+            continue
+        sha = sha256_file(partial)
+        target = cache_dir / f"{sha}.pdf"
+        partial.replace(target)
+        entry = {"mpn": mpn, "file": target.name, "sha256": sha, "url": attempt, "digikey_url": url,
+                 "final_url": final_url, "bytes": target.stat().st_size,
+                 "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        path = manifest_path(cache_dir, mpn)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(entry, indent=1) + "\n", encoding="utf-8")
+        return entry, None
+    if len(errors) == 1:
+        message = errors[0].split(": ", 1)[1]
+        return None, message if "web page" in message else f"download failed: {message}"
+    return None, "download failed: " + "; ".join(errors)
 
 
 # --- per-circuit run ----------------------------------------------------------------
@@ -228,10 +258,12 @@ def find_datasheets(circuit, cache_dir=DEFAULT_CACHE, digikey_cache=digikey.DEFA
         elif offline:
             item.update(status="missing", reason="Not in project docs or cache (offline run)")
         else:
+            if url:
+                log(f"{', '.join(refs)} {mpn}: fetching {url} ...")
             hit, error = download(url, cache_dir, mpn, opener=opener)
             if hit:
                 item.update(status="found", source="downloaded", path=str(cache_dir / hit["file"]), sha256=hit["sha256"],
-                            reason=f"downloaded from {url}")
+                            reason=f"downloaded from {hit['url']}")
             else:
                 item.update(status="missing", reason=f"{error}. Put the PDF into the project docs folder"
                             + (f" (from {url})" if url else ""))

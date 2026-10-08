@@ -148,6 +148,44 @@ class DownloadAndCacheTests(Base):
         self.assertIn("no datasheet URL", item["reason"])
 
 
+class DownloadRobustnessTests(Base):
+    def test_http_link_tries_https_first_then_falls_back(self):
+        pdf_bytes = make_pdf(self.base / "remote.pdf", "LTC4331").read_bytes()
+
+        def opener(request, timeout):
+            self.calls.append(request.full_url)
+            if request.full_url.startswith("https://"):
+                raise datasheets.urllib.error.URLError("timed out")
+            return Response(pdf_bytes, request.full_url)
+
+        entry, error = datasheets.download("http://www.analog.com/x/LTC4331.pdf", self.cache, "LTC4331HUFD#PBF", opener=opener)
+        self.assertIsNone(error)
+        self.assertEqual(self.calls, ["https://www.analog.com/x/LTC4331.pdf", "http://www.analog.com/x/LTC4331.pdf"])
+        self.assertEqual(entry["url"], "http://www.analog.com/x/LTC4331.pdf")
+
+    def test_https_success_needs_one_request(self):
+        pdf_bytes = make_pdf(self.base / "remote.pdf", "LTC4331").read_bytes()
+        entry, error = datasheets.download("http://www.analog.com/x/LTC4331.pdf", self.cache, "LTC4331HUFD#PBF",
+                                           opener=self.opener(pdf_bytes))
+        self.assertEqual(self.calls, ["https://www.analog.com/x/LTC4331.pdf"])
+        self.assertEqual(entry["digikey_url"], "http://www.analog.com/x/LTC4331.pdf")
+
+    def test_slow_site_is_cut_off_by_total_time_limit(self):
+        pdf_bytes = make_pdf(self.base / "remote.pdf", "LP5912").read_bytes()
+        entry, error = datasheets.download("https://slow.example/a.pdf", self.cache, "X", opener=self.opener(pdf_bytes),
+                                           total_seconds=0)
+        self.assertIsNone(entry)
+        self.assertIn("took longer than 0 s", error)
+        self.assertEqual(list(self.cache.glob(".download-*")), [])  # no partial file left behind
+
+    def test_progress_is_printed_before_each_download(self):
+        lines = []
+        pdf_bytes = make_pdf(self.base / "remote.pdf", "LP5912").read_bytes()
+        datasheets.find_datasheets(self.circuit, self.cache, self.dk, opener=self.opener(pdf_bytes), log=lines.append)
+        self.assertTrue(lines[0].startswith("U2 LP591233MDRVREP: fetching https://www.ti.com/"))
+        self.assertIn("found (downloaded)", lines[1])
+
+
 class SelectionTests(unittest.TestCase):
     def test_passives_and_dnp_skipped_unless_all(self):
         circuit = {"components": {"U2": part("U2", "LP591233MDRVREP"), "R1": part("R1", "AF0402FR-0710KL"),
