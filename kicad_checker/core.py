@@ -73,6 +73,38 @@ def component_exemption(ref, component):
     return None
 
 
+PART_NUMBER_LIKE = re.compile(r"[A-Za-z0-9][A-Za-z0-9\-#/.+]*")
+
+
+def compact(text):
+    """Compare part numbers ignoring case, spaces and - # / . separators."""
+    return re.sub(r"[\s\-#/.]", "", text).upper()
+
+
+def value_mpn_check(ref, component, mpn):
+    """Does the Value name the same part as the MPN? R/C/L Values are electrical values
+    (covered by the Description check), and generic library text is not compared.
+    Returns None when not compared, else {"status", "reason", "value", "mpn"}."""
+    value = (component.get("value") or "").strip()
+    if not mpn or re.fullmatch(r"[CRL]\d+", ref) or len(value) < 5 or not PART_NUMBER_LIKE.fullmatch(value) \
+            or not re.search(r"\d", value):
+        return None
+    v, m = compact(value), compact(mpn)
+    result = {"value": value, "mpn": mpn}
+    if v == m:
+        return {**result, "status": "pass", "reason": "Value matches the MPN"}
+    if m.startswith(v) and len(v) >= 4:
+        return {**result, "status": "pass", "reason": "Value is the family/base name of the MPN"}
+    if v.startswith(m):
+        return {**result, "status": "needs_review",
+                "reason": f"MPN {mpn!r} is shorter than Value {value!r}: the MPN may be only a family name; enter the full orderable MPN"}
+    common = len(next((v[:i] for i in range(min(len(v), len(m)), 0, -1) if v[:i] == m[:i]), ""))
+    if common >= 4:
+        return {**result, "status": "needs_review",
+                "reason": f"Value {value!r} names a different variant than MPN {mpn!r} (often only packaging); confirm which one is ordered"}
+    return {**result, "status": "needs_review", "reason": f"Value {value!r} looks like a different part number than MPN {mpn!r}; confirm"}
+
+
 def identification(circuit):
     """Audit declared identity of every exported component, without catalog lookups."""
     results = []
@@ -103,6 +135,11 @@ def identification(circuit):
                 reasons.append("Conflicting identity fields: " + ", ".join(conflicts))
             if supplier_only:
                 reasons.append("Declared MPN resembles an LCSC catalog code (C followed by digits); confirm the manufacturer's exact MPN")
+            check = value_mpn_check(ref, component, item["part_number"])
+            if check:
+                item["value_check"] = check
+                if check["status"] != "pass":
+                    reasons.append(check["reason"])
             if reasons:
                 item["reason"] = "; ".join(reasons)
             else:
@@ -123,7 +160,7 @@ def identification_groups(results):
     every component keeps its own needs_review result."""
     groups = {"missing_manufacturer_mpn_present": {}, "missing_manufacturer_and_mpn": [],
               "missing_mpn_manufacturer_present": [], "conflicting_fields": [],
-              "supplier_code_like_mpn": [], "exemption_without_reason": []}
+              "supplier_code_like_mpn": [], "exemption_without_reason": [], "value_mpn_mismatch": []}
     for item in results:
         if item["status"] != "needs_review":
             continue
@@ -140,6 +177,8 @@ def identification_groups(results):
             groups["supplier_code_like_mpn"].append(ref)
         if "needs Checker_ExemptionReason" in reason:
             groups["exemption_without_reason"].append(ref)
+        if (item.get("value_check") or {}).get("status") == "needs_review":
+            groups["value_mpn_mismatch"].append(ref)
     return groups
 
 
@@ -150,6 +189,7 @@ IDENTIFICATION_GROUP_TITLES = {
     "conflicting_fields": "Conflicting identity fields",
     "supplier_code_like_mpn": "MPN looks like an LCSC code (confirm the manufacturer MPN)",
     "exemption_without_reason": "Checker_NonPurchasable set without Checker_ExemptionReason",
+    "value_mpn_mismatch": "Value and MPN name different parts or variants (confirm which one is ordered)",
 }
 
 

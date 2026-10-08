@@ -105,3 +105,43 @@ class IdentificationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ValueMpnTests(unittest.TestCase):
+    def check(self, ref, value, mpn):
+        from kicad_checker.core import value_mpn_check
+        component = {"reference": ref, "value": value, "fields": {}}
+        return value_mpn_check(ref, component, mpn)
+
+    def test_cases(self):
+        cases = [
+            ("J2", "5040500691", "5040500691", "pass", "matches"),
+            ("U1", "LTC4331HUFD-PBF", "LTC4331HUFD#PBF", "pass", "matches"),           # separators ignored
+            ("U2", "LP5912", "LP591233MDRVREP", "pass", "family"),
+            ("A1", "MLX90640ESF-BAA-000-SP", "MLX90640ESF-BAA-000-TU", "needs_review", "different variant"),
+            ("U2", "LP591233MDRVREP", "LP5912", "needs_review", "only a family name"),  # MPN not specific
+            ("U5", "TPS7A0233", "LP591233MDRVREP", "needs_review", "different part number"),
+        ]
+        for ref, value, mpn, status, words in cases:
+            with self.subTest(value=value, mpn=mpn):
+                result = self.check(ref, value, mpn)
+                self.assertEqual(result["status"], status)
+                self.assertIn(words, result["reason"])
+
+    def test_not_compared(self):
+        for ref, value in (("J1", "Conn_01x06"), ("H1", "MountingHole_Pad"), ("U3", "USB C"), ("Y1", "Crystal"),
+                           ("R1", "10k1234"), ("C1", "GCM21BR71E225"), ("U9", "")):
+            with self.subTest(value=value):
+                self.assertIsNone(self.check(ref, value, "ABC12345"))
+        self.assertIsNone(self.check("U1", "LP5912", None))  # no MPN: identification already reports it
+
+    def test_mismatch_makes_identification_needs_review_and_is_grouped(self):
+        circuit = {"netlist_sha256": "x", "components": {"A1": {
+            "reference": "A1", "value": "MLX90640ESF-BAA-000-SP", "dnp": False, "sheet_path": "/",
+            "fields": {"Manufacturer": "Melexis", "MPN": "MLX90640ESF-BAA-000-TU"}, "pins": {}}}}
+        report = identification(circuit)
+        item = report["results"][0]
+        self.assertEqual(item["status"], "needs_review")
+        self.assertEqual(report["groups"]["value_mpn_mismatch"], ["A1"])
+        circuit["components"]["A1"]["value"] = "MLX90640"
+        self.assertEqual(identification(circuit)["results"][0]["status"], "pass")
