@@ -177,7 +177,7 @@ Review exit codes: 0 = identification and descriptions are complete (or explicit
 
 ## Current boundaries
 
-No automatic PDF ingestion, AI API integration, simulation, PCB layout checks, general circuit solving, parallel-capacitor equivalent calculations, or automatic datasheet rule generation. Symbol count checks do not verify pin names/functions, footprint mapping, or infer package selection. AI-assisted evidence collection follows AGENT_GUIDE.md. Logical nets are not merged across zero-ohm resistors. Source freshness covers project-folder schematics/project files, not external libraries or schematic files outside that folder; pin a full project snapshot for reproducible reviews involving external dependencies.
+No automatic PDF ingestion, AI API integration, simulation, PCB layout checks, general circuit solving, parallel-capacitor equivalent calculations, or automatic datasheet rule generation. Symbol count checks do not verify pin names/functions, footprint mapping, or infer package selection. AI-assisted evidence collection follows AGENT_GUIDE.md. Logical nets are not merged across zero-ohm resistors. Source freshness covers the active design: the root schematic, every sub-sheet it references (wherever it lives) and the `.kicad_pro`. KiCad's `.history/` copies and unrelated files are ignored. External symbol/footprint libraries are not covered; pin a full project snapshot for reproducible reviews involving external dependencies.
 
 ## Tests
 

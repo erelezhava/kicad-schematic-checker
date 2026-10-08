@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 
 from . import digikey
+from .schematic import design_files
 from .description import description_audit, description_markdown, owner_actions, owner_actions_markdown
 from .core import digest, erc_summary, identification, identification_markdown, markdown, parse_netlist, read_json, review, write_json
 
@@ -55,8 +56,11 @@ def extract(args):
     executable = shutil.which("kicad-cli")
     if not executable:
         raise ValueError("Install KiCad and put kicad-cli on PATH")
-    # Record project inputs to detect edits during extraction and stale reviews.
-    inputs = sorted(set(source.parent.rglob("*.kicad_sch")) | set(source.parent.glob("*.kicad_pro")))
+    # Record the active design (root sheet, referenced sub-sheets, project file) to detect
+    # edits during extraction and stale reviews. KiCad's .history copies are not the design.
+    inputs = design_files(source)
+    if source.with_suffix(".kicad_pro").is_file():
+        inputs.append(source.with_suffix(".kicad_pro"))
     hashes = {str(p): digest(p) for p in inputs}
     with tempfile.TemporaryDirectory(prefix="kicad-review-") as tmp:
         tmp = Path(tmp)
