@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 runs/
+cache/
 
 # Local secrets: keep your own keys in .env (see .env.example). Never commit them.
 .env

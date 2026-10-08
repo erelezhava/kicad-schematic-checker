@@ -5,7 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from . import digikey
+from . import datasheets, digikey
 from .schematic import design_files
 from .description import description_audit, description_markdown, owner_actions, owner_actions_markdown
 from .core import digest, erc_summary, identification, identification_markdown, markdown, parse_netlist, read_json, review, write_json
@@ -107,6 +107,14 @@ def main(argv=None):
     command.add_argument("circuit")
     command.add_argument("--cache", default=str(digikey.DEFAULT_CACHE), help=f"Cache folder (default {digikey.DEFAULT_CACHE})")
     command.add_argument("--refresh", action="store_true", help="Query again even when a cached entry exists")
+    command = sub.add_parser("datasheet-fetch", help="Find each part's datasheet: project docs first, shared cache, then download")
+    command.add_argument("circuit")
+    command.add_argument("--output", required=True)
+    command.add_argument("--docs", action="append", help="Document folder to search (repeatable); default: docs/, Docs/, datasheets/ next to the root schematic")
+    command.add_argument("--cache", default=str(datasheets.DEFAULT_CACHE), help=f"Shared PDF cache (default {datasheets.DEFAULT_CACHE})")
+    command.add_argument("--digikey-cache", default=str(digikey.DEFAULT_CACHE), help="DigiKey cache with datasheet URLs")
+    command.add_argument("--all", action="store_true", help="Include R/C/L parts too")
+    command.add_argument("--offline", action="store_true", help="Never download; use project docs and cache only")
     command = sub.add_parser("digikey-check", help="Compare cached DigiKey data with the schematic (offline)")
     command.add_argument("circuit")
     command.add_argument("--cache", default=str(digikey.DEFAULT_CACHE))
@@ -129,6 +137,17 @@ def main(argv=None):
             summary = digikey.fetch(circuit, Path(args.cache), client, refresh=args.refresh)
             print(f"DigiKey: fetched={summary['fetched']}, already cached={summary['cached']}, errors={summary['errors']}; cache {Path(args.cache).resolve()}")
             return 3 if summary["errors"] else 0
+        if args.command == "datasheet-fetch":
+            circuit = read_json(args.circuit)
+            report = datasheets.find_datasheets(circuit, Path(args.cache), Path(args.digikey_cache),
+                                                [Path(d) for d in args.docs] if args.docs else None,
+                                                include_passives=args.all, offline=args.offline)
+            out = new_output(args.output)
+            write_json(out / "datasheets.json", report)
+            (out / "datasheets.md").write_text(datasheets.datasheets_markdown(report), encoding="utf-8")
+            print("Datasheets: " + ", ".join(f"{s}={n}" for s, n in report["coverage"].items()))
+            print(f"Report: {out / 'datasheets.md'}")
+            return 0 if report["coverage"]["found"] == len(report["results"]) else 2
         if args.command == "digikey-check":
             circuit = read_json(args.circuit)
             report = digikey.digikey_audit(circuit, Path(args.cache))

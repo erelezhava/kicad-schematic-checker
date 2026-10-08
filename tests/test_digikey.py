@@ -205,6 +205,8 @@ class CacheAndClientTests(unittest.TestCase):
         ignored = (ROOT / ".gitignore").read_text().split()
         self.assertIn(".env", ignored)
         self.assertIn("!.env.example", ignored)
+        self.assertIn("cache/", ignored)  # DigiKey answers and datasheet PDFs stay local
+        self.assertEqual(digikey.DEFAULT_CACHE, ROOT / "cache" / "digikey")
         values = digikey.credentials.read_env_file(ROOT / ".env.example")
         self.assertIn("DIGIKEY_CLIENT_ID", values)
         self.assertTrue(all(v == "" for v in values.values()), "template must stay empty")

@@ -25,6 +25,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import credentials
+from .paths import CACHE_ROOT
 from .core import component_exemption, identity_candidates
 from .description import (DIMENSION, RATING_FIELDS, component_class, field_by_keys,
                           footprint_size, normalize_description, percent_values, power_values, same_power,
@@ -34,7 +35,7 @@ from .units import dielectric, dielectric_in_text, format_quantity, schematic_qu
 API = "https://api.digikey.com"
 LOCALE = {"X-DIGIKEY-Locale-Site": "US", "X-DIGIKEY-Locale-Language": "en", "X-DIGIKEY-Locale-Currency": "USD"}
 CACHE_SCHEMA = 1
-DEFAULT_CACHE = Path.home() / ".cache" / "kicad_checker" / "digikey"
+DEFAULT_CACHE = CACHE_ROOT / "digikey"
 ACTIVE = {"active"}
 
 

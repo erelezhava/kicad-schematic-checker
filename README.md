@@ -113,10 +113,10 @@ Looks up every declared MPN on DigiKey (Product Information API v4, exact-MPN ke
 python3 -m kicad_checker digikey-fetch runs/board-001/circuit.json          # network; one call per unique MPN
 python3 -m kicad_checker digikey-check runs/board-001/circuit.json --output runs/board-001-digikey   # offline
 # or include it in a review:
-python3 -m kicad_checker review ... --digikey-cache ~/.cache/kicad_checker/digikey
+python3 -m kicad_checker review ... --digikey-cache cache/digikey
 ```
 
-The cache defaults to `~/.cache/kicad_checker/digikey`, one JSON file per MPN, outside the repo and shared by every project. `--cache DIR` changes it, and `--refresh` queries the API again. Cached entries keep exact matches only, with photos and account identifiers removed, plus the fetch date. Credentials are never written by the tool.
+The cache defaults to `cache/digikey` inside the checker folder (git-ignored), one JSON file per MPN, shared by every project you check. `--cache DIR` changes it, and `--refresh` queries the API again. Cached entries keep exact matches only, with photos and account identifiers removed, plus the fetch date. Credentials are never written by the tool.
 
 | Check | Compared | Result |
 | --- | --- | --- |
