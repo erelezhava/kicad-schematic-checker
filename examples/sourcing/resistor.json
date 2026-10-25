@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "resistor",
+  "value": "10k",
+  "package": "0402",
+  "tolerance_percent": 1,
+  "automotive": true,
+  "quantity": 100,
+  "min_stock": 10000,
+  "min_alternatives": 3,
+  "normally_stocking": true,
+  "max_age_hours": 24,
+  "constraints": [
+    {"parameter": "Power (Watts)", "op": "min", "value": "0.0625", "unit": "W"}
+  ]
+}

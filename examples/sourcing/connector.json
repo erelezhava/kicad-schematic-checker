@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "kind": "connector",
+  "keywords": "6 position header surface mount right angle",
+  "category": "Headers, Male Pins",
+  "quantity": 10,
+  "min_stock": 1000,
+  "constraints": [
+    {"parameter": "Number of Positions", "op": "eq", "value": 6, "unit": ""},
+    {"parameter": "Number of Rows", "op": "eq", "value": 1, "unit": ""},
+    {"parameter": "Mounting Type", "op": "eq", "value": "Surface Mount, Right Angle"},
+    {"parameter": "Voltage Rating", "op": "min", "value": 100, "unit": "V"}
+  ]
+}

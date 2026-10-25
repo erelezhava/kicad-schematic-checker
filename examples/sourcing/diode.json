@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "kind": "diode",
+  "package": "SOD-123",
+  "keywords": "Schottky diode SOD-123 40V 1A",
+  "quantity": 100,
+  "min_stock": 1000,
+  "constraints": [
+    {
+      "parameter": "Technology",
+      "op": "eq",
+      "value": "Schottky"
+    },
+    {
+      "parameter": "Voltage - DC Reverse (Vr) (Max)",
+      "op": "min",
+      "value": 40,
+      "unit": "V"
+    },
+    {
+      "parameter": "Current - Average Rectified (Io)",
+      "op": "min",
+      "value": 1,
+      "unit": "A"
+    },
+    {
+      "parameter": "Voltage - Forward (Vf) (Max) @ If",
+      "op": "max",
+      "value": 0.55,
+      "unit": "V",
+      "at": {
+        "If": {
+          "value": 1,
+          "unit": "A"
+        }
+      }
+    },
+    {
+      "parameter": "Operating Temperature - Junction",
+      "op": "covers",
+      "value": [
+        -40,
+        125
+      ],
+      "unit": "°C"
+    }
+  ]
+}

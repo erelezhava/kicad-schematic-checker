@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "kind": "inductor",
+  "value": "10uH",
+  "package": "0805",
+  "tolerance_percent": 20,
+  "quantity": 100,
+  "min_stock": 1000,
+  "constraints": [
+    {"parameter": "Current Rating (Amps)", "op": "min", "value": 1, "unit": "A"},
+    {"parameter": "Current - Saturation (Isat)", "op": "min", "value": 1.5, "unit": "A"}
+  ]
+}

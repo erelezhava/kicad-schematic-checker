@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "mosfet",
+  "keywords": "N-channel MOSFET SOT-23 30V logic level",
+  "category": 278,
+  "package": "SOT-23-3",
+  "quantity": 100,
+  "min_stock": 1000,
+  "constraints": [
+    {"parameter": "FET Type", "op": "eq", "value": "N-Channel"},
+    {"parameter": "Drain to Source Voltage (Vdss)", "op": "min", "value": 30, "unit": "V"},
+    {"parameter": "Current - Continuous Drain (Id) @ 25°C", "op": "min", "value": 3, "unit": "A", "qualifier": "Ta"},
+    {"parameter": "Rds On (Max) @ Id, Vgs", "op": "max", "value": 60, "unit": "mOhm", "at": {"Vgs": {"value": 4.5, "unit": "V"}}},
+    {"parameter": "Operating Temperature", "op": "covers", "value": [-40, 125], "unit": "°C"}
+  ]
+}

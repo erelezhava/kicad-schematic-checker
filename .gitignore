@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 runs/
 cache/
+# Stock exports (company inventory data) stay local: put them here.
+stock/
 
 # Local secrets: keep your own keys in .env (see .env.example). Never commit them.
 .env
@@ -9,3 +11,6 @@ cache/
 !.env.example
 *.secret
 credentials.env
+
+# AI session scratch output (drafts, notes); useful parts live in the real docs.
+Claude outputs/

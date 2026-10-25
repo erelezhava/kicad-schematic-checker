@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "kind": "component",
+  "keywords": "temperature sensor I2C",
+  "quantity": 10,
+  "min_stock": 1000,
+  "min_alternatives": 3
+}

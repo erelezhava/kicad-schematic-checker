@@ -81,20 +81,42 @@ class DigiKeyClient:
             raise ValueError(f"DigiKey authentication failed (HTTP {status}): {data.get('error_description') or data.get('detail') or data}")
         self.token = data["access_token"]
 
-    def keyword(self, mpn, retried=False):
+    def categories(self, retried=False):
+        """Full category tree (GET /products/v4/search/categories), used to turn names into IDs."""
         if not self.token:
             self.authenticate()
-        payload = json.dumps({"Keywords": mpn, "Limit": 10, "Offset": 0}).encode()
+        request = urllib.request.Request(f"{self.api}/products/v4/search/categories", method="GET", headers={
+            "X-DIGIKEY-Client-Id": self.client_id, "Authorization": f"Bearer {self.token}",
+            "Accept": "application/json", **LOCALE})
+        status, body = self._request(request)
+        if status == 401 and not retried:
+            self.token = None
+            return self.categories(retried=True)
+        return status, body
+
+    def keyword(self, mpn, retried=False, *, limit=10, offset=0, filters=None, sort=None):
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 50:
+            raise ValueError("DigiKey limit must be 1–50")
+        if isinstance(offset, bool) or not isinstance(offset, int) or offset < 0:
+            raise ValueError("DigiKey offset must be a nonnegative integer")
+        if not self.token:
+            self.authenticate()
+        query = {"Keywords": mpn, "Limit": limit, "Offset": offset}
+        if filters is not None:
+            query["FilterOptionsRequest"] = filters
+        if sort is not None:
+            query["SortOptions"] = sort
+        payload = json.dumps(query).encode()
         request = urllib.request.Request(f"{self.api}/products/v4/search/keyword", data=payload, method="POST", headers={
             "X-DIGIKEY-Client-Id": self.client_id, "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json", "Accept": "application/json", **LOCALE})
         status, body = self._request(request)
         if status == 401 and not retried:
             self.token = None
-            return self.keyword(mpn, retried=True)
+            return self.keyword(mpn, retried=True, limit=limit, offset=offset, filters=filters, sort=sort)
         if status == 429 and not retried:
             time.sleep(60)
-            return self.keyword(mpn, retried=True)
+            return self.keyword(mpn, retried=True, limit=limit, offset=offset, filters=filters, sort=sort)
         return status, body
 
 

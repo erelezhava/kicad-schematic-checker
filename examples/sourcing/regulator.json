@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "kind": "voltage regulator",
+  "keywords": "3.3V 500mA LDO regulator",
+  "category": "Voltage Regulators - Linear, Low Drop Out (LDO) Regulators",
+  "package": "6-WDFN Exposed Pad",
+  "supplier_device_package": "6-WSON (2x2)",
+  "quantity": 10,
+  "min_stock": 1000,
+  "constraints": [
+    {"parameter": "Output Configuration", "op": "eq", "value": "Positive"},
+    {"parameter": "Output Type", "op": "eq", "value": "Fixed"},
+    {"parameter": "Voltage - Output (Min/Fixed)", "op": "eq", "value": 3.3, "unit": "V"},
+    {"parameter": "Voltage - Input (Max)", "op": "min", "value": 6.5, "unit": "V"},
+    {"parameter": "Current - Output", "op": "min", "value": 0.5, "unit": "A"},
+    {"parameter": "Current - Quiescent (Iq)", "op": "max", "value": 60, "unit": "uA"}
+  ]
+}
