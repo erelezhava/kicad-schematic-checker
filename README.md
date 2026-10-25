@@ -2,6 +2,8 @@
 
 Checks a saved KiCad design for incomplete or contradictory part data and for violations of datasheet requirements, then tells the design owner exactly which fields to fill or fix. The engine is plain Python with deterministic results: the same design, rules and evidence always give the same report, whichever AI assistant you use with it (Claude, ChatGPT/Codex, a local Ollama model) or none at all.
 
+**New here? Start at [USER_GUIDE.md](USER_GUIDE.md): pick your task, then follow its short guide in [docs/](docs/).**
+
 - Needs **Python 3.10+** and **KiCad 10** (`kicad-cli`). No Python packages.
 - Optional: **`pdftotext`** (`sudo apt install poppler-utils`) for datasheet text search, and your own **DigiKey API keys** for catalog checks.
 - Never edits your design. The one helper that can (`tools/fill_fields.py`) is opt-in and previews first.
@@ -43,15 +45,38 @@ After changing the design in KiCad, save and extract again into a new run folder
 
 ## Commands
 
+Component sourcing is now available across DigiKey's catalog: search ICs, MOSFETs,
+connectors, sensors, RLC and other items, screen explicit catalog requirements,
+report three distinct stocked candidates, check exact-part stock
+across DigiKey/LCSC/JLCPCB, or audit the extracted BOM's stock. Start with
+[SOURCING.md](SOURCING.md) for examples and limits; [SOURCING_HANDOFF.md](SOURCING_HANDOFF.md)
+records implementation status and next steps for another AI assistant.
+
+```sh
+python3 -m kicad_checker parts-search examples/sourcing/resistor.json --dry-run
+python3 -m kicad_checker parts-search examples/sourcing/catalog.json --dry-run
+python3 -m kicad_checker parts-bom runs/board-001/circuit.json --output runs/board-stock-001
+python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stock JLC=stock/jlc.csv --output runs/board-inv-001
+```
+
 | Command | Network | Purpose |
 | --- | --- | --- |
 | `extract PROJECT --output DIR` | no | Netlist, pins, fields and ERC via `kicad-cli`; identification and description audits |
 | `import-netlist NETLIST.xml --output DIR` | no | Same audits from an exported netlist (no ERC, no freshness check) |
 | `digikey-fetch CIRCUIT [--refresh]` | yes | Look up every unique MPN once and cache it |
 | `digikey-check CIRCUIT --output DIR` | no | Compare cached DigiKey data with the schematic |
+| `parts-search REQUEST.json --output DIR [--online] [--replace MPN]` | optional | Search any catalog category; screen supplied requirements and count distinct stocked candidates |
+| `parts-stock MPN --manufacturer NAME --output DIR [--online]` | optional | Exact-part stock and lifecycle, suppliers kept separate |
+| `parts-bom CIRCUIT --output DIR [--boards N] [--online]` | optional | Stock audit grouped by manufacturer/MPN; demand from populated reference count |
+| `inventory-check DESIGN --stock FILE --output DIR [--boards N]` | optional | Compare the BOM with your stock CSV/XLSX (e.g. JLCPCB inventory); asks boards, market check and R/C/L alternatives |
 | `datasheet-fetch CIRCUIT --output DIR [--docs DIR] [--offline] [--all]` | optional | Locate a datasheet PDF per active part (`--all` adds R/C/L) |
 | `review CIRCUIT --rules R --evidence E --output DIR` | no | Evaluate rules; options `--snapshot`, `--docs-root`, `--digikey-cache cache/digikey` |
 | `tools/fill_fields.py DIGIKEY_JSON PROJECT [--prefer NAME] [--apply]` | no | Fill **empty** Manufacturer fields from DigiKey suggestions |
+
+**PCB manufacturability (JLCPCB):** `python3 -m jlcpcb_rules install BOARD.kicad_pro` writes
+KiCad 10 custom DRC rules generated from JLCPCB's capability table for the board's stackup;
+`python3 -m jlcpcb_rules preflight BOARD.kicad_pro` checks what DRC can't (size, thickness,
+finish, paid options). See [jlcpcb_rules/README.md](jlcpcb_rules/README.md).
 
 ## Outputs
 
@@ -81,6 +106,7 @@ Each run writes into its own new folder under `runs/` (git-ignored):
 ```text
 kicad_checker/   the engine (CLI, parsers, audits, DigiKey, datasheets)
 tools/           opt-in helpers: fill_fields.py, digikey_capture.py
+jlcpcb_rules/    JLCPCB capability table -> KiCad 10 PCB design rules (.kicad_dru) + preflight
 tests/           unit tests (offline; real DigiKey responses as fixtures)
 examples/        synthetic demo netlists, rules and evidence
 rules/           reusable rule packs (drafts until reviewed)
