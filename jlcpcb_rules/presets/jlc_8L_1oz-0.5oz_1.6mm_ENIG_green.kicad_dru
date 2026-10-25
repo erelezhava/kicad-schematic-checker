@@ -1,0 +1,351 @@
+# >>> JLCPCB RULES BEGIN (generated, do not edit inside this block)
+(version 1)
+
+# JLCPCB design rules for KiCad 10
+# Profile : 8 layers, outer 1 oz, inner 0.5 oz, 1.6 mm, finish ENIG, green mask
+# Tier    : tiered (error = beyond JLC limits, warning = paid option / recommendation)
+# Accepted paid options: none
+# Source  : https://jlcpcb.com/capabilities/pcb-capabilities (snapshot 2026-10-25)
+# Generated 2026-10-25 by jlcpcb_rules. Regenerate after changing the stackup.
+#
+# Set Board Setup > Design Rules > Constraints to at least these values so the
+# router uses them:
+#   Minimum clearance                0.09 mm
+#   Minimum track width              0.09 mm
+#   Minimum through hole             0.15 mm
+#   Minimum via diameter             0.25 mm
+#   Minimum via hole                 0.15 mm
+#   Minimum uVia diameter            0.2 mm
+#   Minimum uVia hole                0.075 mm
+#   Minimum annular width            0.05 mm
+#   Minimum hole to hole             0.2 mm
+#   Copper to hole clearance         0.2 mm
+#   Copper to edge clearance         0.2 mm
+#   Solder mask minimum web width    0.1 mm
+#   Minimum text height              1 mm
+#   Minimum text thickness           0.15 mm
+#
+# These rules replace KiCad's Board Setup minimums for the items they match.
+# Netclass clearances are kept: JLC copper spacing is a separate physical_clearance
+# check. Put stricter rules of your own BELOW the END marker; later rules win.
+#
+# Not checkable with KiCad rules (see 'python3 -m jlcpcb_rules preflight'):
+#   board size, thickness, layer count, finish/copper options, V-cut copper
+#   clearance, same-net track spacing, impedance, gold fingers.
+# jlc-profile: {"accept":[],"finish":"ENIG","inner_oz":0.5,"layers":8,"mask_color":"green","outer_oz":1,"thickness":1.6,"tier":"tiered","via_cap_default":false,"via_fill_default":false}
+
+#------------------------------------------------------------------------------
+# Copper: track width and clearance (different nets)
+#------------------------------------------------------------------------------
+
+(rule "JLC track: outer min width 0.09mm (1oz multilayer)"
+    (severity error)
+    (layer outer)
+    (constraint track_width (min 0.09mm)))
+
+(rule "JLC track: inner min width 0.09mm (0.5oz)"
+    (severity error)
+    (layer inner)
+    (constraint track_width (min 0.09mm)))
+
+# physical_clearance (not clearance) so your netclass clearances still apply.
+(rule "JLC clearance: outer copper min 0.09mm (1oz multilayer)"
+    (severity error)
+    (layer outer)
+    (condition "A.NetName != B.NetName")
+    (constraint physical_clearance (min 0.09mm)))
+
+(rule "JLC clearance: inner copper min 0.09mm (0.5oz)"
+    (severity error)
+    (layer inner)
+    (condition "A.NetName != B.NetName")
+    (constraint physical_clearance (min 0.09mm)))
+
+(rule "JLC clearance: SMD pad to SMD pad min 0.15mm"
+    (severity error)
+    (layer outer)
+    (condition "A.NetName != B.NetName && A.Pad_Type == 'SMD' && B.Pad_Type == 'SMD'")
+    (constraint physical_clearance (min 0.15mm)))
+
+#------------------------------------------------------------------------------
+# Drilling: hole and slot sizes
+#------------------------------------------------------------------------------
+
+(rule "JLC drill: plated hole min 0.15mm"
+    (severity error)
+    (condition "A.Type == 'Pad' && A.isPlated() && A.Hole_Size_X == A.Hole_Size_Y")
+    (constraint hole_size (min 0.15mm)))
+
+(rule "JLC drill: plated slot min width 0.35mm"
+    (severity error)
+    (condition "A.Type == 'Pad' && A.isPlated() && A.Hole_Size_X != A.Hole_Size_Y")
+    (constraint hole_size (min 0.35mm)))
+
+(rule "JLC check: plated slot under 0.5mm (JLC page gives 0.35 and 0.5 mm, confirm before ordering)"
+    (severity warning)
+    (condition "A.Type == 'Pad' && A.isPlated() && A.Hole_Size_X != A.Hole_Size_Y")
+    (constraint assertion "A.Hole_Size_X >= 0.5mm && A.Hole_Size_Y >= 0.5mm"))
+
+(rule "JLC drill: NPTH hole min 0.5mm"
+    (severity error)
+    (condition "A.Pad_Type == 'NPTH, mechanical' && A.Hole_Size_X == A.Hole_Size_Y")
+    (constraint hole_size (min 0.5mm)))
+
+(rule "JLC drill: NPTH slot min width 1mm"
+    (severity error)
+    (condition "A.Pad_Type == 'NPTH, mechanical' && A.Hole_Size_X != A.Hole_Size_Y")
+    (constraint hole_size (min 1mm)))
+
+(rule "JLC drill: castellated hole min 0.5mm"
+    (severity error)
+    (condition "A.Fabrication_Property == 'Castellated pad'")
+    (constraint hole_size (min 0.5mm)))
+
+(rule "JLC drill: press-fit hole 0.55mm to 2mm"
+    (severity error)
+    (condition "A.Fabrication_Property == 'Press-fit pad'")
+    (constraint hole_size (min 0.55mm) (max 2mm)))
+
+(rule "JLC drill: slot length at least 2x its width"
+    (severity error)
+    (condition "A.Type == 'Pad' && A.Hole_Size_X != A.Hole_Size_Y")
+    (constraint assertion "A.Hole_Size_X >= 2 * A.Hole_Size_Y || A.Hole_Size_Y >= 2 * A.Hole_Size_X"))
+
+(rule "JLC note: hole above 6.3mm is CNC-routed (+-0.2 mm)"
+    (severity warning)
+    (condition "A.Type == 'Pad' && A.Hole_Size_X == A.Hole_Size_Y")
+    (constraint assertion "A.Hole_Size_X <= 6.3mm"))
+
+(rule "JLC paid: plated hole under 0.2mm"
+    (severity warning)
+    (condition "A.Type == 'Pad' && A.isPlated()")
+    (constraint assertion "A.Hole_Size_X >= 0.2mm && A.Hole_Size_Y >= 0.2mm"))
+
+#------------------------------------------------------------------------------
+# Vias: size, cost tiers, HDI, via-in-pad, backdrill
+#------------------------------------------------------------------------------
+
+# 0.10 mm via holes need a board <= 1.0 mm thick with ENIG or OSP.
+(rule "JLC via: hole min 0.15mm"
+    (severity error)
+    (condition "A.Type == 'Via'")
+    (constraint hole_size (min 0.15mm)))
+
+(rule "JLC via: diameter min 0.25mm"
+    (severity error)
+    (condition "!A.isMicroVia() && !A.isBlindVia()")
+    (constraint via_diameter (min 0.25mm)))
+
+(rule "JLC HDI: laser blind/micro via hole 0.075mm to 0.15mm"
+    (severity error)
+    (condition "A.isMicroVia() || A.isBlindVia()")
+    (constraint hole_size (min 0.075mm) (max 0.15mm)))
+
+(rule "JLC HDI: buried via hole 0.1mm to 0.55mm"
+    (severity error)
+    (condition "A.isBuriedVia()")
+    (constraint hole_size (min 0.1mm) (max 0.55mm)))
+
+(rule "JLC paid: buried via hole under 0.15mm (extreme, dielectric <= 1.0 mm)"
+    (severity warning)
+    (condition "A.Type == 'Via' && A.isBuriedVia()")
+    (constraint assertion "A.Hole >= 0.15mm"))
+
+(rule "JLC paid: HDI blind/buried/micro via"
+    (severity warning)
+    (constraint disallow blind_via buried_via micro_via))
+
+(rule "JLC paid: via hole under 0.2mm"
+    (severity warning)
+    (condition "A.Type == 'Via' && A.Via_Type == 'Through'")
+    (constraint assertion "A.Hole >= 0.2mm"))
+
+(rule "JLC paid: via hole under 0.3mm needs diameter >= 0.45mm"
+    (severity warning)
+    (condition "A.Type == 'Via' && A.Via_Type == 'Through'")
+    (constraint assertion "A.Hole >= 0.3mm || A.Diameter >= 0.45mm"))
+
+(rule "JLC recommended: via diameter >= hole + 0.15mm"
+    (severity warning)
+    (condition "A.Type == 'Via' && A.Via_Type == 'Through'")
+    (constraint assertion "A.Diameter - A.Hole >= 0.15mm"))
+
+# Drill tools come in 0.05mm steps; e.g. 0.16 mm is drilled at 0.2 mm.
+(rule "JLC drill: via hole off the 0.05mm drill step (drilled at the next step up)"
+    (severity warning)
+    (condition "A.Type == 'Via' && A.Hole <= 0.6mm")
+    (constraint assertion "(A.Hole > 0.0995mm && A.Hole < 0.1005mm) || (A.Hole > 0.1495mm && A.Hole < 0.1505mm) || (A.Hole > 0.1995mm && A.Hole < 0.2005mm) || (A.Hole > 0.2495mm && A.Hole < 0.2505mm) || (A.Hole > 0.2995mm && A.Hole < 0.3005mm) || (A.Hole > 0.3495mm && A.Hole < 0.3505mm) || (A.Hole > 0.3995mm && A.Hole < 0.4005mm) || (A.Hole > 0.4495mm && A.Hole < 0.4505mm) || (A.Hole > 0.4995mm && A.Hole < 0.5005mm) || (A.Hole > 0.5495mm && A.Hole < 0.5505mm) || (A.Hole > 0.5995mm && A.Hole < 0.6005mm)"))
+
+(rule "JLC drill: via ring below 0.05mm once the hole is rounded up to the next step"
+    (severity error)
+    (condition "A.Type == 'Via' && A.Hole <= 0.6mm")
+    (constraint assertion "!((A.Hole > 0.1005mm && A.Hole < 0.1495mm && A.Diameter - 0.15mm < 0.1mm) || (A.Hole > 0.1505mm && A.Hole < 0.1995mm && A.Diameter - 0.2mm < 0.1mm) || (A.Hole > 0.2005mm && A.Hole < 0.2495mm && A.Diameter - 0.25mm < 0.1mm) || (A.Hole > 0.2505mm && A.Hole < 0.2995mm && A.Diameter - 0.3mm < 0.1mm) || (A.Hole > 0.3005mm && A.Hole < 0.3495mm && A.Diameter - 0.35mm < 0.1mm) || (A.Hole > 0.3505mm && A.Hole < 0.3995mm && A.Diameter - 0.4mm < 0.1mm) || (A.Hole > 0.4005mm && A.Hole < 0.4495mm && A.Diameter - 0.45mm < 0.1mm) || (A.Hole > 0.4505mm && A.Hole < 0.4995mm && A.Diameter - 0.5mm < 0.1mm) || (A.Hole > 0.5005mm && A.Hole < 0.5495mm && A.Diameter - 0.55mm < 0.1mm) || (A.Hole > 0.5505mm && A.Hole < 0.5995mm && A.Diameter - 0.6mm < 0.1mm))"))
+
+# Set the via's Filling = Filled and Capping = Capped (via properties),
+# or move it out of the pad. Unfilled vias in pads wick solder.
+(rule "JLC via-in-pad: via in SMD pad must be Filled + Capped (JLC VIP process, default 6+ layers)"
+    (severity warning)
+    (layer "*.Cu")
+    (condition "A.NetName == B.NetName && ((A.Type == 'Via' && B.Pad_Type == 'SMD' && (A.Filling == 'Not filled' || A.Filling == 'From board stackup' || A.Capping == 'Not capped' || A.Capping == 'From board stackup')) || (B.Type == 'Via' && A.Pad_Type == 'SMD' && (B.Filling == 'Not filled' || B.Filling == 'From board stackup' || B.Capping == 'Not capped' || B.Capping == 'From board stackup')))")
+    (constraint physical_hole_clearance (min 0.05mm)))
+
+(rule "JLC via-in-pad: filled via hole 0.15mm to 0.55mm"
+    (severity error)
+    (condition "A.Type == 'Via' && A.Via_Type == 'Through' && A.Filling == 'Filled'")
+    (constraint assertion "A.Hole >= 0.15mm && A.Hole <= 0.55mm"))
+
+(rule "JLC mask plug: plugged via hole max 0.5mm"
+    (severity error)
+    (condition "A.Type == 'Via' && (A.Front_plugging == 'Plugged' || A.Back_plugging == 'Plugged')")
+    (constraint assertion "A.Hole <= 0.5mm"))
+
+(rule "JLC backdrill: through hole 0.2mm to 0.5mm"
+    (severity error)
+    (condition "A.Type == 'Via' && A.Backdrill_Mode != 'No backdrill'")
+    (constraint assertion "A.Hole >= 0.2mm && A.Hole <= 0.5mm"))
+
+(rule "JLC paid: backdrilled hole"
+    (severity warning)
+    (condition "A.Type == 'Via' || A.Type == 'Pad'")
+    (constraint assertion "A.Backdrill_Mode == 'No backdrill'"))
+
+#------------------------------------------------------------------------------
+# Annular rings
+#------------------------------------------------------------------------------
+
+(rule "JLC via: annular ring min 0.05mm (diameter >= hole + 0.1mm)"
+    (severity error)
+    (condition "A.Type == 'Via'")
+    (constraint annular_width (min 0.05mm)))
+
+(rule "JLC PTH: annular ring min 0.15mm"
+    (severity error)
+    (condition "A.Type == 'Pad' && A.isPlated()")
+    (constraint annular_width (min 0.15mm)))
+
+# Approximation: assumes the hole is centred in the pad.
+(rule "JLC recommended: PTH annular ring >= 0.2mm"
+    (severity warning)
+    (condition "A.Type == 'Pad' && A.isPlated() && A.Pad_Shape != 'Custom' && A.Hole_Size_X == A.Hole_Size_Y")
+    (constraint assertion "A.Size_X - A.Hole_Size_X >= 0.4mm && A.Size_Y - A.Hole_Size_Y >= 0.4mm"))
+
+#------------------------------------------------------------------------------
+# Hole spacing and hole-to-copper clearance
+#------------------------------------------------------------------------------
+
+(rule "JLC drill: hole to hole min 0.2mm"
+    (severity error)
+    (constraint hole_to_hole (min 0.2mm)))
+
+(rule "JLC drill: pad hole to pad hole min 0.45mm"
+    (severity error)
+    (condition "A.Type == 'Pad' && B.Type == 'Pad'")
+    (constraint hole_to_hole (min 0.45mm)))
+
+(rule "JLC castellated: hole to hole min 0.5mm"
+    (severity error)
+    (condition "A.Fabrication_Property == 'Castellated pad' && B.Fabrication_Property == 'Castellated pad'")
+    (constraint hole_to_hole (min 0.5mm)))
+
+(rule "JLC clearance: via hole to copper min 0.2mm"
+    (severity error)
+    (condition "A.Type == 'Via' || B.Type == 'Via'")
+    (constraint hole_clearance (min 0.2mm)))
+
+(rule "JLC clearance: PTH hole to copper min 0.28mm (outer)"
+    (severity error)
+    (layer outer)
+    (condition "(A.Type == 'Pad' && A.isPlated()) || (B.Type == 'Pad' && B.isPlated())")
+    (constraint hole_clearance (min 0.28mm)))
+
+(rule "JLC clearance: inner via hole to copper min 0.2mm"
+    (severity error)
+    (layer inner)
+    (condition "A.Type == 'Via' || B.Type == 'Via'")
+    (constraint hole_clearance (min 0.2mm)))
+
+(rule "JLC clearance: inner PTH hole to copper min 0.3mm"
+    (severity error)
+    (layer inner)
+    (condition "(A.Type == 'Pad' && A.isPlated()) || (B.Type == 'Pad' && B.isPlated())")
+    (constraint hole_clearance (min 0.3mm)))
+
+(rule "JLC clearance: NPTH to copper min 0.2mm"
+    (severity error)
+    (layer "*.Cu")
+    (condition "A.Pad_Type == 'NPTH, mechanical' || B.Pad_Type == 'NPTH, mechanical'")
+    (constraint physical_hole_clearance (min 0.2mm)))
+
+#------------------------------------------------------------------------------
+# Board edge
+#------------------------------------------------------------------------------
+
+# V-cut edges need 0.4mm: KiCad cannot tell a V-cut
+# edge from a routed one, so check panel V-cut lines by hand.
+(rule "JLC edge: copper to routed edge min 0.2mm"
+    (severity error)
+    (layer "*.Cu")
+    (constraint edge_clearance (min 0.2mm)))
+
+(rule "JLC edge: castellated and edge-connector pads may reach the edge"
+    (condition "A.Fabrication_Property == 'Castellated pad' || A.Pad_Type == 'Edge connector' || B.Fabrication_Property == 'Castellated pad' || B.Pad_Type == 'Edge connector'")
+    (constraint edge_clearance (min -1mm)))
+
+#------------------------------------------------------------------------------
+# Pads: BGA and small SMD pads
+#------------------------------------------------------------------------------
+
+(rule "JLC BGA: pad min 0.2mm"
+    (severity error)
+    (condition "A.Type == 'Pad' && A.Fabrication_Property == 'BGA pad' && A.Pad_Shape != 'Custom'")
+    (constraint assertion "A.Size_X >= 0.2mm && A.Size_Y >= 0.2mm"))
+
+# Flags pads where BOTH sides are under the JLC minimum SMD pad.
+(rule "JLC pad: SMD pad smaller than 0.25mm x 0.25mm"
+    (severity warning)
+    (condition "A.Type == 'Pad' && A.Pad_Type == 'SMD' && A.Fabrication_Property != 'BGA pad' && A.Pad_Shape != 'Custom'")
+    (constraint assertion "A.Size_X >= 0.25mm || A.Size_Y >= 0.25mm"))
+
+#------------------------------------------------------------------------------
+# Solder mask
+#------------------------------------------------------------------------------
+
+# Below this JLC opens the mask between the pads (no dam = bridge risk).
+(rule "JLC mask: dam (web) min 0.1mm (1oz green), narrower dams are removed"
+    (severity warning)
+    (constraint solder_mask_sliver (min 0.1mm)))
+
+#------------------------------------------------------------------------------
+# Silkscreen (legibility; JLC prints but may lose detail)
+#------------------------------------------------------------------------------
+
+(rule "JLC silk: text height min 1mm"
+    (severity warning)
+    (layer "?.Silkscreen")
+    (constraint text_height (min 1mm)))
+
+(rule "JLC silk: text stroke min 0.15mm"
+    (severity warning)
+    (layer "?.Silkscreen")
+    (constraint text_thickness (min 0.15mm)))
+
+(rule "JLC silk: text stroke at least 1/6 of text height"
+    (severity warning)
+    (condition "(A.Type == 'Text' || A.Type == 'Text Box') && (A.Layer == 'F.Silkscreen' || A.Layer == 'B.Silkscreen')")
+    (constraint assertion "A.Auto_Thickness || A.Thickness * 6 >= A.Height"))
+
+# KiCad library footprints use 0.12 mm silk lines; expect hits here.
+(rule "JLC silk: line width min 0.15mm"
+    (severity warning)
+    (condition "A.Type == 'Graphic' && (A.Layer == 'F.Silkscreen' || A.Layer == 'B.Silkscreen')")
+    (constraint assertion "A.Line_Width >= 0.15mm || A.Line_Width <= 0mm"))
+
+(rule "JLC silk: silkscreen to pad min 0.15mm"
+    (severity warning)
+    (condition "A.Type == 'Pad' || B.Type == 'Pad'")
+    (constraint silk_clearance (min 0.15mm)))
+
+# <<< JLCPCB RULES END
+
+# Your own rules go below this line. They are kept when the JLC block is regenerated
+# and, being later in the file, they override the JLC rules for the items they match.

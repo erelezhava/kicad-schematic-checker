@@ -1,0 +1,252 @@
+{
+  "_about": "JLCPCB rigid FR-4 PCB capabilities. Single source of truth for the generated KiCad rules. Edit numbers here, then regenerate. Values in mm unless the key says otherwise.",
+  "source": "https://jlcpcb.com/capabilities/pcb-capabilities",
+  "snapshot": "2026-10-25",
+  "material": "FR-4",
+  "layers": {
+    "allowed": [
+      1,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32
+    ],
+    "review_above": 10
+  },
+  "thickness": {
+    "min": 0.4,
+    "max": 4.5,
+    "max_conflict": 3.2,
+    "standard": [
+      0.4,
+      0.6,
+      0.8,
+      1.0,
+      1.2,
+      1.6,
+      2.0
+    ],
+    "thick_from": 2.5,
+    "thick_min_layers": 12
+  },
+  "copper_oz": {
+    "outer_2L": [
+      1,
+      2,
+      2.5,
+      3.5,
+      4.5
+    ],
+    "outer_2L_paid": [
+      2.5,
+      3.5,
+      4.5
+    ],
+    "outer_2L_conflict_max": 3,
+    "outer_multilayer": [
+      1,
+      2
+    ],
+    "inner": [
+      0.5,
+      1,
+      2
+    ],
+    "inner_paid": [
+      2
+    ],
+    "inner_default": 0.5
+  },
+  "trace_space": {
+    "_note": "min trace width = min spacing for each case",
+    "two_layer_outer": {
+      "1": 0.1,
+      "2": 0.16,
+      "2.5": 0.2,
+      "3.5": 0.25,
+      "4.5": 0.3
+    },
+    "multilayer_outer": {
+      "1": 0.09,
+      "2": 0.15
+    },
+    "multilayer_inner": {
+      "0.5": 0.09,
+      "1": 0.09,
+      "2": 0.15
+    }
+  },
+  "clearance": {
+    "smd_pad_to_pad_diff_net": 0.15,
+    "via_hole_to_track": 0.2,
+    "pth_to_track": 0.28,
+    "pth_to_track_recommended": 0.35,
+    "npth_to_track": 0.2,
+    "inner_via_hole_to_copper": 0.2,
+    "inner_pth_hole_to_copper": 0.3,
+    "copper_to_routed_edge": 0.2,
+    "copper_to_vcut": 0.4,
+    "same_net_track_spacing": 0.25
+  },
+  "drill": {
+    "min_1L": 0.3,
+    "min_multilayer": 0.15,
+    "min_micro": 0.1,
+    "micro_max_board_thickness": 1.0,
+    "micro_finishes": [
+      "ENIG",
+      "OSP"
+    ],
+    "max_drilled": 6.3,
+    "npth_min": 0.5,
+    "plated_slot_min_2L": 0.5,
+    "plated_slot_min_multilayer": 0.35,
+    "plated_slot_min_conflict": 0.5,
+    "npth_slot_min": 1.0,
+    "slot_length_to_width": 2.0,
+    "press_fit_min": 0.55,
+    "press_fit_max": 2.0,
+    "via_hole_to_hole": 0.2,
+    "pad_hole_to_hole": 0.45
+  },
+  "drill_step": {
+    "_source": "Fab practice stated by Erekle (drill tools in 0.05 mm steps, size rounded UP). Not published on the JLC capability page.",
+    "step": 0.05,
+    "rounding": "up",
+    "via_grid_check_max": 0.6
+  },
+  "via": {
+    "hole_min": 0.15,
+    "diameter_min": 0.25,
+    "micro_hole_min": 0.1,
+    "micro_diameter_min": 0.2,
+    "diameter_over_hole_min": 0.1,
+    "diameter_over_hole_preferred": 0.15,
+    "free_hole_min": 0.2,
+    "free_small_hole_below": 0.3,
+    "free_small_hole_diameter_min": 0.45,
+    "_cost_note": "Paid: 0.10/0.15 mm hole with any diameter; 0.20/0.25 mm hole with diameter < 0.45 mm.",
+    "plugged_hole_max": 0.5,
+    "via_in_pad_hole_min": 0.15,
+    "via_in_pad_hole_max": 0.55,
+    "via_in_pad_free_from_layers": 6
+  },
+  "annular_ring_pth": {
+    "two_layer_1oz_min": 0.18,
+    "two_layer_1oz_recommended": 0.25,
+    "multilayer_1oz_min": 0.15,
+    "multilayer_1oz_recommended": 0.2,
+    "two_oz_min": 0.254
+  },
+  "castellated": {
+    "hole_min": 0.5,
+    "hole_to_hole_min": 0.5,
+    "board_min_mm": [
+      10,
+      10
+    ],
+    "board_thickness_min": 0.6
+  },
+  "hdi": {
+    "laser_blind_hole_min": 0.075,
+    "laser_blind_hole_max": 0.15,
+    "buried_hole_min": 0.15,
+    "buried_hole_max": 0.55,
+    "buried_hole_extreme_min": 0.1,
+    "min_layers": 4
+  },
+  "backdrill": {
+    "min_layers": 4,
+    "board_thickness_min": 0.8,
+    "hole_min": 0.2,
+    "hole_max": 0.5
+  },
+  "soldermask": {
+    "colors": [
+      "green",
+      "purple",
+      "red",
+      "yellow",
+      "blue",
+      "white",
+      "black"
+    ],
+    "dam_1oz": 0.1,
+    "dam_1oz_black_white": 0.13,
+    "dam_2oz": 0.2
+  },
+  "silkscreen": {
+    "line_width_min": 0.15,
+    "text_height_min": 1.0,
+    "text_width_to_height": 6,
+    "pad_to_silk": 0.15
+  },
+  "bga": {
+    "pad_min": 0.2,
+    "pad_enig_below": 0.25,
+    "_pitch_source": "https://jlcpcb.com/blog/bga-pcb-design-complete-guide-layout-and-routing-guidelines",
+    "pitch_guide": {
+      "0.8": "dog-bone fanout with standard vias",
+      "0.65": "dog-bone on outer rows, selective via-in-pad on inner rows",
+      "0.5": "via-in-pad (filled + capped) or HDI",
+      "0.4": "microvia / HDI escape"
+    }
+  },
+  "smd_pad_min": 0.25,
+  "board_size": {
+    "min_fr4": [
+      3,
+      3
+    ],
+    "max": {
+      "1": [
+        606,
+        510
+      ],
+      "2": [
+        670,
+        600
+      ],
+      "4": [
+        663,
+        593
+      ],
+      "6": [
+        656,
+        586
+      ]
+    },
+    "max_note": {
+      "2": [
+        1020,
+        600
+      ],
+      "4": [
+        1016,
+        596
+      ]
+    },
+    "hdi_max": [
+      576,
+      469
+    ]
+  },
+  "finish_restrictions": {
+    "hasl_not_below_thickness": 0.4,
+    "hasl_not_hdi_from_layers": 6,
+    "osp_not_single_sided": true,
+    "plated_edge_requires": "ENIG"
+  }
+}
