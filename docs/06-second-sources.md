@@ -1,9 +1,10 @@
 # 6. Second sources for flight hardware
 
-Finds alternative R/C/L parts for **every** line, including the ones you already have, so each
-part has an independent second source before a build. Needs DigiKey keys.
+Finds alternative R/C/L parts for **every** line, or just the lines you name, including the
+ones you already have, so each part has an independent second source before a build. Needs
+DigiKey keys.
 
-[← All guides](../USER_GUIDE.md) · Command: `inventory-check --alternatives-even-if-available`
+[← All guides](../USER_GUIDE.md) · Command: `inventory-check --alternatives-even-if-available` or `--alternatives-for`
 
 ## Run it
 
@@ -16,6 +17,27 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro \
 
 Every R/C/L line gets a DigiKey search and an in-stock check. This spends the search budget
 fast: raise `--max-alternative-searches` (default 10 lines) for bigger boards.
+
+## Only the parts that matter
+
+Usually only a few parts are critical (sense resistors, the LDO output cap, a single-source
+inductor). Name them instead of searching the whole BOM:
+
+```sh
+python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro \
+  --stock JLC=stock/jlc-all-parts.csv --boards 5 \
+  --check-market --alternatives-for R27,C2,LQM2HPN2R2MG0L --no-input \
+  --output runs/board-inv-003
+```
+
+References or MPNs, comma-separated, repeatable, case-insensitive. Those lines are searched
+even when in stock; the report calls them `second_source` (in stock) or `replacement`
+(missing). In a terminal you can answer the pick-list question with the same list
+([guide 5](05-inventory-check.md)).
+
+The run stops before any API call if a name matches nothing, points at a DNP/excluded part, or
+is combined with `--alternatives-even-if-available` or `--no-find-alternatives`. A chosen
+diode, transistor or IC is reported as "R/C/L only".
 
 ## Reading the result
 

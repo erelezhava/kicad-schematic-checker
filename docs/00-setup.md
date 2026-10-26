@@ -44,13 +44,15 @@ and whitelist the public IP you run from. A VPN changes that IP.
 
 | Folder | Content | In git? |
 | --- | --- | --- |
-| `kicad_checker/`, `jlcpcb_rules/`, `tools/` | the code | yes |
+| `kicad_checker/`, `jlcpcb_rules/`, `refplane/`, `tools/` | the code | yes |
+| `refplane/defaults.json` | reference-plane rules for all boards (editable) | yes |
 | `docs/` | these guides | yes |
 | `examples/`, `rules/` | demo inputs, reusable rule packs | yes |
 | `.env` | your keys | **never** |
 | `stock/` | company stock exports | **never** |
 | `runs/` | every report; one new folder per run | no |
 | `cache/` | DigiKey answers, datasheet PDFs, sourcing snapshots | no |
+| `<board>.refplane.json`, `<board>.kicad_dru` | written next to **your board**, in your design repo | your choice |
 
 ## Sharing with a colleague
 
@@ -69,5 +71,11 @@ python3 -m kicad_checker review runs/demo-001/circuit.json \
 
 Open `runs/demo-001/owner-actions.md` and `runs/demo-001-review/report.md`. The demo
 contains a deliberate violation, so the second command exits with `1`.
+
+PCB side, on a synthetic 4-layer board:
+
+```sh
+python3 -m refplane check tests/fixtures/refplane/demo_4L.kicad_pro -y --refill no -o runs/refplane-demo-001
+```
 
 **Next:** [1. Check the part data in a schematic](01-schematic-check.md)

@@ -86,4 +86,4 @@ Override any detected value with `--layers --outer-oz --inner-oz --thickness --f
 Rule-engine details, the full table of checks and known JLC contradictions:
 [jlcpcb_rules/README.md](../jlcpcb_rules/README.md).
 
-**Next:** [9. Use it with an AI assistant](09-ai-assistants.md)
+**Next:** [11. Check reference planes under your traces](11-reference-plane.md)

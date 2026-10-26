@@ -184,6 +184,71 @@ parts and find alternatives (R/C/L first, as before).
   write the suggested C-codes into empty LCSC fields (same opt-in preview/apply model as
   `tools/fill_fields.py`).
 
+## 2026-10-26: choose which lines get alternatives (Claude)
+
+User request: let the user choose the components to search alternatives for, instead of only the
+automatic rule.
+
+- `inventory-check --alternatives-for R27,C2` (references or MPNs, comma-separated, repeatable,
+  case-insensitive; MPN compared like matching). Only those lines are searched, also when in stock
+  or available on the market (`purpose`: `second_source` if in stock, else `replacement`); they also
+  get original-part baselines, in-stock alternatives and DigiKey verification. Implies
+  `--find-alternatives`. Errors before any API call: unknown selector, a DNP/excluded reference,
+  combination with `--alternatives-even-if-available` or `--no-find-alternatives`.
+  A chosen non-R/C/L line is reported as "R/C/L only", not ignored. Open lines not chosen →
+  `market_alternatives.status = not_selected` ("Not searched (…): not selected").
+- Interactive: the yes/no question became a numbered pick list of the default candidate lines.
+  Enter = none (safe default, no API calls), `a`/`y` = all listed, `e` = every R/C/L line, or
+  numbers and/or references/MPNs (any BOM line). Invalid input is re-asked. Lines picked beyond the
+  default set are prepared (baseline + in-stock candidates + DigiKey check) before searching.
+- Code: `inventory.select_lines()`, `inventory_cli.pick_lines()`, `prepare()` closure in `run()`.
+  Tests: `SelectionTests` (6). Tests: 217 in the sourcing/inventory suites (the full repo count
+  is higher with jlcpcb_rules/refplane). Smoke-tested offline on earth-sensor data; not run live.
+- **Docs updated 2026-10-26 (docs chat):** `docs/05-*` (pick-list answers, option row),
+  `docs/06-*` ("Only the parts that matter" with `--alternatives-for`), `docs/09-*` (AI prompt),
+  `docs/10-*` (selector errors), README command table, SOURCING.md "Chosen lines" paragraph,
+  USER_GUIDE task row.
+
+## 2026-10-26: independent Codex review (open issues)
+
+- Review and offline reproductions: `runs/codex-review-20261026-001/review.md` and
+  `reproduce.py` (local run artifacts, not committed). Implementation and design inputs
+  were left unchanged.
+- Full suite: 301 tests run, 300 passed, 1 existing skip. `git diff --check` passed.
+  Earlier per-iteration test counts below are historical. The later dated entries also
+  supersede old pending milestones for baselines, manufacturer aliases and phase B.
+- Open sourcing findings: generic R/C/L grouping can discard stronger per-reference
+  ratings; candidate verification falls back to another manufacturer when its own is
+  absent; inventory groups/counts by MPN despite known manufacturer conflicts; explicit
+  alternative selection prepares unchosen open lines before the selected line and can
+  exhaust the shared DigiKey verification budget. All reproduced with synthetic inputs.
+- Open reference-plane findings: boundary-start coverage changes when a trace is
+  reversed; same-net blind vias on unrelated layers can exempt real trace gaps.
+- KiCad 10.0.7 smoke check on temporary synthetic board copies accepted generated 4-layer
+  ENIG rules and caught planted narrow tracks and drill-ring violations. This is not
+  validation of every manufacturing rule or supplier capability number.
+- No live supplier calls in this review. Next: fix the six findings with targeted offline
+  regressions, then rerun the full suite. Details and exact source locations are in the report.
+
+### F1/F2 follow-up review (2026-10-26)
+
+The user limited further fixes/review to reference-plane F1/F2; inventory remains outside
+the requested fix scope. Both original reproductions now give the expected results:
+F1 = 5 mm in either direction, F2 = 0.6 mm despite an unrelated blind via. Full suite:
+308 run, 307 passed, 1 existing skip; 56 are reference-plane tests.
+
+One related F2 case remains open: the maximum netclass clearance of all reference nets
+is applied to every plane's via exemption. A large clearance on a nonadjacent power plane
+can therefore hide an unrelated GND gap. Reproduction and details:
+`runs/codex-refplane-followup-20261026-001/review.md` and `reproduce.py` (local artifacts).
+No implementation changes or supplier calls were made during this follow-up review.
+
+**Fixed (Claude, 2026-10-26):** `refplane/check.py` now takes the netclass clearance per
+reference layer, only from the reference nets filled on that layer. The follow-up reproduction
+gives 1.0 mm in both cases. Regression: `test_other_plane_clearance_does_not_widen_exemption`.
+Remaining by design: two reference nets on the same layer still share the larger clearance.
+Full suite: 309 run, all OK. Inventory findings F3–F6 above are still open.
+
 ## File map
 
 | File | Responsibility |

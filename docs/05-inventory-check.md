@@ -19,7 +19,22 @@ In a terminal it asks three questions:
 
 1. **How many boards?**
 2. **Some parts are missing or short. Check market stock?** (DigiKey, LCSC, JLCPCB; read-only)
-3. **Some parts are not covered. Search DigiKey for R/C/L alternatives?**
+3. **Which lines should get alternatives?** It lists the numbered lines that may need one:
+
+   ```text
+   Lines that may need alternatives (3):
+     1. R27 — RC0402FR-0710KL (not in stock)
+     2. C2, C7 — GRM155R71C104KA88D (insufficient)
+     3. L1 — LQM2HPN2R2MG0L (not in stock, available on the market)
+   Search DigiKey for alternatives? Enter = no · a = all listed · numbers or references/MPNs (e.g. 1,3 or R27,C2) · e = every R/C/L line:
+   ```
+
+   | Answer | Searches |
+   | --- | --- |
+   | Enter | nothing (no API calls) |
+   | `a` | every listed line |
+   | `1,3` or `R27,C2` or an MPN | only those, also lines that aren't listed (already in stock) |
+   | `e` | every R/C/L line in the BOM (second sources, [guide 6](06-second-sources.md)) |
 
 Same thing without prompts (scripts, CI, AI assistants):
 
@@ -28,6 +43,8 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro \
   --stock JLC=stock/jlc-all-parts.csv --boards 5 --check-market --find-alternatives \
   --no-input --output runs/board-inv-001
 ```
+
+Only some lines, without prompts: `--alternatives-for R27,C2` (references or MPNs).
 
 The design can be a `.kicad_pro`, a root `.kicad_sch`, the project folder, an exported XML
 netlist, or a `circuit.json` from `extract`.
@@ -55,7 +72,7 @@ add `--combine-sources` when they are one physical pool.
 | In-stock alternatives | For missing R/C/L: other stock rows with the same value and package, equal-or-better tolerance, voltage/power and dielectric, then checked on DigiKey (JLC never states grade) |
 | Original part baseline | Your MPN's DigiKey record fills in ratings the schematic doesn't state. Your schematic values always win |
 | Market check | Stock at DigiKey / LCSC / JLCPCB for the shortfall quantity |
-| DigiKey alternatives | For lines not available anywhere: a search excluding your MPN, by category, stock and value |
+| DigiKey alternatives | For lines not available anywhere, or the lines you picked: a search excluding your MPN, by category, stock and value. Lines you didn't pick show "Not searched: not selected" |
 
 ## Output files
 
@@ -88,8 +105,9 @@ lifecycle failed) · `unknown` (no data, e.g. no keys).
 | --- | --- |
 | `--boards N` | Skip question 1 (required when not in a terminal) |
 | `--check-market` / `--no-check-market` | Answer question 2 |
-| `--find-alternatives` / `--no-find-alternatives` | Answer question 3 |
-| `--alternatives-even-if-available` | Second sources for every R/C/L line ([guide 6](06-second-sources.md)) |
+| `--find-alternatives` / `--no-find-alternatives` | Answer question 3 with "all listed" / "no" |
+| `--alternatives-for R27,C2` | Answer question 3 with these lines only (references or MPNs, repeatable). Searched even when in stock |
+| `--alternatives-even-if-available` | Every R/C/L line ([guide 6](06-second-sources.md)). Can't be combined with `--alternatives-for` |
 | `--spare-percent 5`, `--spare-min 2` | Attrition spare per line |
 | `--sheet NAME` | XLSX sheet (default: the one with the best header) |
 | `--offline` | Caches only, no network |

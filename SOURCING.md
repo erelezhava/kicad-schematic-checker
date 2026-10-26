@@ -108,7 +108,7 @@ design, groups it into BOM lines, compares them with one or more stock files, an
 
 ```sh
 # Put stock exports in stock/ (git-ignored: company inventory stays local).
-# In a terminal it asks: number of boards, check market?, search alternatives?
+# In a terminal it asks: number of boards, check market?, which lines get alternatives?
 python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro \
   --stock JLC=stock/jlc-all-parts.csv --output runs/board-inventory-001
 
@@ -196,12 +196,26 @@ are compared after removing trailing words such as Inc, NV, Technologies, Electr
 "Melexis Technologies NV"); if DigiKey lists the MPN under a different manufacturer the report says so.
 When the schematic has no LCSC field, the matching stock C-code is used for the JLCPCB lookup.
 
-**Market alternatives (`--find-alternatives` or "y"):** for lines not available on the market
+**Market alternatives (`--find-alternatives` or "a"):** for lines not available on the market
 and not covered by a full in-stock `match`, drafts a `parts-search` request from declared
 schematic data only (value, footprint size, tolerance, dielectric, voltage/power fields or
 Description) and searches DigiKey, excluding the original MPN. A missing tolerance is never
 assumed: the line is skipped with the reason. Scope: R/C/L; diodes, transistors and ICs
 are listed with "write a request JSON" (see the selection request below).
+
+In a terminal the question is a numbered pick list of those default lines: Enter = none (no
+API calls), `a`/`y` = all listed, `e` = every R/C/L line, or numbers and/or references/MPNs
+(any BOM line, also lines already in stock). Invalid input is asked again.
+
+**Chosen lines (`--alternatives-for R27,C2`):** references or MPNs, comma-separated,
+repeatable, case-insensitive (MPNs compared as in matching). Only those lines are searched,
+also when in stock or available on the market; `market_alternatives.purpose` is
+`second_source` when in stock, else `replacement`. They also get original-part baselines,
+in-stock alternatives and the DigiKey check. Implies `--find-alternatives`. Open lines not
+chosen get `market_alternatives.status = not_selected`. The run stops before any API call on an
+unknown selector, a DNP/excluded reference, or a combination with
+`--alternatives-even-if-available` or `--no-find-alternatives`. A chosen non-R/C/L line is
+reported as "R/C/L only".
 
 **Second sources (`--alternatives-even-if-available`):** for flight hardware, searches every
 R/C/L line, including lines already in stock or available on the market (implies

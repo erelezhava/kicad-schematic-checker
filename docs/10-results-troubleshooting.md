@@ -12,6 +12,7 @@
 | Alternatives | `match` · `possible` · `rejected` | [guide 6](06-second-sources.md#reading-the-result). Always a lead, never an approval |
 | parts-search | `target_met` · `shortfall` | ≥ 3 distinct parts from ≥ 2 manufacturers, or not |
 | jlcpcb_rules | error · warning · info | Beyond JLC limit · paid option or recommendation · FYI |
+| refplane | error · warning · info | [guide 11](11-reference-plane.md#reading-the-result) |
 
 Missing data never becomes a pass or a fail.
 
@@ -25,6 +26,8 @@ Missing data never becomes a pass or a fail.
 | `3` | Invalid input or tool error |
 
 `0` never means "design approved". In CI, treat `1` and `3` as failures and `2` as a warning.
+`python3 -m refplane check` uses only `0` (no errors; warnings allowed) and `1` (at least one
+error finding, or bad input such as a missing board file).
 
 ## Troubleshooting
 
@@ -40,7 +43,15 @@ Missing data never becomes a pass or a fail.
 | LCSC / JLCPCB always `? (unknown)` | No keys (expected), or your IP isn't whitelisted at LCSC |
 | `DigiKey lists <MPN> under <X>, not <Y>` | Fix the Manufacturer spelling in KiCad |
 | Search shows `shortfall` with few results | Raise `--max-pages`, check value/package in the request, read "Parametric value filter: not used — …" in that line's `sourcing.md` |
+| `R27 matches no reference or MPN in the design` | Check the spelling in `--alternatives-for` (references or exact MPNs) |
+| `R27 is not in the BOM (…)` | That part is DNP or excluded: pick a populated one |
+| `Use either --alternatives-for … or --alternatives-even-if-available` | Choose one: named lines, or every R/C/L line |
+| Alternatives section says "Not searched: not selected" | Expected: you didn't pick that line. Add it to `--alternatives-for` |
 | `fill_fields.py` refuses to write | Close the schematic in KiCad (lock file) |
+| refplane `stale_fill` errors | Refill zones in KiCad (B), save, run again; or install `kicad-cli` so it refills a copy itself |
+| `kicad-cli refill failed` | Run with `--refill no` to check the saved fills, or point `--kicad-cli` at your KiCad 10 binary |
+| refplane asks nothing on a re-run | Answers are saved in `<board>.refplane.json`; pass `--ask` to change them |
+| refplane checks too many / too few nets | `--classes`, `--nets`, `--include-power`; mounting-hole nets (`Net-(H*-Pad1)`) are checked but give no findings |
 | Datasheet `needs_review`: two local files match | Remove or rename the stale PDF in `docs/` |
 | DRC ignores the JLC rules | Reopen Board Setup after `install`; check `board.kicad_dru` sits next to the `.kicad_pro` |
 | `preflight` says rules are stale | Stackup changed: run `install` again |

@@ -68,7 +68,7 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stoc
 | `parts-search REQUEST.json --output DIR [--online] [--replace MPN]` | optional | Search any catalog category; screen supplied requirements and count distinct stocked candidates |
 | `parts-stock MPN --manufacturer NAME --output DIR [--online]` | optional | Exact-part stock and lifecycle, suppliers kept separate |
 | `parts-bom CIRCUIT --output DIR [--boards N] [--online]` | optional | Stock audit grouped by manufacturer/MPN; demand from populated reference count |
-| `inventory-check DESIGN --stock FILE --output DIR [--boards N]` | optional | Compare the BOM with your stock CSV/XLSX (e.g. JLCPCB inventory); asks boards, market check and R/C/L alternatives |
+| `inventory-check DESIGN --stock FILE --output DIR [--boards N] [--alternatives-for R27,C2]` | optional | Compare the BOM with your stock CSV/XLSX (e.g. JLCPCB inventory); asks boards, market check, and which lines get R/C/L alternatives |
 | `datasheet-fetch CIRCUIT --output DIR [--docs DIR] [--offline] [--all]` | optional | Locate a datasheet PDF per active part (`--all` adds R/C/L) |
 | `review CIRCUIT --rules R --evidence E --output DIR` | no | Evaluate rules; options `--snapshot`, `--docs-root`, `--digikey-cache cache/digikey` |
 | `tools/fill_fields.py DIGIKEY_JSON PROJECT [--prefer NAME] [--apply]` | no | Fill **empty** Manufacturer fields from DigiKey suggestions |
@@ -77,6 +77,11 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stoc
 KiCad 10 custom DRC rules generated from JLCPCB's capability table for the board's stackup;
 `python3 -m jlcpcb_rules preflight BOARD.kicad_pro` checks what DRC can't (size, thickness,
 finish, paid options). See [jlcpcb_rules/README.md](jlcpcb_rules/README.md).
+
+**PCB return paths:** `python3 -m refplane check BOARD.kicad_pro` checks that the routed nets of
+the net classes you pick run over unbroken GND (or, with a warning, PWR) copper on the adjacent
+layer: antipads, cutouts, split crossings, plane edges, stale fills. See
+[refplane/README.md](refplane/README.md).
 
 ## Outputs
 
@@ -107,6 +112,7 @@ Each run writes into its own new folder under `runs/` (git-ignored):
 kicad_checker/   the engine (CLI, parsers, audits, DigiKey, datasheets)
 tools/           opt-in helpers: fill_fields.py, digikey_capture.py
 jlcpcb_rules/    JLCPCB capability table -> KiCad 10 PCB design rules (.kicad_dru) + preflight
+refplane/        reference-plane continuity check (traces over antipads, splits, plane edges)
 tests/           unit tests (offline; real DigiKey responses as fixtures)
 examples/        synthetic demo netlists, rules and evidence
 rules/           reusable rule packs (drafts until reviewed)

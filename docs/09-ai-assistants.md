@@ -32,9 +32,19 @@ Replace `<project>` with your `.kicad_pro` path.
 **Second sources** ([guide 6](06-second-sources.md))
 
 > Read docs/06-second-sources.md. Run inventory-check on `<project>` with
-> `--boards <N> --check-market --alternatives-even-if-available --no-input`. For each R/C/L
+> `--boards <N> --check-market --alternatives-for <R27,C2,…> --no-input`. For each chosen
 > line list independent second sources (different manufacturer) with their verdict, and what
 > I must still verify in the datasheet.
+
+For the whole BOM, swap `--alternatives-for …` for `--alternatives-even-if-available`.
+
+**Reference planes** ([guide 11](11-reference-plane.md))
+
+> Read docs/11-reference-plane.md. Run `python3 -m refplane info` on `<project>`, show me the
+> guessed layer roles, GND/PWR nets and net classes, and wait for my confirmation. Then run
+> `python3 -m refplane check` with those answers as flags and `-y`. Group the findings by net
+> and severity, give KiCad coordinates for each error, and say which `return_via_missing`
+> findings involve my high-speed nets.
 
 **PCB manufacturability** ([guide 8](08-jlcpcb-rules.md))
 
@@ -48,8 +58,9 @@ for the sheets in scope first.
 
 ## Rules every assistant must follow
 
-- Always pass flags (`--boards`, `--check-market`, `--find-alternatives`, `--no-input`) instead
-  of relying on prompts, and use a new `--output` folder each run.
+- Always pass flags (`--boards`, `--check-market`, `--find-alternatives` or
+  `--alternatives-for`, `--no-input`; `-y` for refplane) instead of relying on prompts, and use
+  a new `--output` folder each run.
 - Never edit your schematic, never write `approved_by_human`, never print `.env`.
 - Treat `heuristic`, `possible` and every alternative as a lead for you, not a verdict.
 - Source policy: DigiKey for RLC specs, manufacturer datasheets for active parts, LCSC/JLCPCB
