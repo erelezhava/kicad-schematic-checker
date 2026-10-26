@@ -1,0 +1,60 @@
+{
+  "_about": "Built-in defaults for python3 -m refplane. Edit freely. Per-board overrides go in <board>.refplane.json next to the .kicad_pcb (same keys, any subset); command-line flags override both.",
+
+  "margin_h": 3.0,
+  "min_length_mm": 0.02,
+
+  "power_nets": {
+    "_about": "Supply rails are not signals: routed tracks of these nets are skipped (GND is a reference net anyway). A net named with --nets, or --include-power, is checked anyway.",
+    "patterns": ["+*", "-*V*", "VCC*", "VDD*", "VEE*", "VBAT*", "VBUS*", "VSYS*", "*_VIN", "VIN"],
+    "nets_with_zones": true
+  },
+
+  "stitch": {
+    "_about": "Return-via rules for layer changes. A net gets its profile from: 'classes' (any class except Default), then the first matching 'nets' pattern, then 'classes'.Default, then 'default_profile'. A class or pattern may name a profile or give a number (distance in mm, other values from default_profile).",
+
+    "default_profile": "high_speed",
+
+    "_high_speed_about": "Explicit mode: list the high-speed nets (wildcards) and/or net classes here, e.g. [\"USB\", \"Clock\", \"*ETH_*\"]. Then every other net is low speed and the 'nets' name patterns below are not used. Empty list = name-pattern mode.",
+    "high_speed": [],
+    "high_speed_profile": "high_speed",
+    "low_speed_profile": "low_speed",
+
+    "profiles": {
+      "high_speed": {
+        "distance_mm": 1.0,
+        "max_share": 2,
+        "severity": "error",
+        "description": "clocks, USB, Ethernet, LVDS, DDR, RF: return via close to every signal via; a differential pair may share one"
+      },
+      "low_speed": {
+        "distance_mm": 3.0,
+        "max_share": 4,
+        "severity": "warning",
+        "description": "I2C, UART, SPI, CAN, SWD, GPIO, LEDs: a few signal vias may share one or two return vias"
+      }
+    },
+
+    "classes": {},
+
+    "nets": {
+      "*I2C*": "low_speed",
+      "*SCL*": "low_speed",
+      "*SDA*": "low_speed",
+      "*SMBUS*": "low_speed",
+      "*UART*": "low_speed",
+      "*USART*": "low_speed",
+      "*SPI*": "low_speed",
+      "*MOSI*": "low_speed",
+      "*MISO*": "low_speed",
+      "*CAN*": "low_speed",
+      "*SWDIO*": "low_speed",
+      "*SWCLK*": "low_speed",
+      "*NRST*": "low_speed",
+      "*RESET*": "low_speed",
+      "*GPIO*": "low_speed",
+      "*LED*": "low_speed",
+      "*BTN*": "low_speed"
+    }
+  }
+}

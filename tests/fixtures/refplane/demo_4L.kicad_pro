@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "filename": "demo_4L.kicad_pro",
+    "version": 3
+  },
+  "net_settings": {
+    "meta": {
+      "version": 4
+    },
+    "classes": [
+      {
+        "name": "Default",
+        "track_width": 0.2
+      },
+      {
+        "name": "USB",
+        "track_width": 0.2
+      },
+      {
+        "name": "Clock",
+        "track_width": 0.2
+      }
+    ],
+    "netclass_assignments": {
+      "/CLK": [
+        "Clock"
+      ]
+    },
+    "netclass_patterns": [
+      {
+        "netclass": "USB",
+        "pattern": "/USB_*"
+      }
+    ]
+  }
+}
