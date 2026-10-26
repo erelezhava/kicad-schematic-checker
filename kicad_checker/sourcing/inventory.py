@@ -116,6 +116,27 @@ def _ref_key(ref):
     return (match.group(1), int(match.group(2)) if match.group(2) else -1, match.group(3)) if match else (ref, 0, "")
 
 
+def select_lines(lines, excluded, selectors):
+    """Resolve user selectors (references such as R27, or MPNs; comma-separated, case-insensitive)
+    to BOM lines in BOM order. Returns (lines, problems); a problem stops the run before any API call."""
+    wanted = [s.strip() for item in selectors for s in str(item).split(",") if s.strip()]
+    chosen, problems = set(), []
+    excluded_refs = {r.casefold(): e["reason"] for e in excluded for r in e["references"]}
+    for selector in wanted:
+        key = selector.casefold()
+        hits = [l for l in lines if key in (r.casefold() for r in l["references"])
+                or (l["mpn"] and compact(l["mpn"]) == compact(selector))]
+        if hits:
+            chosen.update(id(l) for l in hits)
+        elif key in excluded_refs:
+            problems.append(f"{selector} is not in the BOM ({excluded_refs[key]})")
+        else:
+            problems.append(f"{selector} matches no reference or MPN in the design")
+    if not wanted:
+        problems.append("--alternatives-for needs at least one reference or MPN")
+    return [l for l in lines if id(l) in chosen], problems
+
+
 # --- stock matching ------------------------------------------------------------------------
 
 def match_entry(line, entry):

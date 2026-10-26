@@ -604,6 +604,98 @@ class BaselineTests(Fixture):
         self.assertIn("requires ≤1% · ≥62.5 mW · AEC-Q200 (from original part on DigiKey: power, AEC-Q200)", md)
 
 
+def empty_search(log):
+    def fake_run(args):
+        if Path(args.request).name == "request.json":  # primary search; spelling retries not counted
+            log.append(json.loads(Path(args.request).read_text(encoding="utf-8")))
+        folder = Path(args.output)
+        folder.mkdir(parents=True)
+        (folder / "sourcing.json").write_text(json.dumps({"status": "shortfall", "qualified_candidates": 0, "target": 3,
+                                                          "discovered_candidates": 0, "warnings": [], "results": []}),
+                                              encoding="utf-8")
+        return 2
+    return fake_run
+
+
+class SelectionTests(Fixture):
+    def test_select_lines_by_reference_or_mpn(self):
+        from kicad_checker.sourcing.inventory import select_lines
+        lines, excluded = bom_lines(parse_netlist(self.net))
+        chosen, problems = select_lines(lines, excluded, ["r2, GCM21BR71E225KA73L", "U1"])
+        self.assertEqual(problems, [])
+        self.assertEqual([l["references"] for l in chosen], [["C2"], ["R1", "R2"], ["U1"]])  # BOM order, line of R2
+        chosen, problems = select_lines(lines, excluded, ["grm155r71c104ka88d"])  # MPN, case-insensitive
+        self.assertEqual(chosen[0]["references"], ["C1"])
+        _, problems = select_lines(lines, excluded, ["R4,R99"])
+        self.assertIn("R4 is not in the BOM (DNP", problems[0])
+        self.assertIn("R99 matches no reference or MPN", problems[1])
+        self.assertTrue(select_lines(lines, excluded, [" , "])[1])
+
+    def run_selected(self, *extra, folder="s1"):
+        log = []
+        out = io.StringIO()
+        with mock.patch("kicad_checker.sourcing.cli.run", empty_search(log)), redirect_stdout(out):
+            code = main(["inventory-check", str(self.net), "--stock", str(self.csv), "--boards", "5", "--no-input",
+                         *extra, "--output", str(self.dir / folder)])
+        report = json.loads((self.dir / folder / "inventory.json").read_text(encoding="utf-8")) if code != 3 else None
+        return code, log, report
+
+    def test_only_chosen_lines_are_searched_even_when_in_stock(self):
+        code, log, report = self.run_selected("--alternatives-for", "R1,C2", "--alternatives-for", "U1")
+        self.assertEqual(code, 2)
+        self.assertEqual(sorted((q["kind"], q["value"]) for q in log), [("capacitor", "2.2uF"), ("resistor", "10k")])
+        lines = {"|".join(l["references"]): l for l in report["lines"]}
+        self.assertEqual(lines["R1|R2"]["market_alternatives"]["purpose"], "second_source")   # in stock, chosen
+        self.assertEqual(lines["C2"]["market_alternatives"]["purpose"], "replacement")        # missing, chosen
+        self.assertIn("R/C/L only", lines["U1"]["market_alternatives"]["reason"])           # chosen IC: said, not ignored
+        self.assertEqual(lines["R3"]["market_alternatives"]["status"], "not_selected")       # open but not chosen
+        self.assertTrue(lines["R1|R2"]["stock_alternatives"])  # in-stock second sources for a chosen in-stock line
+        md = (self.dir / "s1" / "inventory.md").read_text(encoding="utf-8")
+        self.assertIn("Not searched (", md)
+
+    def test_selection_errors_stop_before_any_search(self):
+        for extra in (["--alternatives-for", "R99"], ["--alternatives-for", "R4"],
+                      ["--alternatives-for", "R1", "--alternatives-even-if-available"],
+                      ["--alternatives-for", "R1", "--no-find-alternatives"]):
+            with self.subTest(extra=extra):
+                code, log, _ = self.run_selected(*extra, folder="err")
+                self.assertEqual((code, log), (3, []))
+                self.assertFalse((self.dir / "err").exists())
+
+    def interactive(self, answers, folder):
+        log, prompts = [], []
+        answers = iter(answers)
+
+        def fake_input(question):
+            prompts.append(question)
+            return next(answers)
+
+        with mock.patch("kicad_checker.sourcing.cli.run", empty_search(log)), \
+             mock.patch.object(inventory_cli.sys.stdin, "isatty", return_value=True), \
+             mock.patch("builtins.input", fake_input), redirect_stdout(io.StringIO()) as out:
+            main(["inventory-check", str(self.net), "--stock", str(self.csv), "--output", str(self.dir / folder)])
+        return log, prompts, out.getvalue(), json.loads((self.dir / folder / "inventory.json").read_text(encoding="utf-8"))
+
+    def test_pick_list_numbers_and_references(self):
+        # boards, market? n, then pick: invalid number first, then listed #1 (C2) plus in-stock R1.
+        log, prompts, out, report = self.interactive(["5", "n", "9", "1,R1"], "p1")
+        self.assertIn("1. C2", out)
+        self.assertIn("no listed line 9", out)
+        self.assertEqual(sorted(q["value"] for q in log), ["10k", "2.2uF"])
+        lines = {"|".join(l["references"]): l for l in report["lines"]}
+        self.assertEqual(lines["R3"]["market_alternatives"]["status"], "not_selected")
+        self.assertTrue(lines["R1|R2"].get("stock_alternatives"))  # prepared after being picked
+
+    def test_pick_list_enter_means_no_searches(self):
+        log, _, _, report = self.interactive(["5", "n", ""], "p2")
+        self.assertEqual(log, [])
+        self.assertFalse(report["alternatives_searched"])
+
+    def test_pick_list_every_rlc_line(self):
+        log, _, _, _ = self.interactive(["5", "n", "e"], "p3")
+        self.assertEqual(len(log), 3)  # C1, C2, R1/R2; R3 has no tolerance → skipped with a reason
+
+
 class ManufacturerNameTests(unittest.TestCase):
     def test_suffixes_and_aliases_normalize_but_mpn_stays_exact(self):
         from kicad_checker.sourcing.providers import identity, manufacturer_key

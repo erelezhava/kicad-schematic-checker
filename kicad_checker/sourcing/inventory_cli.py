@@ -17,7 +17,7 @@ from pathlib import Path
 from ..core import digest, parse_netlist, read_json, write_json
 from ..paths import CACHE_ROOT
 from ..schematic import design_files, root_schematic
-from .inventory import (NEEDS_PARTS, bom_lines, catalog_values, draft_request, match_line, required_quantity,
+from .inventory import (NEEDS_PARTS, bom_lines, catalog_values, draft_request, match_line, required_quantity, select_lines,
                         schematic_spec, stock_alternatives, verification_request, verify_candidate,
                         baseline_from_digikey, requirement_summary)
 from .providers import SUPPLIERS, manufacturer_key, utc_now
@@ -48,6 +48,9 @@ def add_command(sub):
     c.add_argument("--alternatives-even-if-available", action="store_true",
                    help="Second sources: search alternatives for every R/C/L line, also when it is in stock or "
                         "available on the market (implies --find-alternatives; uses the search budget)")
+    c.add_argument("--alternatives-for", action="append", default=[], metavar="REF_OR_MPN[,...]",
+                   help="Search alternatives only for these lines, e.g. R27,C2 or an MPN (repeatable); they are searched "
+                        "even when in stock or available. Implies --find-alternatives")
     c.add_argument("--verify-stock-alternatives", action=argparse.BooleanOptionalAction, default=None,
                    help="Check in-stock R/C/L candidates against their exact DigiKey record (qualification, ratings, "
                         "lifecycle). Default: online when --check-market/--find-alternatives is used, else cache only")
@@ -128,12 +131,51 @@ class Asker:
                 return int(answer)
             print("  Enter a whole number greater than 0.")
 
+    def text(self, question):
+        return input(question).strip()
+
     def yes(self, question):
         answer = input(question + " [y/N] ").strip().casefold()
         return answer in ("y", "yes")
 
 
 # --- market and alternatives -----------------------------------------------------------------
+
+def pick_lines(ask, lines, excluded, default):
+    """Terminal pick list. Enter = none (no API calls), a = the listed lines, e = every R/C/L line,
+    or numbers / references / MPNs (any BOM line, also lines already in stock)."""
+    if default:
+        print(f"Lines that may need alternatives ({len(default)}):")
+        for number, line in enumerate(default, 1):
+            state = STATUS_TEXT.get(line["stock"]["status"], line["stock"]["status"])
+            if line.get("market", {}).get("status") == "available":
+                state += ", available on the market"
+            print(f"  {number}. {', '.join(line['references'][:6])} — {line['mpn'] or line['value']} ({state})")
+        question = ("Search DigiKey for alternatives? Enter = no · a = all listed · numbers or references/MPNs "
+                    "(e.g. 1,3 or R27,C2) · e = every R/C/L line: ")
+    else:
+        question = ("No line needs alternatives. Search second sources anyway? Enter = no · references/MPNs "
+                    "(e.g. R27,C2) · e = every R/C/L line: ")
+    while True:
+        answer = ask.text(question)
+        word = answer.casefold()
+        if word in ("", "n", "no"):
+            return []
+        if word in ("a", "all", "y", "yes") and default:
+            return list(default)
+        if word in ("e", "every"):
+            return [l for l in lines if l["class"]]
+        numbers, names = [], []
+        for part in (p.strip() for p in answer.split(",") if p.strip()):
+            (numbers if part.isdigit() else names).append(part)
+        bad = [n for n in numbers if not 1 <= int(n) <= len(default)]
+        chosen, problems = select_lines(lines, excluded, names) if names else ([], [])
+        if bad or problems:
+            print("  " + "; ".join(([f"no listed line {', '.join(bad)}"] if bad else []) + problems))
+            continue
+        ids = {id(default[int(n) - 1]) for n in numbers} | {id(l) for l in chosen}
+        return [l for l in lines if id(l) in ids]
+
 
 def _quiet(function, args):
     with contextlib.redirect_stdout(io.StringIO()):
@@ -389,8 +431,8 @@ def markdown(report):
             a = line["market_alternatives"]
             head = (f"**{', '.join(line['references'])}** ({line['mpn'] or line['value']}"
                     + (f"; requires {line['requirements']}" if line.get("requirements") else "") + "): ")
-            if a.get("status") in ("skipped", "not_needed"):
-                prefix = "Not searched" if a["status"] == "not_needed" else "Skipped"
+            if a.get("status") in ("skipped", "not_needed", "not_selected"):
+                prefix = "Not searched" if a["status"] in ("not_needed", "not_selected") else "Skipped"
                 skipped.setdefault((prefix, a["reason"]), []).append(", ".join(line["references"]))
                 continue
             purpose = " (second source)" if a.get("purpose") == "second_source" else ""
@@ -456,12 +498,28 @@ def run(args):
     if boards < 1:
         raise ValueError("--boards must be at least 1")
 
+    selected = None  # ids of lines the user chose for alternatives (None = automatic choice)
+    if args.alternatives_for:
+        if args.alternatives_even_if_available:
+            raise ValueError("Use either --alternatives-for (chosen lines) or --alternatives-even-if-available (all R/C/L lines)")
+        if args.find_alternatives is False:
+            raise ValueError("--alternatives-for contradicts --no-find-alternatives")
+        chosen, problems = select_lines(lines, excluded, args.alternatives_for)
+        if problems:
+            raise ValueError("; ".join(problems))
+        selected = {id(l) for l in chosen}
+        args.find_alternatives = True
+
+    def alternatives_wanted(line):
+        return (line["stock"]["status"] in NEEDS_PARTS or (line["class"] and args.alternatives_even_if_available)
+                or (selected is not None and id(line) in selected))
+
     for line in lines:
         line["need"] = required_quantity(len(line["references"]), boards, args.spare_percent, args.spare_min)
         line["stock"] = match_line(line, sources, line["need"], args.combine_sources)
         if line["identity"].startswith("none") and line["stock"]["status"] == "not_in_stock":
             line["stock"]["status"] = "unidentified"
-        if line["stock"]["status"] in NEEDS_PARTS or (args.alternatives_even_if_available and line["class"]):
+        if alternatives_wanted(line) and (line["class"] or line["stock"]["status"] in NEEDS_PARTS):
             alternatives, reason = stock_alternatives(line, sources, line["need"])
             if alternatives:
                 line["stock_alternatives"] = alternatives
@@ -506,21 +564,28 @@ def run(args):
                 line["market"] = {"status": "skipped", "reason": "no MPN: market lookups need manufacturer + exact MPN"}
 
     # Baselines from the original parts, then (re)screen stock alternatives and check them on DigiKey.
-    if args.verify_stock_alternatives is not False:
-        records = DigiKeyRecords(args, digikey_online(args, check_market), warnings)
-        def relevant(line):
-            return line["stock"]["status"] in NEEDS_PARTS or args.alternatives_even_if_available
-        apply_baselines(lines, records, relevant)
-        for line in lines:
-            if line.get("_baseline") and (line["stock"]["status"] in NEEDS_PARTS or args.alternatives_even_if_available):
+    records = (DigiKeyRecords(args, digikey_online(args, check_market), warnings)
+               if args.verify_stock_alternatives is not False else None)
+    prepared = set()
+
+    def prepare(subset):
+        subset = [l for l in subset if id(l) not in prepared]
+        prepared.update(id(l) for l in subset)
+        if records is None or not subset:
+            return
+        apply_baselines(subset, records, lambda line: True)
+        for line in subset:
+            if line.get("_baseline") or (line["class"] and "stock_alternatives" not in line):
                 alternatives, _ = stock_alternatives(line, sources, line["need"])
-                line["stock_alternatives"] = alternatives or []
-                if not alternatives:
-                    line.pop("stock_alternatives")
-        verify_stock_alternatives(lines, records)
-        if records.lookups:
-            print(f"  DigiKey records (original parts + in-stock candidates): {records.lookups} lookup(s)"
-                  f"{'' if records.client else ' (cache only)'}")
+                line.pop("stock_alternatives", None)
+                if alternatives:
+                    line["stock_alternatives"] = alternatives
+        verify_stock_alternatives(subset, records)
+
+    prepare([l for l in lines if alternatives_wanted(l)])
+    if records is not None and records.lookups:
+        print(f"  DigiKey records (original parts + in-stock candidates): {records.lookups} lookup(s)"
+              f"{'' if records.client else ' (cache only)'}")
 
     # Alternatives: lines not available on the market (or market not checked) and not
     # already covered by a fully matching in-stock candidate.
@@ -530,22 +595,33 @@ def run(args):
         return not any(a["spec_status"] == "match" and a["covers_need"] for a in line.get("stock_alternatives", []))
 
     alt_lines = [l for l in open_lines if wants_search(l)]
-    if args.alternatives_even_if_available:
+    if selected is not None:
+        alt_lines = [l for l in lines if id(l) in selected]
+    elif args.alternatives_even_if_available:
         if args.find_alternatives is False:
             raise ValueError("--alternatives-even-if-available contradicts --no-find-alternatives")
         second = {id(l) for l in lines if l["class"] and l not in alt_lines}
         alt_lines = [l for l in lines if l in alt_lines or id(l) in second]
         args.find_alternatives = True
     find = args.find_alternatives
-    if find is None:
-        find = bool(alt_lines) and interactive and ask.yes(
-            f"{len(alt_lines)} line(s) are not covered by stock or market. Search DigiKey for R/C/L alternatives?")
+    if find is None and interactive and any(l["class"] for l in lines):
+        chosen = pick_lines(ask, lines, excluded, alt_lines)
+        if chosen:
+            if [id(l) for l in chosen] != [id(l) for l in alt_lines]:
+                selected = {id(l) for l in chosen}
+            alt_lines = chosen
+            prepare(alt_lines)  # baseline + in-stock check for lines picked beyond the default set
+        find = bool(chosen)
     if find:
         for line in open_lines:
             if line not in alt_lines:
-                why = ("available on the market" if line.get("market", {}).get("status") == "available"
-                       else "a fully matching part is already in stock")
-                line["market_alternatives"] = {"status": "not_needed", "reason": why}
+                if selected is not None:
+                    why, status = "not selected", "not_selected"
+                else:
+                    status = "not_needed"
+                    why = ("available on the market" if line.get("market", {}).get("status") == "available"
+                           else "a fully matching part is already in stock")
+                line["market_alternatives"] = {"status": status, "reason": why}
         searches = 0
         for line in alt_lines:
             request, reason = draft_request(line, line["need"])
