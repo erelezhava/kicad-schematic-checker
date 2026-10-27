@@ -249,6 +249,153 @@ gives 1.0 mm in both cases. Regression: `test_other_plane_clearance_does_not_wid
 Remaining by design: two reference nets on the same layer still share the larger clearance.
 Full suite: 309 run, all OK. Inventory findings F3–F6 above are still open.
 
+## 2026-10-27: parts-list (Claude)
+
+User request: read a recommended-components list (CSV-like, exact MPNs + manufacturer) and find
+the parts on DigiKey (LCSC/JLCPCB later); report availability, compare with stock, alternatives
+for problem rows.
+
+- `kicad_checker/sourcing/partslist.py`, command `parts-list LIST --output DIR [--online]
+  [--boards N] [--quantity Q] [--stock LABEL=FILE] [--min-stock N] [--no-find-alternatives]`.
+  Reads the list with `stockfile.load_stock(require_quantity=False)` (quantity column optional;
+  new per-board quantity header aliases). One DigiKey exact lookup per row via `DigiKeyRecords`
+  (shared cache, 24 h reuse, `--max-lookups` 60). `find_product()` → not_found / ambiguous /
+  manufacturer_differs / found (suffix-normalized manufacturer). Availability from
+  `service.stock_report` with LCSC/JLCPCB observations (`cli.lcsc_observations`,
+  `jlc_observations`; C-code from list, stock match or LCSC result). Row status:
+  available / stock_issues / not_active (lifecycle ≠ Active or discontinued/EOL) / identity states
+  / no_mpn / not_checked.
+- Problem rows (not_active, stock_issues), R/C/L only: requirements from the recommended part's own
+  DigiKey record (`inventory.spec_from_product`), in-stock screening
+  (`inventory.screen_stock_for_spec`) + DigiKey verification (`verify_candidate`), DigiKey search via
+  `inventory_cli.market_alternatives(..., value=)` (new optional argument). Other categories: "review
+  manually".
+- Outputs: `parts-list.md`, `parts-list.json`, `parts-list.csv` (adds DigiKey PNs, best alternative).
+- `tests/test_partslist.py` (4, seeded cache, mocked searches). Guide: `docs/12-parts-list.md`, row in
+  `USER_GUIDE.md`. Not run live yet; README command table and SOURCING.md not updated (docs chat).
+
+## 2026-10-27: inductor current ratings (Claude, reference-design item 1 of 4)
+
+Context: the user copies vendor reference designs; inductors in DC-DC stages are the parts most
+likely to break the circuit if substituted. Before this, inductor alternatives compared only
+value, package and tolerance.
+
+- Inductor ratings in every spec: `isat`, `irms` (rated current), `dcr`, `shielded`
+  (True / False / "semi"). Sources in priority order: schematic fields (`Isat`, `Saturation Current`,
+  `Irms`, `Rated Current`, `Current`, `DCR`, `Shielding`), then the original part's DigiKey record
+  (`Current - Saturation (Isat)`, `Current Rating (Amps)`, `DC Resistance (DCR)`, `Shielding`;
+  worst case of several listed values), and in parts-list the recommended part's record.
+- Requests add `min` Isat/rated current, `max` DCR, `eq Shielded` when the original is shielded.
+- No current rating known → no DigiKey search for that inductor (reason given), and in-stock
+  candidates can never be a full `match`. Stock descriptions (LCSC '1.4A 110mΩ 2.1A') have unlabeled
+  currents and are never guessed; shielding words are read.
+- `requirements.evaluate_numeric`: '110mOhm Max' now accepted; 'Typ'/'Nom' values return unknown
+  for min/max requirements (no guaranteed limit).
+- Tests: `InductorRatingTests` (5) + 1 parts-list test. Tests: 227 in the cloud copy. Not run live (no
+  inductor in the earth-sensor BOM). Docs: docs/12 updated; docs/05 and docs/06 should mention the
+  inductor rules (docs chat).
+- Remaining reference-design items: (2) vendor alternates columns checked first, (3) reference BOM
+  formats (designators, Not Fitted/DNP, TI/ADI column names), (4) `--against circuit.json`
+  copy check.
+
+## 2026-10-27: reference-design BOM formats and vendor alternates (Claude, items 3 and 2 of 4)
+
+- `stockfile`: new roles `references` (Designator, Reference Designator, RefDes…) and `fitted`
+  (Fitted, Populate, DNP, Mount…); package aliases `PackageReference`, `PCB Decal`; `Manufacturer 1` /
+  `… Part Number 1` map to the primary pair. `alternate_of()` detects alternate columns (`Alternate
+  PartNumber`, `Alt Manufacturer`, `Manufacturer 2`, `Manufacturer Part Number 3`; prefixes
+  alternate/alt/second source/substitute); alternate columns never become primary roles. Several
+  MPNs in one cell (`;`, newline, ` / `, ` or `; a slash inside an MPN like `M24C64-DRMF3TG/K` is kept)
+  → first is primary, the rest are alternates. Entries now carry `references`, `fitted`,
+  `alternates` (also for stock files; harmless there).
+- `partslist`: `fitting()` → `not_fitted` (Fitted/Populate false, quantity 0, DNP/Not Fitted text)
+  or `not_a_part` (TI `!PCB…` rows, "Printed Circuit Board"); no lookups for those.
+  `count_references()` gives the per-board quantity when there is no quantity column (`C1-C3, C7` = 4),
+  and a note is written when quantity and designator count disagree. Vendor alternates are looked up
+  when the primary is not_active / stock_issues / not_found / manufacturer_differs / ambiguous (or the
+  alternate is in stock and the primary isn't); `resolution` = first alternate available at DigiKey or
+  in stock → own search skipped. Report: Refs column, ✔ note, "Vendor alternates…" and "Not fitted"
+  sections; CSV adds References and Vendor alternates. Alternates get DigiKey only (no LCSC/JLC yet).
+- `tests/test_reference_bom.py` (5, synthetic TI- and ADI-style BOMs). Tests: 232 in the cloud copy.
+  Built to common TI/ADI conventions without a real file: test with a downloaded eval BOM.
+- Remaining: item 4 `--against circuit.json` (copy check), and the "reference-design part: substitution
+  needs re-verification" marking for power-stage alternatives.
+- **Item 4 done: `parts-list BOM --against DESIGN`** (project / netlist / circuit.json via
+  `inventory_cli.load_design`). `compare_design()`: per fitted reference row → same_part (MPN) /
+  vendor_alternate / substituted / value_differs (designator match with a different R/C/L value) /
+  not_in_design; renumbered R/C/L found by value (Value column, else the reference part's DigiKey value)
+  and package size. Substitutes: `substitution_verdict()` screens the design MPN's DigiKey record
+  against the reference part's DigiKey ratings (`spec_from_product` + `verify_candidate`) → match /
+  possible / rejected; non-R/C/L → "review" (datasheet/pinout). Every substitution carries the
+  reference-design re-verification note (⚠); partial copies note "n of m positions found".
+  Report section "Your schematic vs the reference BOM", JSON `against`. Tests: 3 more (237).
+  All four reference-design items are done; none run live yet.
+- 2026-10-27 later: `parts-list --dry-run [--preview-rows N]` prints the column mapping (ordered, with
+  each role's use), ignored headers, notes for missing manufacturer/quantity/designator columns, the
+  first rows with the planned action (look up / skip reason / +N alternates) and the lookup estimate;
+  no DigiKey, no files, `--output` optional. `load_stock` now also returns `headers`. Tests: 234.
+
+## 2026-10-27: independent review of the new component-search features (Codex)
+
+- Scope: current `parts-list`, reference BOM parsing/vendor alternates, `--against`, and
+  inductor-rating changes. Concurrent reference-plane changes were not reviewed here.
+- Full offline suite: 339 run, 338 passed, one existing skip; `git diff --check` passed.
+  No live supplier calls, credential access, design edits or implementation changes.
+- Seven independently reproduced findings and suggested corrections are recorded in
+  `runs/codex-sourcing-review-20261027-001/review.md`; `reproduce.py` and
+  `reproductions.json` contain synthetic offline evidence (local run artifacts).
+- Open: negative DNP-column booleans are inverted; grouped schematic substitutions verify
+  only the first position; schematic same-part/vendor-alternate matching ignores manufacturer;
+  one design position can satisfy multiple reference rows; semi-shielding is dropped from
+  DigiKey requests; unreadable explicit per-board quantities become a default demand; and
+  rejected/missing `--against` results do not affect the exit status.
+- Next: fix these with targeted offline regressions, then rerun the full suite. Older
+  inventory findings from 2026-10-26 remain separate; this review did not fix them.
+
+### Resolution (Claude, 2026-10-27)
+
+All seven fixed; `tests/test_review_20261027.py` holds each reproduction with the correct
+assertion, and a copy of `reproduce.py` with every bug assertion evaluated independently reports
+all seven as fixed.
+
+- F1: `stockfile.parse_fitted(text, negative)`; `DNP`/`DNF`/`Do Not Populate`/`NoPop` headers are
+  negative (yes/1/x = not fitted); "DNP"/"Not Fitted"/"Fitted" text keeps its meaning under any header.
+- F2/F4: `compare_design()` rewritten. Expected positions = declared designators (else per-board
+  quantity), allocated once across all rows: pass 1 declared designators that agree (same identity or
+  same R/C/L value), pass 2 reference/alternate MPN elsewhere, pass 3 R/C/L value+size, pass 4 a
+  conflicting part at the declared designator (labelled "designator only … could be unrelated", so a
+  pasted circuit colliding with your own U1 is not silently compared). Every position is classified and
+  substitutes are screened per distinct manufacturer+MPN; the worst position decides the row
+  (`positions[]`, row `verdict` = worst). Missing positions → `incomplete` or `not_in_design`.
+- F3: identity = manufacturer + MPN in the schematic match: `same_part` / `vendor_alternate` only with
+  matching (suffix-normalized) manufacturers; other maker → `manufacturer_differs`; missing maker →
+  `unconfirmed`. `inventory.verify_candidate()` no longer falls back to another manufacturer's record
+  (`digikey.status = manufacturer_differs`; the older open fallback issue). Added reviewed aliases for
+  makers DigiKey writes long (Samsung Electro-Mechanics, KOA Speer, Panasonic Industry, Würth
+  Elektronik, Nexperia USA, Analog Devices/Maxim, Linear Technology).
+- F5: new constraint op `in` (list of texts) in `requirements.validate_constraint`/`screen`;
+  semi-shielded baselines emit `Shielding in [Shielded, Semi-Shielded]`.
+- F6: `partslist.per_board_quantity()`: explicit quantity wins; blank cell → designator count or
+  `--quantity` with a note; unreadable explicit cell → `demand_unknown` (status "quantity unreadable",
+  exit 2). `parse_quantity` accepts `100pcs`, `4 ea`, `12 units`.
+- F7: exit 0 only when every row is available/not fitted/not a part **and** `against.open == 0`
+  (open = any row not `same_part`/`vendor_alternate`, including every substitution).
+- Tests: 244 in the cloud copy (repo-wide count higher with jlcpcb_rules/refplane).
+
+### Independent fix recheck (Codex, 2026-10-27)
+
+- All seven original regression cases pass. Full suite: 346 run, 345 passed, one existing
+  skip; `git diff --check` passed. No live supplier calls or implementation/test/design edits.
+- Two independently reproduced follow-up findings remain:
+  (R1) `compare_design()` shares a substitute verdict across different reference requirements
+  (25 V substitute matches both 16 V and 50 V references, depending on row order);
+  (R2) `verify_candidate()` records a manufacturer conflict but leaves a pre-existing stock
+  `spec_status = match`, allowing it to suppress the inventory alternative search.
+- Full locations, evidence and suggested corrections:
+  `runs/codex-sourcing-recheck-20261027-001/review.md`, with `reproduce.py` and
+  `reproductions.json` in the same local run directory. Next: fix R1/R2 with regressions,
+  then rerun the full suite. The original seven-case results are distinct from these follow-ups.
+
 ## File map
 
 | File | Responsibility |

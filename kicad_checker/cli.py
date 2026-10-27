@@ -9,6 +9,7 @@ from . import datasheets, digikey
 from .sourcing import cli as sourcing_cli
 from .sourcing import bom as sourcing_bom
 from .sourcing import inventory_cli as sourcing_inventory
+from .sourcing import partslist as sourcing_partslist
 from .schematic import design_files
 from .description import description_audit, description_markdown, owner_actions, owner_actions_markdown
 from .core import digest, erc_summary, identification, identification_markdown, markdown, parse_netlist, read_json, review, write_json
@@ -95,6 +96,7 @@ def main(argv=None):
     sourcing_cli.add_commands(sub)
     sourcing_bom.add_command(sub)
     sourcing_inventory.add_command(sub)
+    sourcing_partslist.add_command(sub)
     command = sub.add_parser("extract", help="Export saved project connectivity and ERC without editing the design")
     command.add_argument("project")
     command.add_argument("--output", required=True, help="New directory outside the source project")
@@ -127,6 +129,8 @@ def main(argv=None):
     command.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "parts-list":
+            return sourcing_partslist.run(args)
         if args.command == "inventory-check":
             return sourcing_inventory.run(args)
         if args.command == "parts-bom":

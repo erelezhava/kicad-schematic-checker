@@ -303,12 +303,16 @@ def _search(line, request, args, folder, name):
     return read_json(folder / name.replace("request", "search") / "sourcing.json")
 
 
-def market_alternatives(line, request, args, folder):
+def market_alternatives(line, request, args, folder, value=None):
+    """DigiKey alternative search for one line; `value` (Decimal) overrides the schematic value
+    used for the alternate-spelling retry (parts lists have no schematic component)."""
     folder.mkdir(parents=True)
     report, name = _search(line, request, args, folder, "request"), "request"
     tried = [request["value"]]
     # Keyword search depends on the value spelling; one retry with the alternate spelling on a shortfall.
-    spec_values = catalog_values(line["class"], schematic_spec(line)["value"]) if line["class"] else []
+    if value is None and line["class"]:
+        value = schematic_spec(line)["value"]
+    spec_values = catalog_values(line["class"], value) if line["class"] and value is not None else []
     for alternate in spec_values[1:2]:
         if report["status"] == "target_met" or alternate == request["value"]:
             break

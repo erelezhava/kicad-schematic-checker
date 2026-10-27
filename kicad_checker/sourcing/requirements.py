@@ -117,11 +117,17 @@ def validate_constraint(c):
     """parameter + op (eq/min/max/covers) + value [+ unit, at, qualifier]; see SOURCING.md."""
     if (not isinstance(c, dict) or set(c) - {"parameter", "op", "value", "unit", "at", "qualifier"}
             or not isinstance(c.get("parameter"), str) or not c["parameter"].strip()
-            or c.get("op") not in ("eq", "min", "max", "covers") or "value" not in c):
-        raise ValueError("Each constraint needs parameter, op (eq/min/max/covers), value and optional unit/at/qualifier")
+            or c.get("op") not in ("eq", "min", "max", "covers", "in") or "value" not in c):
+        raise ValueError("Each constraint needs parameter, op (eq/min/max/covers/in), value and optional unit/at/qualifier")
+    if c["op"] == "in":
+        # One of several catalog texts, e.g. Shielding in ["Shielded", "Semi-Shielded"].
+        if ("unit" in c or {"at", "qualifier"} & set(c) or not isinstance(c["value"], list) or not c["value"]
+                or any(not isinstance(v, str) or not v.strip() for v in c["value"])):
+            raise ValueError("'in' needs a list of catalog texts, without unit/at/qualifier")
+        return
     if "unit" not in c:
         if c["op"] != "eq" or not isinstance(c["value"], str) or not c["value"].strip() or {"at", "qualifier"} & set(c):
-            raise ValueError("Text constraints support eq only, without at/qualifier")
+            raise ValueError("Text constraints support eq (or in) only, without at/qualifier")
         return
     if not _unit_ok(c["unit"]):
         raise ValueError(f"Unsupported unit in constraint {c['parameter']!r}")
@@ -311,6 +317,10 @@ def evaluate_numeric(parameter, actual, c):
         return low <= want[0] and high >= want[1], None
     if span:
         return None, "catalog value is a range; use op 'covers'"
+    # '110mOhm Max' states a guaranteed limit; 'Typ'/'Nom' does not guarantee a max/min requirement.
+    if re.search(r"\b(typ|typical|nom|nominal)\.?\s*$", main.strip(), re.I) and c["op"] in ("min", "max"):
+        return None, "only a typical value is listed; no guaranteed limit"
+    main = re.sub(r"\s*\b(max|maximum)\.?\s*$", "", main.strip(), flags=re.I)
     values = [_qualified(item) for item in main.split(",")]
     if "qualifier" in c:
         values = [v for v in values if (v[1] or "").casefold() == c["qualifier"].casefold()]
@@ -433,7 +443,10 @@ def screen(product, req):
         add("dielectric", actual, req["dielectric"], None if not code else code == dielectric(req["dielectric"]))
     for c in req["constraints"]:
         actual = digikey.parameter(product, c["parameter"])
-        if "unit" not in c:
+        if c["op"] == "in":
+            allowed = {v.casefold().strip() for v in c["value"]}
+            matched = None if actual is None else actual.casefold().strip() in allowed
+        elif "unit" not in c:
             matched = None if actual is None else actual.casefold().strip() == c["value"].casefold().strip()
         elif c["parameter"] == "Power (Watts)" and c["unit"] == "W" and c["op"] != "covers" and "@" not in (actual or ""):
             # '0.063W, 1/16W' states one rating twice; use the smaller for minimum comparisons.

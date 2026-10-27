@@ -13,18 +13,34 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-ROLES = ("mpn", "lcsc", "manufacturer", "quantity", "description", "value", "package", "category")
+ROLES = ("mpn", "lcsc", "manufacturer", "quantity", "description", "value", "package", "category", "references", "fitted")
 ROLE_ALIASES = {
     "mpn": {"mpn", "mfrpart", "mfrpartnumber", "mfrpartno", "mfrpn", "manufacturerpartnumber", "manufacturerpart",
             "manufacturerpartno", "manufacturerpn", "mfgpart", "mfgpartnumber", "mfgpn", "mfrpartnum"},
     "lcsc": {"lcsc", "lcscpart", "lcscpartnumber", "lcscpartno", "lcscno", "lcsccode", "jlcpcbpart", "jlcpcbpartnumber",
              "jlcpcbpartno", "jlcpart", "jlcpartnumber", "jlcpcb", "jlc", "jlccode", "componentcode"},
-    "manufacturer": {"manufacturer", "mfr", "mfg", "brand", "manufacturername", "mfrname", "maker"},
+    "manufacturer": {"manufacturer", "mfr", "mfg", "brand", "manufacturername", "mfrname", "maker", "mfgname"},
     "description": {"description", "desc", "specification", "spec", "productdescription", "comment"},
     "value": {"value"},
-    "package": {"package", "footprint", "case", "packagecase", "packagetype"},
+    "package": {"package", "footprint", "case", "packagecase", "packagetype", "packagereference", "pcbdecal",
+                "pcbfootprint", "footprintname", "casepackage"},
     "category": {"componenttype", "category", "type", "originalcategory", "parttype"},
+    # Reference-design BOMs (TI, ADI, NXP, ST eval boards)
+    "references": {"designator", "designators", "reference", "references", "refdes", "referencedesignator",
+                   "referencedesignators", "refdesignator", "refdesignators", "ref", "refs", "partreference",
+                   "partreferences", "reflist"},
+    "fitted": {"fitted", "fittednotfitted", "populate", "populated", "dnp", "dnf", "donotpopulate", "mount", "mounted",
+               "install", "installed", "assembly", "fit", "nopop", "stuff", "stuffed", "place", "placed"},
 }
+ALTERNATE_PREFIXES = ("alternative", "alternate", "secondsource", "substitute", "second", "2nd", "alt", "sub")
+# Headers whose yes/no answers mean "do NOT fit" (DNP=Yes → not fitted). Positive headers
+# (Fitted, Populate, Mount…) mean the opposite. Textual values keep their own meaning in both.
+NEGATIVE_FITTED = {"dnp", "dnf", "donotpopulate", "nopop"}
+TEXT_NOT_FITTED = {"notfitted", "dnp", "dnf", "dni", "nf", "nopop", "donotpopulate", "donotplace", "donotfit", "notplaced",
+                   "notmounted", "notinstalled", "notpopulated", "npop", "omit", "nc"}
+TEXT_FITTED = {"fitted", "populate", "populated", "mounted", "installed", "pop", "placed", "fit"}
+ANSWER_YES = {"yes", "y", "true", "1", "x"}
+ANSWER_NO = {"no", "n", "false", "0"}
 # Columns that hold an MPN or a C-code depending on the export; decided by their contents.
 AMBIGUOUS_PART = {"partnumber", "partno", "part", "pn", "partnum", "model"}
 # Most specific first: an "available" column beats a total, which beats a bare quantity.
@@ -33,7 +49,7 @@ QUANTITY_TIERS = (
     {"totalqty", "totalquantity", "totalstock"},
     {"stock", "stockqty", "instock", "inventory", "inventoryqty", "onhand", "qtyonhand", "quantityonhand", "balance",
      "currentstock", "remaining", "remainingqty"},
-    {"quantity", "qty"},
+    {"quantity", "qty", "qtyperboard", "quantityperboard", "qtyboard", "perboard", "qtyperunit", "usage"},
 )
 CCODE = re.compile(r"C\d+")
 
@@ -43,8 +59,9 @@ def norm(text):
 
 
 def parse_quantity(text):
-    """'1,000' / '1 000' / '250.0' -> int; blank or unreadable -> None."""
-    text = re.sub(r"[\s,'_]", "", str(text or ""))
+    """'1,000' / '1 000' / '250.0' / '100pcs' / '4 ea' -> int; blank or unreadable -> None."""
+    text = re.sub(r"(?i)(pcs|pc|pieces|piece|ea|each|units|unit)\.?\s*$", "", str(text or "").strip())
+    text = re.sub(r"[\s,'_]", "", text)
     if re.fullmatch(r"\d+", text):
         return int(text)
     if re.fullmatch(r"\d+\.0*", text):
@@ -117,27 +134,73 @@ def read_xlsx_sheets(path):
 
 # --- header detection --------------------------------------------------------------------
 
-def _role_of(header):
-    key = norm(header)
+def _base_role(key):
     for role, aliases in ROLE_ALIASES.items():
         if key in aliases:
             return role
+    return "part" if key in AMBIGUOUS_PART else None
+
+
+def _role_of(header):
+    key = norm(header)
+    role = _base_role(key)
+    if role is None and key.endswith("1") and not key[:-1][-1:].isdigit():
+        role = _base_role(key[:-1])  # 'Manufacturer 1' / 'Manufacturer Part Number 1' are the primary pair
+        role = role if role in ("mpn", "manufacturer") else None
+    return None if role == "part" else role
+
+
+def alternate_of(header):
+    """('mpn' | 'manufacturer', order) for alternate-part columns: 'Alternate PartNumber',
+    'Alt Manufacturer', 'Manufacturer 2', 'Manufacturer Part Number 3'. None for other columns."""
+    key = norm(header)
+    numbered = re.fullmatch(r"(.*?\D)(\d+)", key)
+    if numbered and int(numbered.group(2)) >= 2:
+        role = _base_role(numbered.group(1))
+        if role in ("mpn", "part", "manufacturer"):
+            return ("manufacturer" if role == "manufacturer" else "mpn", int(numbered.group(2)))
+    for prefix in ALTERNATE_PREFIXES:
+        if key.startswith(prefix) and len(key) > len(prefix):
+            rest = re.fullmatch(r"(.*?)(\d*)", key[len(prefix):])
+            role = _base_role(rest.group(1))
+            if role in ("mpn", "part", "manufacturer"):
+                return ("manufacturer" if role == "manufacturer" else "mpn", int(rest.group(2) or 2))
     return None
 
 
-def detect_columns(rows, overrides=None, scan=30):
-    """Return (header row index, {role: column index}, {pool header: column index}) or raise ValueError."""
+def parse_fitted(text, negative=False):
+    """Fitted True/False/None. 'DNP'/'Not Fitted' text is False and 'Fitted' text is True under any
+    header; yes/no/1/0 answers follow the header's polarity (negative = a DNP-style header)."""
+    key = norm(text)
+    if key in TEXT_NOT_FITTED:
+        return False
+    if key in TEXT_FITTED:
+        return True
+    if key in ANSWER_YES:
+        return not negative
+    if key in ANSWER_NO:
+        return negative
+    return None
+
+
+MULTI_PART = re.compile(r"\s*(?:;|\n|\s/\s|\s\bor\b\s)\s*", re.I)
+
+
+def detect_columns(rows, overrides=None, scan=30, require_quantity=True):
+    """Return (header row index, {role: column index}, {pool header: column index}) or raise ValueError.
+    Parts lists (require_quantity=False) need only an MPN or C-code column."""
     overrides = {role: norm(header) for role, header in (overrides or {}).items()}
     best = None
     for index, row in enumerate(rows[:scan]):
         headers = [norm(cell) for cell in row]
+        alternates = {c for c, cell in enumerate(row) if alternate_of(cell)}
         mapping = {}
         for role, wanted in overrides.items():
             if wanted in headers:
                 mapping[role] = headers.index(wanted)
         for column, key in enumerate(headers):
             role = _role_of(row[column])
-            if role and role not in mapping and column not in mapping.values():
+            if role and role not in mapping and column not in mapping.values() and column not in alternates:
                 mapping[role] = column
         if "quantity" not in mapping:
             for tier in QUANTITY_TIERS:
@@ -145,18 +208,20 @@ def detect_columns(rows, overrides=None, scan=30):
                 if hit is not None:
                     mapping["quantity"] = hit
                     break
-        ambiguous = [c for c, key in enumerate(headers) if key in AMBIGUOUS_PART and c not in mapping.values()]
+        ambiguous = [c for c, key in enumerate(headers) if (key in AMBIGUOUS_PART or key[:-1] in AMBIGUOUS_PART and key.endswith("1"))
+                     and c not in mapping.values() and c not in alternates]
         for column in ambiguous:
             values = [r[column].strip() for r in rows[index + 1:index + 51] if len(r) > column and r[column].strip()]
             role = "lcsc" if values and sum(bool(CCODE.fullmatch(v.upper())) for v in values) >= 0.8 * len(values) else "mpn"
             mapping.setdefault(role, column)
-        if "quantity" in mapping and ({"mpn", "lcsc"} & set(mapping)):
+        if ("quantity" in mapping or not require_quantity) and ({"mpn", "lcsc"} & set(mapping)):
             score = len(mapping)
             if best is None or score > best[0]:
                 best = (score, index, mapping, headers)
     if best is None:
-        raise ValueError("No header row with a quantity column and an MPN or LCSC/JLCPCB part column was found; "
-                         "use --column quantity=<header> --column mpn=<header> (or lcsc=<header>)")
+        raise ValueError(("No header row with a quantity column and an MPN or LCSC/JLCPCB part column was found; "
+                          "use --column quantity=<header> --column mpn=<header> (or lcsc=<header>)") if require_quantity else
+                         "No header row with an MPN or LCSC/JLCPCB part column was found; use --column mpn=<header>")
     _, index, mapping, headers = best
     missing = [role for role in overrides if role not in mapping]
     if missing:
@@ -169,7 +234,7 @@ def detect_columns(rows, overrides=None, scan=30):
 
 # --- loading -----------------------------------------------------------------------------
 
-def load_stock(path, overrides=None, label=None, sheet=None):
+def load_stock(path, overrides=None, label=None, sheet=None, require_quantity=True):
     """Normalized stock entries for one file. Duplicate rows stay separate (the matcher sums
     rows of the same identity within one source; different sources are never summed)."""
     path = Path(path)
@@ -185,7 +250,7 @@ def load_stock(path, overrides=None, label=None, sheet=None):
         found = []
         for name, rows in candidates.items():
             try:
-                found.append((len(detect_columns(rows, overrides)[1]), name, rows))
+                found.append((len(detect_columns(rows, overrides, require_quantity=require_quantity)[1]), name, rows))
             except ValueError:
                 continue
         if not found:
@@ -199,8 +264,18 @@ def load_stock(path, overrides=None, label=None, sheet=None):
         rows, chosen = read_csv_rows(path), None
     else:
         raise ValueError(f"Unsupported stock file type {path.suffix!r}; use .csv or .xlsx")
-    header, mapping, pools = detect_columns(rows, overrides)
+    header, mapping, pools = detect_columns(rows, overrides, require_quantity=require_quantity)
     names = {role: rows[header][column].strip() for role, column in mapping.items()}
+    negative_fitted = "fitted" in mapping and norm(rows[header][mapping["fitted"]]) in NEGATIVE_FITTED
+    pairs = {}
+    for column, cell_text in enumerate(rows[header]):
+        found = alternate_of(cell_text) if column not in mapping.values() else None
+        if found:
+            pairs.setdefault(found[1], {})[found[0]] = column
+    alternate_columns = [pairs[k] for k in sorted(pairs) if "mpn" in pairs[k]]
+    if alternate_columns:
+        names["alternates"] = [" + ".join(rows[header][c].strip() for c in (pair.get("manufacturer"), pair["mpn"])
+                                          if c is not None) for pair in alternate_columns]
     entries, skipped, bad_codes = [], 0, 0
 
     def cell(row, role):
@@ -218,7 +293,25 @@ def load_stock(path, overrides=None, label=None, sheet=None):
             skipped += 1
             continue
         raw_qty = cell(row, "quantity")
+        alternates = []
+        if mpn and MULTI_PART.search(mpn):  # 'GRM155R71C104KA88D / CL05B104KO5NNNC' in one cell
+            options = [m for m in MULTI_PART.split(mpn) if m]
+            makers = [m for m in MULTI_PART.split(cell(row, "manufacturer")) if m]
+            mpn = options[0]
+            alternates += [{"mpn": m, "manufacturer": makers[i] if len(makers) == len(options) else None}
+                           for i, m in enumerate(options[1:], 1)]
+            if len(makers) == len(options):
+                row = list(row)
+                row[mapping["manufacturer"]] = makers[0]
+        for pair in alternate_columns:
+            alt = row[pair["mpn"]].strip() if pair["mpn"] < len(row) else ""
+            maker = row[pair["manufacturer"]].strip() if "manufacturer" in pair and pair["manufacturer"] < len(row) else ""
+            if alt and alt.casefold() not in ("-", "n/a", "na", "none") and alt != mpn:
+                alternates.append({"mpn": alt, "manufacturer": maker or None})
         entries.append({
+            "references": cell(row, "references"),
+            "fitted": parse_fitted(cell(row, "fitted"), negative_fitted) if "fitted" in mapping else None,
+            "alternates": alternates,
             "source": label or path.stem, "row": number, "mpn": mpn or None, "lcsc": code or None,
             "manufacturer": cell(row, "manufacturer") or None,
             "quantity": parse_quantity(raw_qty), "quantity_text": raw_qty,
@@ -231,9 +324,10 @@ def load_stock(path, overrides=None, label=None, sheet=None):
     if bad_codes:
         warnings.append(f"{path.name}: {bad_codes} C-code cell(s) were not C+digits and were ignored")
     unknown = sum(e["quantity"] is None for e in entries)
-    if unknown:
+    if unknown and "quantity" in mapping:
         warnings.append(f"{path.name}: {unknown} row(s) have an unreadable quantity (treated as unknown, never as stock)")
     if "manufacturer" not in mapping:
         warnings.append(f"{path.name}: no manufacturer column; matching uses MPN and C-code only")
     return {"source": label or path.stem, "path": str(path), "sheet": chosen, "header_row": header + 1,
+            "headers": [h.strip() for h in rows[header]],
             "columns": names, "quantity_pools": list(pools), "entries": entries, "warnings": warnings}

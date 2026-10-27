@@ -227,6 +227,42 @@ def _quantity(text, unit):
     return None if error else value
 
 
+RATINGS = ("tolerance_percent", "voltage", "power", "dielectric", "isat", "irms", "dcr", "shielded")
+INDUCTOR_KEYS = ("isat", "irms", "dcr", "shielded")
+# Schematic field names for inductor ratings (compared ignoring case and punctuation).
+INDUCTOR_FIELDS = (("isat", {"isat", "saturationcurrent", "currentsaturation", "isatmin"}, "A"),
+                   ("irms", {"irms", "ratedcurrent", "currentrating", "current", "irated"}, "A"),
+                   ("dcr", {"dcr", "dcresistance", "dcrmax"}, "Ohm"),
+                   ("shielded", {"shielding", "shielded"}, None))
+# DigiKey parameter names for the same ratings.
+INDUCTOR_PARAMETERS = {"isat": "Current - Saturation (Isat)", "irms": "Current Rating (Amps)",
+                       "dcr": "DC Resistance (DCR)", "shielded": "Shielding"}
+
+
+def shielding(text):
+    """'Shielded' → True, 'Unshielded' → False, 'Semi-Shielded' → 'semi', else None."""
+    key = re.sub(r"[^a-z]", "", str(text or "").casefold())
+    return {"shielded": True, "yes": True, "true": True, "unshielded": False, "no": False, "false": False,
+            "semishielded": "semi"}.get(key)
+
+
+def catalog_amounts(text, unit, worst):
+    """'2.1A', '1.9A, 2.2A', '110mOhm Max' → the worst-case number (min for currents, max for DCR)."""
+    from .requirements import catalog_number
+    text = re.sub(r"\s*\b(max|maximum|typ|typical|nom)\.?\s*$", "", str(text or "").split("@")[0].strip(), flags=re.I)
+    numbers = [catalog_number(re.sub(r"\s*\(\w+\)\s*$", "", part.strip()), unit) for part in text.split(",") if part.strip()]
+    numbers = [n for n in numbers if n is not None]
+    return worst(numbers) if numbers else None
+
+
+def inductor_ratings(get):
+    """Isat / rated current (worst case = smallest), DCR (largest), shielding from DigiKey parameters."""
+    return {"isat": catalog_amounts(get(INDUCTOR_PARAMETERS["isat"]), "A", min),
+            "irms": catalog_amounts(get(INDUCTOR_PARAMETERS["irms"]), "A", min),
+            "dcr": catalog_amounts(get(INDUCTOR_PARAMETERS["dcr"]), "Ohm", max),
+            "shielded": shielding(get(INDUCTOR_PARAMETERS["shielded"]))}
+
+
 def schematic_spec(line):
     """What the schematic declares for an R/C/L line. Missing items stay None (unknown)."""
     cls, component = line["class"], line["_component"]
@@ -234,7 +270,8 @@ def schematic_spec(line):
         return None
     text = line["description"]
     spec = {"class": cls, "value": None, "package": None, "tolerance_percent": None, "voltage": None, "power": None,
-            "dielectric": None, "automotive": "aec-q200" in (text + " ".join(map(str, component.get("fields", {}).values()))).casefold()}
+            "dielectric": None, "isat": None, "irms": None, "dcr": None, "shielded": None,
+            "automotive": "aec-q200" in (text + " ".join(map(str, component.get("fields", {}).values()))).casefold()}
     value, error = schematic_quantity(line["value"], UNIT[cls])
     spec["value"] = None if error else value
     size = footprint_size(line["footprint"])
@@ -259,17 +296,24 @@ def schematic_spec(line):
     if cls == "capacitor":
         declared = field("dielectric")
         spec["dielectric"] = dielectric(declared) if declared else dielectric_in_text(text)
+    if cls == "inductor":
+        for key, names, unit in INDUCTOR_FIELDS:
+            try:
+                declared = field_by_keys(component, names)[1]
+            except ValueError:
+                declared = None
+            if declared:
+                spec[key] = _quantity(declared, unit) if unit else shielding(declared)
     # What the schematic leaves out comes from the original part's DigiKey record (no downgrade
     # versus the part actually designed in). Declared schematic values always win.
-    spec["provenance"] = {k: "schematic" for k in ("tolerance_percent", "voltage", "power", "dielectric")
-                          if spec[k] is not None}
+    spec["provenance"] = {k: "schematic" for k in RATINGS if spec[k] is not None}
     if spec["automotive"]:
         spec["provenance"]["automotive"] = "schematic"
     baseline = line.get("_baseline")
     if baseline:
-        for key in ("tolerance_percent", "voltage", "power", "dielectric"):
+        for key in RATINGS:
             if spec[key] is None and baseline.get(key) is not None and (key != "dielectric" or cls == "capacitor") \
-                    and (key != "power" or cls == "resistor"):
+                    and (key != "power" or cls == "resistor") and (key not in INDUCTOR_KEYS or cls == "inductor"):
                 spec[key] = baseline[key]
                 spec["provenance"][key] = "original part (DigiKey)"
         if not spec["automotive"] and baseline.get("automotive"):
@@ -306,7 +350,8 @@ def baseline_from_digikey(line, products, observed_at):
                "voltage": _quantity(get("Voltage - Rated"), "V"),
                "power": min(powers) if powers else None,
                "dielectric": dielectric(get("Temperature Coefficient") or ""),
-               "automotive": bool(re.search(r"AEC-?Q200", qualification, re.I))}
+               "automotive": bool(re.search(r"AEC-?Q200", qualification, re.I)),
+               **(inductor_ratings(get) if line["class"] == "inductor" else {})}
     public = {"status": "ok", "source": "DigiKey", "manufacturer": (product.get("Manufacturer") or {}).get("Name"),
               "url": product.get("ProductUrl"), "observed_at": observed_at,
               "ratings": {k: (_plain(v) if isinstance(v, Decimal) else v) for k, v in private.items()}}
@@ -317,6 +362,61 @@ def _plain(number):
     """Decimal without exponent: 10 -> '10', 0.0625 -> '0.0625' (str(normalize()) gives '1E+1')."""
     text = format(number.normalize(), "f")
     return text.rstrip("0").rstrip(".") if "." in text else text
+
+
+def spec_from_product(product):
+    """R/C/L requirements taken entirely from a DigiKey record (for parts lists, where the record
+    of the recommended MPN is the reference). None for other categories or unreadable value/package."""
+    from .. import digikey
+    from .requirements import CATEGORIES, FIELDS, category_nodes
+    leaf = [n.get("Name", "") for n in category_nodes(product)][-1:] or [""]
+    cls = next((kind for kind, names in CATEGORIES.items() if leaf[0] in names), None)
+    if cls is None:
+        return None
+    get = lambda name: digikey.parameter(product, name)
+    value, _ = schematic_quantity(normalize_description(get(FIELDS[cls]) or ""), UNIT[cls])
+    package = _single(size_codes(get("Package / Case") or "")[0])
+    if value is None or package is None:
+        return None
+    tolerances = percent_values(get("Tolerance") or "")
+    powers = power_values(get("Power (Watts)") or "")
+    qualification = " ".join(v for v in (get("Ratings"), get("Features"), get("Qualification")) if v)
+    spec = {"class": cls, "value": value, "package": package,
+            "tolerance_percent": max(tolerances) if tolerances else None,
+            "voltage": _quantity(get("Voltage - Rated"), "V"),
+            "power": min(powers) if powers and cls == "resistor" else None,
+            "dielectric": dielectric(get("Temperature Coefficient") or "") if cls == "capacitor" else None,
+            "isat": None, "irms": None, "dcr": None, "shielded": None,
+            "automotive": bool(re.search(r"AEC-?Q200", qualification, re.I))}
+    if cls == "inductor":
+        spec.update(inductor_ratings(get))
+    spec["provenance"] = {k: "recommended part (DigiKey)" for k in RATINGS if spec[k] is not None}
+    if spec["automotive"]:
+        spec["provenance"]["automotive"] = "recommended part (DigiKey)"
+    return spec
+
+
+def screen_stock_for_spec(required, sources, need, exclude=(), limit=5):
+    """In-stock rows that may replace a part described by `required` (same shape as schematic_spec)."""
+    found = []
+    excluded = {compact(m) for m in exclude if m}
+    for source in sources:
+        for entry in source["entries"]:
+            if entry["mpn"] and compact(entry["mpn"]) in excluded:
+                continue
+            spec = stock_spec(entry)
+            if not spec or spec["class"] != required["class"]:
+                continue
+            status, checks = compare_specs(required, spec)
+            if status == "mismatch":
+                continue
+            quantity = entry["quantity"]
+            found.append({"source": source["source"], "row": entry["row"], "mpn": entry["mpn"], "lcsc": entry["lcsc"],
+                          "manufacturer": entry["manufacturer"], "description": entry["description"],
+                          "quantity": quantity, "covers_need": quantity is not None and quantity >= need["needed"],
+                          "spec_status": status, "checks": checks, "engineering_status": "requires_review"})
+    found.sort(key=lambda r: (r["spec_status"] != "match", not r["covers_need"], -(r["quantity"] or 0)))
+    return found[:limit]
 
 
 def requirement_summary(spec):
@@ -332,10 +432,23 @@ def requirement_summary(spec):
         parts.append(f"≥{format_quantity(spec['power'], 'W')}")
     if spec["dielectric"]:
         parts.append(spec["dielectric"])
+    if spec.get("isat") is not None:
+        parts.append(f"Isat ≥{format_quantity(spec['isat'], 'A')}")
+    if spec.get("irms") is not None:
+        parts.append(f"Irated ≥{format_quantity(spec['irms'], 'A')}")
+    if spec.get("dcr") is not None:
+        parts.append(f"DCR ≤{format_quantity(spec['dcr'], 'Ohm')}")
+    if spec.get("shielded") is True:
+        parts.append("shielded")
+    elif spec.get("shielded") == "semi":
+        parts.append("semi-shielded or better")
     if spec["automotive"]:
         parts.append("AEC-Q200")
-    inherited = [k.replace("_percent", "").replace("automotive", "AEC-Q200") for k, v in spec["provenance"].items()
-                 if v != "schematic"]
+    names = {"tolerance_percent": "tolerance", "automotive": "AEC-Q200", "irms": "rated current", "isat": "Isat",
+             "dcr": "DCR", "shielded": "shielding"}
+    inherited = [names.get(k, k) for k, v in spec["provenance"].items() if v != "schematic"]
+    if inherited and all(v == "recommended part (DigiKey)" for v in spec["provenance"].values()):
+        return " · ".join(parts) + " (from the recommended part's DigiKey record)"
     return " · ".join(parts) + (f" (from original part on DigiKey: {', '.join(inherited)})" if inherited else "")
 
 
@@ -357,10 +470,15 @@ def stock_spec(entry):
         value, error = description_quantity(text, UNIT[cls])
         value = None if error else value
     package = entry["package"].strip() if entry["package"].strip() in IMPERIAL_CODES else _single(size_codes(text)[0])
+    lowered = text.casefold()
     return {"class": cls, "value": value, "package": package, "tolerance_percent": _single(percent_values(text)),
             "voltage": _quantity(text, "V"), "power": _single(power_values(text)),
             "dielectric": dielectric_in_text(text) if cls == "capacitor" else None,
-            "automotive": "aec-q200" in text.casefold()}
+            # Stock descriptions list inductor currents without labels ('1.4A 110mΩ 2.1A'): never guessed.
+            "isat": None, "irms": None, "dcr": None,
+            "shielded": ("semi" if "semi-shielded" in lowered or "semishielded" in lowered else
+                         False if "unshielded" in lowered else True if "shielded" in lowered else None),
+            "automotive": "aec-q200" in lowered}
 
 
 LOW_TEMP = {"X": -55, "Y": -30, "Z": 10}
@@ -418,6 +536,22 @@ def compare_specs(required, candidate):
     if required["class"] == "capacitor":
         check("dielectric", dielectric_ok(required["dielectric"], candidate["dielectric"]),
               required["dielectric"] or "not declared", candidate["dielectric"] or "unknown")
+    if required["class"] == "inductor":
+        if not inductor_current_known(required):
+            check("current rating", None, "not known", "not compared")
+        for key, label, better in (("isat", "Isat", lambda c, r: c >= r), ("irms", "rated current", lambda c, r: c >= r),
+                                   ("dcr", "DCR", lambda c, r: c <= r)):
+            r, c = required.get(key), candidate.get(key)
+            if r is None:
+                continue
+            unit_text = "Ohm" if key == "dcr" else "A"
+            check(label, None if c is None else better(c, r), f"{'≤' if key == 'dcr' else '≥'}{_show(r, unit_text)}",
+                  _show(c, unit_text) if c is not None else "unknown")
+        if required.get("shielded") in (True, "semi"):
+            c = candidate.get("shielded")
+            ok = None if c is None else (c is True or (required["shielded"] == "semi" and c == "semi"))
+            check("shielding", ok, "shielded" if required["shielded"] is True else "semi-shielded or better",
+                  {True: "shielded", False: "unshielded", "semi": "semi-shielded"}.get(c, "unknown"))
     if required["automotive"]:
         check("AEC-Q200", True if candidate["automotive"] else None, "required", "stated" if candidate["automotive"] else "not stated")
     statuses = {c["status"] for c in checks}
@@ -499,7 +633,21 @@ def _request(spec, need, tolerance):
         request["constraints"].append({"parameter": "Voltage - Rated", "op": "min", "value": _plain(spec["voltage"]), "unit": "V"})
     if spec["power"] is not None and spec["class"] == "resistor":
         request["constraints"].append({"parameter": "Power (Watts)", "op": "min", "value": _plain(spec["power"]), "unit": "W"})
+    if spec["class"] == "inductor":
+        for key, op, unit in (("isat", "min", "A"), ("irms", "min", "A"), ("dcr", "max", "Ohm")):
+            if spec.get(key) is not None:
+                request["constraints"].append({"parameter": INDUCTOR_PARAMETERS[key], "op": op,
+                                               "value": _plain(spec[key]), "unit": unit})
+        if spec.get("shielded") is True:
+            request["constraints"].append({"parameter": INDUCTOR_PARAMETERS["shielded"], "op": "eq", "value": "Shielded"})
+        elif spec.get("shielded") == "semi":
+            request["constraints"].append({"parameter": INDUCTOR_PARAMETERS["shielded"], "op": "in",
+                                           "value": ["Shielded", "Semi-Shielded"]})
     return request
+
+
+def inductor_current_known(spec):
+    return spec["class"] != "inductor" or spec.get("isat") is not None or spec.get("irms") is not None
 
 
 def draft_request(line, need):
@@ -514,6 +662,9 @@ def draft_request(line, need):
     missing = [n for n in ("value", "package", "tolerance_percent") if spec[n] is None]
     if missing:
         return None, f"Schematic does not declare {', '.join(missing)}; add the field(s) or write a request JSON"
+    if not inductor_current_known(spec):
+        return None, ("Inductor current ratings unknown (no Isat/rated current in the schematic or on the original part's "
+                      "DigiKey record); a search by value and package alone could suggest under-rated parts. Add Isat/Irms fields")
     return _request(spec, need, spec["tolerance_percent"]), None
 
 
@@ -528,7 +679,8 @@ def verification_request(line, need):
     if not spec or spec["value"] is None or spec["package"] is None:
         return None, "value or package not readable"
     declared = {"tolerance": spec["tolerance_percent"] is not None,
-                "power": spec["power"] is not None or spec["class"] != "resistor"}
+                "power": spec["power"] is not None or spec["class"] != "resistor",
+                "current": inductor_current_known(spec)}
     return _request(spec, need, spec["tolerance_percent"] if declared["tolerance"] else 100), declared
 
 
@@ -538,13 +690,19 @@ def verify_candidate(candidate, products, observed_at, request, tolerance_declar
     from .requirements import screen
     mpn = digikey.mpn_key(candidate["mpn"] or "")
     same = [p for p in products if digikey.mpn_key(p.get("ManufacturerProductNumber") or "") == mpn]
-    if candidate.get("manufacturer"):
-        named = [p for p in same if manufacturer_key((p.get("Manufacturer") or {}).get("Name")) == manufacturer_key(candidate["manufacturer"])]
-        same = named or same
-    makers = {manufacturer_key((p.get("Manufacturer") or {}).get("Name")) for p in same}
     if not same:
         candidate["digikey"] = {"status": "not_found", "note": "exact MPN not listed by DigiKey"}
         return candidate
+    if candidate.get("manufacturer"):
+        named = [p for p in same if manufacturer_key((p.get("Manufacturer") or {}).get("Name")) == manufacturer_key(candidate["manufacturer"])]
+        if not named:
+            # Never screen another manufacturer's record under this candidate's identity.
+            names = sorted({(p.get("Manufacturer") or {}).get("Name") or "?" for p in same})
+            candidate["digikey"] = {"status": "manufacturer_differs",
+                                    "note": f"DigiKey lists {candidate['mpn']} under {', '.join(names)}, not {candidate['manufacturer']!r}"}
+            return candidate
+        same = named
+    makers = {manufacturer_key((p.get("Manufacturer") or {}).get("Name")) for p in same}
     if len(makers) > 1:
         candidate["digikey"] = {"status": "ambiguous", "note": "MPN listed under several manufacturers; add a manufacturer column"}
         return candidate
@@ -552,6 +710,7 @@ def verify_candidate(candidate, products, observed_at, request, tolerance_declar
     from .. import digikey as dk
     if isinstance(tolerance_declared, bool):
         tolerance_declared = {"tolerance": tolerance_declared, "power": True}
+    tolerance_declared = {"current": True, **tolerance_declared}
     status, checks = screen(product, request)
     for check in checks:
         if check["parameter"] == "tolerance_percent" and not tolerance_declared["tolerance"]:
@@ -561,6 +720,10 @@ def verify_candidate(candidate, products, observed_at, request, tolerance_declar
     if not tolerance_declared["power"]:
         checks.append({"parameter": "Power (Watts)", "status": "unknown", "actual": dk.parameter(product, "Power (Watts)"),
                        "expected": None, "note": "power not declared in the schematic; not compared"})
+    if not tolerance_declared["current"]:
+        checks.append({"parameter": INDUCTOR_PARAMETERS["isat"], "status": "unknown",
+                       "actual": dk.parameter(product, INDUCTOR_PARAMETERS["isat"]), "expected": None,
+                       "note": "inductor current rating of the original not known; not compared"})
     if any(c["status"] == "unknown" for c in checks) and status == "catalog_match":
         status = "needs_review"
     lifecycle, flags = digikey.lifecycle(product)

@@ -435,7 +435,7 @@ class StockVerificationTests(Fixture):
         from kicad_checker.sourcing.inventory import verification_request, verify_candidate
         c1, alts = self.candidates()
         request, declared = verification_request(c1, c1["need"])
-        self.assertEqual(declared, {"tolerance": True, "power": True})
+        self.assertEqual(declared, {"tolerance": True, "power": True, "current": True})
         good = verify_candidate(alts["GCM155R71C104KA55J"], [dk_product("GCM155R71C104KA55J", "Murata Electronics")],
                                 "2026-10-25T00:00:00+00:00", request, declared, "Murata")
         self.assertEqual(good["spec_status"], "match")
@@ -508,7 +508,7 @@ class ResistorPowerTests(Fixture):
         lines, _, _ = self.lines()
         r = lines["R1|R2"]  # Description states 1 % but no power
         request, declared = verification_request(r, r["need"])
-        self.assertEqual(declared, {"tolerance": True, "power": False})
+        self.assertEqual(declared, {"tolerance": True, "power": False, "current": True})
         product = {"ManufacturerProductNumber": "CRCW040210K0FKED", "Manufacturer": {"Name": "Vishay Dale"},
                    "ProductStatus": {"Status": "Active"},
                    "Category": {"Name": "Resistors", "ChildCategories": [{"Name": "Chip Resistor - Surface Mount"}]},
@@ -694,6 +694,89 @@ class SelectionTests(Fixture):
     def test_pick_list_every_rlc_line(self):
         log, _, _, _ = self.interactive(["5", "n", "e"], "p3")
         self.assertEqual(len(log), 3)  # C1, C2, R1/R2; R3 has no tolerance → skipped with a reason
+
+
+def dk_inductor(mpn, manufacturer, isat="2.1A", irms="1.4A", dcr="110mOhm Max", shielding="Shielded", ratings="AEC-Q200"):
+    params = {"Inductance": "2.2 µH", "Tolerance": "±20%", "Package / Case": "1210 (3225 Metric)",
+              "Current - Saturation (Isat)": isat, "Current Rating (Amps)": irms, "DC Resistance (DCR)": dcr,
+              "Shielding": shielding, "Ratings": ratings}
+    return {"ManufacturerProductNumber": mpn, "Manufacturer": {"Name": manufacturer}, "ProductStatus": {"Status": "Active"},
+            "Category": {"Name": "Inductors", "ChildCategories": [{"Name": "Fixed Inductors"}]},
+            "Parameters": [{"ParameterText": k, "ValueText": v} for k, v in params.items()], "ProductUrl": "https://example.invalid"}
+
+
+INDUCTOR_STOCK = """MPN,LCSC,Qty,Description,Value,Footprint,Component Type
+LQH32PZ2R2NN0L,C1000001,500,1.1A 2.2uH Shielded Power Inductor ±20% 1210,2.2uH,1210,Inductors
+CHEAP-2R2,C1000002,800,0.6A 2.2uH Unshielded Inductor ±20% 1210,2.2uH,1210,Inductors
+"""
+
+
+class InductorRatingTests(Fixture):
+    def inductor_line(self, fields=()):
+        path = self.dir / "ind.xml"
+        path.write_text(netlist([("L1", "2.2u", "Inductor_SMD:L_1210_3225Metric",
+                                  [("MPN", "LPS3015-222MRC"), ("Manufacturer", "Coilcraft"),
+                                   ("Description", "2.2uH ±20% 1210 power inductor"), *fields])]), encoding="utf-8")
+        line = bom_lines(parse_netlist(path))[0][0]
+        line["need"] = required_quantity(1, 5, 5, 2)
+        return line
+
+    def test_original_part_supplies_isat_irated_dcr_shielding(self):
+        from kicad_checker.sourcing.inventory import baseline_from_digikey, requirement_summary
+        line = self.inductor_line()
+        private, public = baseline_from_digikey(line, [dk_inductor("LPS3015-222MRC", "Coilcraft")], "t")
+        self.assertEqual((str(private["isat"]), str(private["irms"]), str(private["dcr"]), private["shielded"]),
+                         ("2.1", "1.4", "0.110", True))
+        line["_baseline"] = private
+        spec = schematic_spec(line)
+        self.assertIn("Isat ≥2.1 A · Irated ≥1.4 A · DCR ≤110 mOhm · shielded", requirement_summary(spec))
+        request, _ = draft_request(line, line["need"])
+        self.assertEqual([(c["parameter"], c["op"], c["value"]) for c in request["constraints"]], [
+            ("Current - Saturation (Isat)", "min", "2.1"), ("Current Rating (Amps)", "min", "1.4"),
+            ("DC Resistance (DCR)", "max", "0.11"), ("Shielding", "eq", "Shielded")])
+        validate_request(request)
+
+    def test_schematic_fields_win_over_the_original(self):
+        from kicad_checker.sourcing.inventory import baseline_from_digikey
+        line = self.inductor_line([("Isat", "3A"), ("DCR", "80mOhm")])
+        line["_baseline"], _ = baseline_from_digikey(line, [dk_inductor("LPS3015-222MRC", "Coilcraft")], "t")
+        spec = schematic_spec(line)
+        self.assertEqual((str(spec["isat"]), spec["provenance"]["isat"]), ("3", "schematic"))
+        self.assertEqual(spec["provenance"]["irms"], "original part (DigiKey)")
+
+    def test_no_current_rating_means_no_search_and_no_full_match(self):
+        line = self.inductor_line()  # no fields, no baseline
+        request, reason = draft_request(line, line["need"])
+        self.assertIsNone(request)
+        self.assertIn("could suggest under-rated parts", reason)
+        stock = self.dir / "ind.csv"
+        stock.write_text(INDUCTOR_STOCK, encoding="utf-8")
+        alternatives, _ = stock_alternatives(line, [load_stock(stock)], line["need"])
+        self.assertTrue(alternatives and all(a["spec_status"] == "possible" for a in alternatives))
+
+    def test_digikey_screen_rejects_low_isat_high_dcr_and_unshielded(self):
+        from kicad_checker.sourcing.inventory import baseline_from_digikey, verification_request, verify_candidate
+        line = self.inductor_line()
+        line["_baseline"], _ = baseline_from_digikey(line, [dk_inductor("LPS3015-222MRC", "Coilcraft")], "t")
+        request, declared = verification_request(line, line["need"])
+        def verdict(product):
+            return verify_candidate({"mpn": product["ManufacturerProductNumber"], "manufacturer": None, "checks": []},
+                                    [product], "t", request, declared, "Coilcraft")["spec_status"]
+        self.assertEqual(verdict(dk_inductor("GOOD-2R2", "TDK", isat="2.5A", irms="1.6A", dcr="90mOhm Max")), "match")
+        self.assertEqual(verdict(dk_inductor("LOW-ISAT", "TDK", isat="1.2A")), "rejected")
+        self.assertEqual(verdict(dk_inductor("HIGH-DCR", "TDK", dcr="200mOhm Max")), "rejected")
+        self.assertEqual(verdict(dk_inductor("OPEN", "TDK", shielding="Unshielded")), "rejected")
+        self.assertEqual(verdict(dk_inductor("TYP-DCR", "TDK", dcr="100mOhm Typ")), "possible")  # no guaranteed max
+
+    def test_stock_description_shielding_is_screened(self):
+        from kicad_checker.sourcing.inventory import baseline_from_digikey
+        line = self.inductor_line()
+        line["_baseline"], _ = baseline_from_digikey(line, [dk_inductor("LPS3015-222MRC", "Coilcraft")], "t")
+        stock = self.dir / "ind.csv"
+        stock.write_text(INDUCTOR_STOCK, encoding="utf-8")
+        alternatives, _ = stock_alternatives(line, [load_stock(stock)], line["need"])
+        self.assertEqual([a["mpn"] for a in alternatives], ["LQH32PZ2R2NN0L"])  # unshielded part rejected
+        self.assertEqual(alternatives[0]["spec_status"], "possible")            # currents need DigiKey to confirm
 
 
 class ManufacturerNameTests(unittest.TestCase):

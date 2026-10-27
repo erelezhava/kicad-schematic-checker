@@ -31,13 +31,21 @@ def utc_now():
 MANUFACTURER_SUFFIXES = {"inc", "incorporated", "corp", "corporation", "co", "company", "ltd", "limited", "llc", "lp",
                          "plc", "gmbh", "ag", "sa", "nv", "bv", "srl", "spa", "kk", "oy", "ab", "technologies",
                          "technology", "electronics", "electronic", "semiconductor", "semiconductors", "components",
-                         "international", "group", "holdings", "industries", "usa", "america", "north", "europe", "the"}
+                         "international", "group", "holdings", "industries", "usa", "america", "north", "europe", "the",
+                         "elektronik", "corporation"}
 # Reviewed brand/short-name aliases (key after suffix removal -> canonical key).
 MANUFACTURER_ALIASES = {"ti": "texas instruments", "st": "stmicroelectronics", "stmicro": "stmicroelectronics",
                         "adi": "analog devices", "on": "onsemi", "on semiconductor": "onsemi", "on semi": "onsemi",
                         "vishay dale": "vishay", "vishay beyschlag": "vishay", "vishay siliconix": "vishay",
                         "vishay sfernice": "vishay", "vishay bccomponents": "vishay", "vishay bc components": "vishay",
-                        "yageo group": "yageo", "nxp": "nxp", "infineon": "infineon"}
+                        "yageo group": "yageo", "nxp": "nxp", "infineon": "infineon",
+                        # DigiKey's long names for makers usually written short in schematics
+                        "samsung electro mechanics": "samsung", "samsung electromechanics": "samsung", "semco": "samsung",
+                        "panasonic industry": "panasonic", "koa speer": "koa", "wurth": "wurth", "wuerth": "wurth",
+                        "w rth": "wurth", "nexperia usa": "nexperia", "rohm": "rohm", "taiyo yuden": "taiyo yuden",
+                        "maxim": "analog devices", "maxim integrated": "analog devices", "linear technology": "analog devices",
+                        "analog devices maxim integrated": "analog devices", "analog devices inc maxim integrated": "analog devices", "te connectivity passive product": "te connectivity",
+                        "stmicroelectronics": "stmicroelectronics", "micro commercial co": "mcc", "micro commercial": "mcc"}
 
 
 def manufacturer_key(name):
