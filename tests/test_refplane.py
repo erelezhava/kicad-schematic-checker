@@ -383,7 +383,8 @@ class TransitionTests(unittest.TestCase):
             b = read_board(make_board(Path(tmp), body))
             res = run(b, Config(roles=parse_roles("sig,gnd,sig,gnd", b), gnd_nets={"GND"}, pwr_nets=set(),
                                 nets={"SIG"}))
-            self.assertFalse([f for f in res.findings if f.via_layers], [f.message for f in res.findings])
+            self.assertFalse([f for f in res.findings if f.via_layers and not f.kind.startswith("island")],
+                             [f.message for f in res.findings])
             self.assertEqual(res.net_stats["SIG"]["transitions_ok"], 1)
             # In2 is a stripline between In1 and B.Cu: both counted as references
             self.assertEqual(set(res.net_stats["SIG"]["references"]), {"In1.Cu/GND", "B.Cu/GND"})
@@ -831,6 +832,107 @@ class ReviewFindingTests(unittest.TestCase):
             res = run(board, cfg)
             self.assertAlmostEqual(res.net_stats["SIG"]["unreferenced"], 1.0, places=6, msg=f"+HV clearance {hv}")
             self.assertIn("no_reference", [f.kind for f in res.findings])
+
+
+class IslandTests(unittest.TestCase):
+    """Reference-copper islands under a trace (refplane/islands.py)."""
+
+    @staticmethod
+    def R(x0, y0, x1, y1):
+        return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+    @staticmethod
+    def via(x, y):
+        return f'(via (at {x} {y}) (size 0.6) (drill 0.3) (layers "F.Cu" "B.Cu") (net 1))'
+
+    TRACE = '(segment (start 14 3) (end 14 17) (width 0.2) (layer "F.Cu") (net 2))'
+    NECK = [(0.5, 0.5), (10, 0.5), (10, 9.7), (13, 9.7), (13, 0.5), (19.5, 0.5), (19.5, 19.5), (13, 19.5),
+            (13, 10.3), (10, 10.3), (10, 19.5), (0.5, 19.5)]
+
+    def halves(self):
+        return (zone(1, "GND", "In1.Cu", self.R(0.5, 0.5, 12, 19.5))
+                + zone(1, "GND", "In1.Cu", self.R(12.5, 0.5, 19.5, 19.5)))
+
+    def plane2(self):
+        return zone(1, "GND", "In2.Cu", self.R(0.5, 0.5, 19.5, 19.5)) + self.via(5, 5) + self.via(5, 15)
+
+    def run_case(self, body, roles="sig,gnd,gnd,sig", islands=None):
+        with tempfile.TemporaryDirectory() as tmp:
+            b = read_board(make_board(Path(tmp), body + self.TRACE))
+            res = run(b, Config(roles=parse_roles(roles, b), gnd_nets={"GND"}, pwr_nets=set(), nets={"SIG"},
+                                islands=islands))
+            return [f for f in res.findings if f.kind.startswith("island")], res
+
+    def test_floating_island_is_error(self):
+        f, res = self.run_case(self.halves(), roles="sig,gnd,sig,sig")
+        self.assertEqual([(x.severity, x.kind) for x in f], [("error", "island_floating")])
+        self.assertIn("SIG 14.0 mm over GND copper on In1.Cu", f[0].message)
+        self.assertEqual(res.islands["GND"]["islands"], 1)
+        self.assertEqual(f[0].via_layers, ["F.Cu"])               # drawn as a ring on the trace's layer
+
+    def test_island_tied_by_one_via(self):
+        f, _ = self.run_case(self.halves() + self.plane2() + self.via(16, 10))
+        self.assertEqual([(x.severity, x.kind) for x in f], [("warning", "island_weak_tie")])
+        self.assertIn("only 1 via", f[0].message)
+
+    def test_island_ties_far_from_the_trace(self):
+        body = self.halves() + self.plane2() + self.via(16, 1.5) + self.via(17, 1.5) + self.via(18, 1.5)
+        f, _ = self.run_case(body)
+        self.assertEqual([x.kind for x in f], ["island_tie_far"])
+        self.assertRegex(f[0].message, r"15\.\d mm from the island's nearest tie via")
+        f, _ = self.run_case(body, islands={"max_tie_distance_mm": 20})
+        self.assertEqual(f, [])
+
+    def test_well_tied_island_is_clean(self):
+        body = self.halves() + self.plane2() + "".join(self.via(16, y) for y in (3, 8, 13, 17))
+        f, _ = self.run_case(body)
+        self.assertEqual(f, [])
+
+    def test_peninsula_on_a_neck(self):
+        f, _ = self.run_case(zone(1, "GND", "In1.Cu", self.NECK), roles="sig,gnd,sig,sig")
+        self.assertEqual([(x.severity, x.kind) for x in f], [("warning", "island_neck")])
+        self.assertIn("a neck about 0.6", f[0].message)
+        # a 0.5 mm neck setting no longer counts the 0.6 mm neck as a split
+        f, _ = self.run_case(zone(1, "GND", "In1.Cu", self.NECK), roles="sig,gnd,sig,sig", islands={"neck_mm": 0.5})
+        self.assertEqual(f, [])
+
+    def test_peninsula_tied_by_vias_is_clean(self):
+        body = zone(1, "GND", "In1.Cu", self.NECK) + self.plane2() + "".join(self.via(16, y) for y in (3, 8, 13, 17))
+        f, _ = self.run_case(body)
+        self.assertEqual(f, [])
+
+    def test_trace_only_over_the_plane_is_clean(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            b = read_board(make_board(Path(tmp), self.halves() + '(segment (start 3 3) (end 3 17) (width 0.2) (layer "F.Cu") (net 2))'))
+            res = run(b, Config(roles=parse_roles("sig,gnd,sig,sig", b), gnd_nets={"GND"}, pwr_nets=set(), nets={"SIG"}))
+            self.assertFalse([f for f in res.findings if f.kind.startswith("island")])
+
+    def test_disabled(self):
+        f, _ = self.run_case(self.halves(), roles="sig,gnd,sig,sig", islands={"enabled": False})
+        self.assertEqual(f, [])
+
+    def test_demo_board_has_no_islands(self):
+        b = read_board(DEMO)
+        res = run(b, demo_config(b))
+        self.assertFalse([f for f in res.findings if f.kind.startswith("island")])
+        self.assertIn("GND", res.islands)
+
+    def test_cli_flag_and_report(self):
+        out, err = io.StringIO(), io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp, redirect_stdout(out), redirect_stderr(err):
+            board = make_board(Path(tmp), self.halves() + self.TRACE)
+            cli.main(["check", str(board), "--layers", "sig,gnd,sig,sig", "--classes", "all", "-y", "--refill", "no",
+                      "-o", str(Path(tmp) / "r")])
+            md = (Path(tmp) / "r" / "report.md").read_text()
+            data = json.loads((Path(tmp) / "r" / "report.json").read_text())
+            out2 = io.StringIO()
+            with redirect_stdout(out2):
+                cli.main(["check", str(board), "--layers", "sig,gnd,sig,sig", "--classes", "all", "-y",
+                          "--refill", "no", "--no-files", "--json", "--no-islands"])
+        self.assertIn("## Reference copper islands", md)
+        self.assertIn("island_floating", md)
+        self.assertEqual(data["islands"]["GND"]["regions"], 2)
+        self.assertFalse([f for f in json.loads(out2.getvalue())["findings"] if f["kind"].startswith("island")])
 
 
 if __name__ == "__main__":

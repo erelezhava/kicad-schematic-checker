@@ -104,6 +104,24 @@ That also works as the first answer to the return-via question, or as
 `"high_speed": [...]` under `stitch` in a settings file. `--high-speed -` goes back to name
 patterns.
 
+## Islands under a trace
+
+The copper under a trace can be unbroken and still be a bad return path: a pour island joined
+to the rest of GND only by a thin neck, a single via, or nothing at all. For every trace
+of the selected nets, the check finds the ground (or power) island the trace runs over and
+asks how it is tied to the main plane:
+
+| Finding | Meaning | Fix |
+| --- | --- | --- |
+| `island_floating` (error) | not connected to the main plane at all | tie it in with vias, or remove it |
+| `island_neck` | reaches the plane only through a neck under 1 mm, or a track | add vias inside the island, or widen the neck |
+| `island_weak_tie` | tied by only one via | add vias inside the island |
+| `island_tie_far` | part of the trace is over 5 mm from the island's nearest tie via | add vias along the trace |
+
+The limits are under `islands` in `refplane/defaults.json` (`neck_mm`, `min_ties`,
+`max_tie_distance_mm` …). `--no-islands` skips the check. On a board with solid inner planes
+it reports nothing; the report still lists the regions it found per net.
+
 ## Reading the result
 
 | Severity | Finding | What to do |
@@ -120,6 +138,7 @@ patterns.
 | error / warning | `return_via_missing` | The signal via moves the reference to another GND layer: add a GND via within the ring (dashed ring in the SVG). Error for `high_speed`, warning for `low_speed` |
 | warning | `return_via_shared` | Too many signal vias share one GND via: add one, or spread the signal vias |
 | warning | `reference_net_change` | The reference changes from GND to a power net at this via: keep the net on layers that share a GND reference |
+| error / warning | `island_*` | The trace runs over a ground island that is floating, on a neck, tied by one via, or tied too far away (see above) |
 
 Coordinates are KiCad board millimetres, so you can go straight to them in KiCad.
 
@@ -133,6 +152,7 @@ Exit code: `1` if there is at least one error, otherwise `0` (warnings don't fai
 | `--layers`, `--gnd-nets`, `--pwr-nets`, `--classes` | Answer the questions up front (`--pwr-nets ''` = none, `--classes all`) |
 | `--nets '/DDR_*'` | Add nets to the class selection (wildcards) |
 | `--include-power` | Also check power-rail nets |
+| `--no-islands` | Skip the reference-copper island check |
 | `--high-speed 'USB,Clock'` | Explicit mode: only these are `high_speed` (`-` = back to name patterns) |
 | `--stitch-class 'USB=0.6,Default=low_speed'` | Return-via rule per class: distance in mm or a profile name |
 | `--stitch-mm 1.0` | Distance of the default return-via profile |

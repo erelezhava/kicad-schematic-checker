@@ -31,6 +31,7 @@ def to_json(res: Result, board: Board, setup: dict) -> str:
                    for p in res.plans],
         "nets": res.net_stats,
         "notes": res.notes,
+        "islands": res.islands,
         "findings": [f.to_dict() for f in res.findings],
     }, indent=2)
 
@@ -83,6 +84,16 @@ def to_markdown(res: Result, board: Board, setup: dict) -> str:
             out.append(f"| {p.layer} | {p.role} | **none** | - | - |")
     for n in res.notes:
         out.append(f"\nNote: {n}")
+    if res.islands:
+        out += ["", "## Reference copper islands", "",
+                "Each reference net's fills are split into regions at necks narrower than the island `neck_mm`. "
+                "Regions are joined by vias and through pads. The largest region of each layer in the main group "
+                "is that layer's plane; every other region is an island.", "",
+                "| Net | Regions | Islands | Main group area (mm²) | Plane per layer (mm²) |",
+                "| --- | --- | --- | --- | --- |"]
+        for net, st in res.islands.items():
+            planes = ", ".join(f"{l} {a:g}" for l, a in st.get("planes", {}).items())
+            out.append(f"| {net} | {st['regions']} | {st['islands']} | {st['main_area_mm2']:g} | {planes} |")
     out += ["", "## Nets", "", "| Net | Class | Layers | Length (mm) | No reference | Edge over void | PWR only | Margin | Layer changes OK | Return-via profile | References (mm) |",
             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for net, st in sorted(res.net_stats.items(), key=lambda kv: (-kv[1]["unreferenced"], kv[0])):
@@ -106,8 +117,8 @@ LEGEND = [("#d62728", "line", "no reference under the trace centre (error)"),
           ("#e6b800", "line", "void or plane edge within margin"),
           ("#4a90d9", "box", "GND fill on the reference layer"),
           ("#e8a33d", "box", "PWR fill on the reference layer"),
-          ("#d62728", "ring", "missing return via (ring = allowed distance)"),
-          ("#ff7f0e", "ring", "net change / low-speed miss / shared via"),
+          ("#d62728", "ring", "missing return via (ring = allowed distance) / floating island"),
+          ("#ff7f0e", "ring", "net change / low-speed miss / shared via / weak island"),
           ("#555555", "via", "via (filled: checked net, open: other)"),
           ("#2e7d32", "gndvia", "GND via (green outline)")]
 

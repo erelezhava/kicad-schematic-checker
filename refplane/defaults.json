@@ -10,6 +10,17 @@
     "nets_with_zones": true
   },
 
+  "islands": {
+    "_about": "Reference-copper islands under selected traces: floating (error), reached only through a neck or track (warning), tied by fewer than min_ties vias (warning), or trace farther than max_tie_distance_mm from the island's nearest tie via (warning).",
+    "enabled": true,
+    "neck_mm": 1.0,
+    "min_area_mm2": 4.0,
+    "min_ties": 2,
+    "max_tie_distance_mm": 5.0,
+    "min_length_mm": 0.5,
+    "max_cells": 400000
+  },
+
   "stitch": {
     "_about": "Return-via rules for layer changes. A net gets its profile from: 'classes' (any class except Default), then the first matching 'nets' pattern, then 'classes'.Default, then 'default_profile'. A class or pattern may name a profile or give a number (distance in mm, other values from default_profile).",
 

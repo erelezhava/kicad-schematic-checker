@@ -277,7 +277,8 @@ def cmd_check(args) -> int:
     ncl = load_netclasses(pro if pro.exists() else None)
     net_clearance = {n: c for n in board.nets if (c := ncl.clearance_for(n)) is not None}
     cfg = Config(roles=roles, gnd_nets=gnd, pwr_nets=pwr, nets=nets, netclass_of=class_of,
-                 margin_h=margin_h, min_length=min_length, stitch=rules, net_clearance=net_clearance)
+                 margin_h=margin_h, min_length=min_length, stitch=rules, net_clearance=net_clearance,
+                 islands={**(settings.get("islands") or {}), **({"enabled": False} if args.no_islands else {})})
     res = run(board, cfg)
     res.notes = load_notes + res.notes
     setup = {"roles": format_roles(roles, board), "gnd_nets": sorted(gnd), "pwr_nets": sorted(pwr),
@@ -463,6 +464,7 @@ def main(argv=None) -> int:
     c.add_argument("--stitch-mm", type=float, default=None,
                    help="distance of the default return-via profile, mm (settings file: 1.0)")
     c.add_argument("--stitch-class", help="per net class: CLASS=MM or CLASS=PROFILE, e.g. 'USB=0.6,Default=low_speed'")
+    c.add_argument("--no-islands", action="store_true", help="skip the reference-copper island check")
     c.add_argument("--include-power", action="store_true",
                    help="also check routed power-rail nets (+3V3, VCC..., nets with a zone fill)")
     c.add_argument("--high-speed", help="explicit mode: these classes/nets (comma, wildcards) are high speed, "

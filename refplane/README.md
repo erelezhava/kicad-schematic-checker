@@ -115,6 +115,10 @@ result is a set of intervals along the trace:
 | `return_via_missing` | profile: error (`high_speed`) / warning (`low_speed`) | at a layer change the reference moves to the same net on another layer, with no via of that net within the profile distance |
 | `return_via_shared` | warning | one return via serves more signal vias than the profile's `max_share` |
 | `reference_net_change` | warning | at a layer change the reference moves to a different net, e.g. GND → +3V3 |
+| `island_floating` | error | the reference copper under the trace is not connected to the rest of its net at all |
+| `island_neck` | warning | that copper reaches the rest of its net only through a neck narrower than `neck_mm`, or a track |
+| `island_weak_tie` | warning | that copper is tied to the rest of its net by fewer than `min_ties` vias or through pads |
+| `island_tie_far` | warning | part of the trace over that copper is farther than `max_tie_distance_mm` from its nearest tie |
 
 **Error messages explain what is under the trace.** The copper just before and just after the
 run is looked up:
@@ -219,6 +223,43 @@ The per-net table also lists each net's **reference profile**: how many mm of it
 line run over each (layer, net), e.g. `In1.Cu/GND 24.6, In2.Cu/GND 6.5`. It also shows how
 many of its layer changes passed.
 
+### Reference copper islands
+
+The plane check only sees the copper directly under a trace. That copper can be a pour island
+joined to the rest of its net by a thin neck or a single via, so the return current has to
+detour. The island check (`refplane/islands.py`) works per reference net:
+
+1. **Regions.** Each fill polygon a selected trace runs over is rasterised (cell about
+   `neck_mm`/6) and eroded by `neck_mm`/2. Cores of at least a quarter of `min_area_mm2` are
+   grown back over the polygon, so a peninsula on a neck narrower than `neck_mm` becomes its
+   own region. Polygons no trace runs over stay one region each.
+2. **Ties.** A via or through pad of the net that is tied into regions on two layers (solid,
+   or thermal spokes) joins them. A neck, or a track of the net between two regions, is a
+   weak link.
+3. **Main group.** The via-tied group with the largest copper area is the net's main group.
+   The largest region of each layer in it is that layer's plane. Every other region is an
+   island. Outer-layer pours count for ties, but only regions on reference layers are
+   reported.
+4. **Islands under selected traces** (centre line, at least `min_length_mm`) are reported as
+   `island_floating`, `island_neck`, `island_weak_tie` or `island_tie_far`. In the SVG they
+   are rings on the trace's layer, centred on the island.
+
+Settings go under `islands` in `defaults.json` or `<board>.refplane.json`:
+
+| Key | Default | |
+| --- | --- | --- |
+| `neck_mm` | 1.0 | copper narrower than this splits a pour into regions |
+| `min_area_mm2` | 4.0 | smaller pieces are absorbed into their neighbours |
+| `min_ties` | 2 | fewer tie vias or pads than this gives `island_weak_tie` |
+| `max_tie_distance_mm` | 5.0 | trace over an island farther than this from a tie gives `island_tie_far` |
+| `min_length_mm` | 0.5 | islands a trace only clips are ignored |
+| `enabled` | true | `--no-islands` turns the check off for one run |
+
+The report lists, for each reference net, the regions, the islands and the plane area per
+layer. Not modelled: copper joined only through SMD pads of a component, and narrow necks
+inside the main plane itself, where a slot of antipads cuts it into two big halves that are
+each well tied.
+
 ### Margin
 
 H is the dielectric thickness between the two copper layers, taken from **Board Setup →
@@ -257,6 +298,7 @@ Exit code `1` if there is any error, otherwise `0`. `--json` prints JSON to stdo
 | `--refill` | `auto` | `auto`: refill if kicad-cli is found; `yes`: must refill; `no`: use saved fills |
 | `--kicad-cli` | PATH, standard install locations | |
 | `--include-power` | — | also check power-rail nets |
+| `--no-islands` | — | skip the reference-copper island check |
 | `-y` | — | no questions: flags plus guesses, each guess listed as "assumed" |
 
 ## Limits and next steps

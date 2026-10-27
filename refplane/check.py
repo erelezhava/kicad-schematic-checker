@@ -47,6 +47,7 @@ class Config:
     default_clearance: float = 0.25        # mm, zone clearance when the zone has none
     stitch: object = None                  # settings.StitchRules; None = built-in defaults.json
     net_clearance: dict[str, float] = field(default_factory=dict)  # netclass clearance per net (antipad size)
+    islands: dict | None = None            # island-check settings (islands.DEFAULTS); {"enabled": False} = off
 
     def stitch_rules(self):
         if self.stitch is None:
@@ -96,6 +97,7 @@ class Result:
     plans: list[LayerPlan]
     net_stats: dict[str, dict]
     notes: list[str]
+    islands: dict = field(default_factory=dict)
 
 
 # --------------------------------------------------------------------------- roles / nets
@@ -359,6 +361,9 @@ def run(board: Board, cfg: Config) -> Result:
 
     from .transitions import check_transitions
     findings += check_transitions(board, cfg, plans, ref_layers, clearance, net_stats)
+    from .islands import check_islands
+    island_findings, island_summary = check_islands(board, cfg, plans, cfg.islands)
+    findings += island_findings
 
     for (kind, net, layer), plist in pieces.items():
         plan = plan_by_layer[layer]
@@ -372,7 +377,7 @@ def run(board: Board, cfg: Config) -> Result:
         st["references"] = {k: round(v, 3) for k, v in sorted(st["references"].items(), key=lambda kv: -kv[1])}
     findings.sort(key=lambda f: (SEVERITY_ORDER.get(f.severity, 9), f.kind, f.layer, f.net,
                                  -(f.length or 0)))
-    return Result(findings, plans, net_stats, notes)
+    return Result(findings, plans, net_stats, notes, island_summary)
 
 
 _STAT_KEY = {"no_reference": "unreferenced", "reference_edge": "edge_only", "pwr_reference": "pwr_only",
