@@ -69,6 +69,7 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stoc
 | `parts-stock MPN --manufacturer NAME --output DIR [--online]` | optional | Exact-part stock and lifecycle, suppliers kept separate |
 | `parts-bom CIRCUIT --output DIR [--boards N] [--online]` | optional | Stock audit grouped by manufacturer/MPN; demand from populated reference count |
 | `inventory-check DESIGN --stock FILE --output DIR [--boards N] [--alternatives-for R27,C2]` | optional | Compare the BOM with your stock CSV/XLSX (e.g. JLCPCB inventory); asks boards, market check, and which lines get R/C/L alternatives |
+| `parts-list LIST --output DIR [--online] [--boards N] [--stock FILE] [--against DESIGN] [--dry-run]` | optional | Check a recommended parts list or vendor reference BOM on DigiKey (lifecycle, stock, vendor alternates, R/C/L alternatives); `--against` compares your schematic with it; `--dry-run` shows the column mapping only. See [docs/12](docs/12-parts-list.md) |
 | `datasheet-fetch CIRCUIT --output DIR [--docs DIR] [--offline] [--all]` | optional | Locate a datasheet PDF per active part (`--all` adds R/C/L) |
 | `review CIRCUIT --rules R --evidence E --output DIR` | no | Evaluate rules; options `--snapshot`, `--docs-root`, `--digikey-cache cache/digikey` |
 | `tools/fill_fields.py DIGIKEY_JSON PROJECT [--prefer NAME] [--apply]` | no | Fill **empty** Manufacturer fields from DigiKey suggestions |

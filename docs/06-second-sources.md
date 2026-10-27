@@ -55,6 +55,7 @@ For each line `inventory.md` shows:
 | `match` | Every check passed on DigiKey data and the part is Active |
 | `possible` | Something unconfirmed: AEC-Q200 not listed, not Active, a rating not declared, MPN not on DigiKey |
 | `rejected` | DigiKey contradicts a requirement |
+| manufacturer differs | DigiKey lists the stock row's MPN only under another manufacturer: not verified, never a `match` |
 
 Every verdict is an engineering-review lead, never an approval.
 
@@ -63,6 +64,17 @@ Every verdict is an engineering-review lead, never an approval.
 Add `Tolerance` and `Power` fields (or state them in the Description) for resistors in critical
 circuits, and `Voltage`/`Dielectric` for capacitors. Then the search uses your design intent
 instead of copying the original part's ratings.
+
+## Inductors
+
+Inductor alternatives must match or beat the original's saturation current, rated current, DCR
+and shielding (`requires ≤20% · Isat ≥2.1 A · Irated ≥1.6 A · DCR ≤110 mOhm · shielded`).
+If no current rating is known, from the schematic or the original part on DigiKey, the line is
+not searched. Add `Isat` and `Irms` fields to the inductor symbol. Details:
+[guide 5](05-inventory-check.md#inductors-current-ratings-decide).
+
+For DC-DC inductors copied from a reference design, a catalog `match` still needs the converter's
+datasheet check (ripple current, peak current at your load, core losses).
 
 ## Not covered automatically
 

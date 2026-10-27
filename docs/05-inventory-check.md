@@ -69,10 +69,30 @@ add `--combine-sources` when they are one physical pool.
 | BOM lines | Grouped by MPN (or C-code). DNP, power symbols and *Exclude from BOM* listed separately |
 | Quantity | references × boards + spare. Spare = 5 % or 2 parts per line, whichever is more |
 | Match | Same MPN counts. A C-code whose stock row has a **different** MPN never counts. Same MPN under another C-code counts, and the report tells you which C-code to put in the schematic (JLCPCB uses consigned stock by C-code) |
-| In-stock alternatives | For missing R/C/L: other stock rows with the same value and package, equal-or-better tolerance, voltage/power and dielectric, then checked on DigiKey (JLC never states grade) |
+| In-stock alternatives | For missing R/C/L: other stock rows with the same value and package, equal-or-better tolerance, voltage/power and dielectric (inductors: see below), then checked on DigiKey under the stock row's own manufacturer (JLC never states grade). If DigiKey lists that MPN only under another maker, it's "manufacturer differs", never a match |
 | Original part baseline | Your MPN's DigiKey record fills in ratings the schematic doesn't state. Your schematic values always win |
 | Market check | Stock at DigiKey / LCSC / JLCPCB for the shortfall quantity |
 | DigiKey alternatives | For lines not available anywhere, or the lines you picked: a search excluding your MPN, by category, stock and value. Lines you didn't pick show "Not searched: not selected" |
+
+## Inductors: current ratings decide
+
+In a DC-DC stage the wrong inductor saturates or overheats, so an alternative must be at least
+as good as the original on:
+
+| Rating | Rule | Read from (first found wins) |
+| --- | --- | --- |
+| Saturation current (Isat) | ≥ original | schematic field `Isat` / `Saturation Current`, else the original's DigiKey record |
+| Rated current | ≥ original | `Irms` / `Rated Current` / `Current Rating` / `Current` / `Irated`, else DigiKey |
+| DC resistance (DCR) | ≤ original | `DCR` / `DC Resistance`, else DigiKey |
+| Shielding | shielded → shielded; semi-shielded → shielded or semi | `Shielding`, else DigiKey |
+
+When DigiKey lists several values, the worst one is used. `Typ` values are not guaranteed
+limits and count as unknown.
+
+**No current rating known → no DigiKey search** for that inductor; the report says why. An
+in-stock inductor can then never be a full `match`. LCSC stock descriptions like
+`1.4A 110mΩ 2.1A` don't say which current is which, so they are never guessed. Fix: add `Isat`
+and `Irms` fields to the symbol, or use an MPN that DigiKey knows.
 
 ## Output files
 

@@ -46,6 +46,13 @@ For the whole BOM, swap `--alternatives-for …` for `--alternatives-even-if-ava
 > and severity, give KiCad coordinates for each error, and say which `return_via_missing`
 > findings involve my high-speed nets.
 
+**Copy a reference design** ([guide 12](12-parts-list.md))
+
+> Read docs/12-parts-list.md. Run `parts-list <bom.csv> --dry-run` and show me the column mapping
+> and how the first rows are read; wait for my OK. Then run it with `--boards <N> --online` into a
+> new runs/ folder, and once I've copied the circuit, again with `--against <project>`. List every
+> row that is not *same part* / *vendor alternate*, per position, and what I must verify.
+
 **PCB manufacturability** ([guide 8](08-jlcpcb-rules.md))
 
 > Read docs/08-jlcpcb-rules.md. Run `python3 -m jlcpcb_rules install` and `preflight` on

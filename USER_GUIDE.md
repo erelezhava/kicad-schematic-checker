@@ -19,6 +19,8 @@ a substitution, or turns missing data into a pass.
 | **Know whether I can build N boards from our stock** | [5. Inventory check](docs/05-inventory-check.md) | optional |
 | **Find second sources for flight hardware** (whole BOM or the parts I name) | [6. Second sources](docs/06-second-sources.md) | yes |
 | Find parts by my own criteria, check one part, check a BOM's market stock | [7. Parts search](docs/07-parts-search.md) | optional |
+| **Check a recommended parts list** (vendor reference BOM, approved parts) on DigiKey | [12. Parts list](docs/12-parts-list.md) | optional |
+| **Copy a reference design**: check its BOM first, then compare my schematic with it (`--against`) | [12. Parts list](docs/12-parts-list.md#after-copying-check-your-schematic-against-the-reference-bom) | optional |
 | **Check the PCB against JLCPCB manufacturing limits** | [8. JLCPCB rules](docs/08-jlcpcb-rules.md) | no |
 | **Check every trace runs over an unbroken reference plane** | [11. Reference plane](docs/11-reference-plane.md) | no |
 | Run any of this through an AI assistant | [9. AI assistants](docs/09-ai-assistants.md) | — |

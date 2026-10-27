@@ -231,8 +231,78 @@ next steps), `inventory.json` (all data), `shortfall.csv` (what to buy, with sto
 C-codes), plus `market/line-NNN/` and `alternatives/line-NNN/` reports. Exit code 0 only
 when every line is in stock without flags; otherwise 2.
 
+**Inductors:** in-stock screening, the DigiKey check and the DigiKey search all require the
+alternative's saturation current (Isat) and rated current ≥ the original's, DCR ≤ the original's,
+and shielding at least as good (`eq Shielded`; a semi-shielded original emits
+`Shielding in [Shielded, Semi-Shielded]`). Sources in priority order: schematic fields (`Isat`,
+`Saturation Current`, `Irms`, `Rated Current`, `Current Rating`, `Current`, `Irated`, `DCR`,
+`DC Resistance`, `Shielding`), then the original's DigiKey record (`Current - Saturation (Isat)`,
+`Current Rating (Amps)`, `DC Resistance (DCR)`, `Shielding`; worst case of several listed values).
+`Typ`/`Nom` values are not limits and stay unknown. No current rating known → no DigiKey search
+for that inductor (reason given), and in-stock candidates can never be a full `match`.
+Unlabeled currents in stock descriptions (LCSC `1.4A 110mΩ 2.1A`) are never guessed.
+
+**Manufacturer identity in the DigiKey check:** an in-stock candidate with a manufacturer is
+screened only against DigiKey records of that manufacturer (suffix-normalized, plus reviewed
+aliases such as Samsung Electro-Mechanics, KOA Speer, Würth Elektronik, Analog Devices/Maxim).
+If DigiKey lists the MPN only under another maker, the result is `manufacturer_differs`; another
+maker's ratings are never used.
+
 Limits: stock file dates are not verified (export fresh before an order); no attrition table
 per package (one spare rule for all lines); the tool never edits the schematic or orders.
+
+## Parts list: recommended parts and reference-design BOMs
+
+`parts-list` checks a list of exact parts (approved-parts list, colleague's sheet, a TI/ADI/NXP/ST
+evaluation-board BOM) on DigiKey and optionally against your stock and your schematic. User
+guide: [docs/12-parts-list.md](docs/12-parts-list.md).
+
+```sh
+python3 -m kicad_checker parts-list eval-bom.csv --dry-run                       # column mapping, no lookups
+python3 -m kicad_checker parts-list eval-bom.csv --boards 5 --online \
+  --stock JLC=stock/jlc-all-parts.csv --output runs/reflist-001
+python3 -m kicad_checker parts-list eval-bom.csv --online \
+  --against ~/projects/board/board.kicad_pro --output runs/reflist-check-001     # copy check
+```
+
+**Reading the list:** same loader as stock files (`stockfile.load_stock`, quantity optional).
+Extra roles `references` (Designator, RefDes…) and `fitted` (Fitted, Populate, Mount, DNP…).
+Alternate columns (`Alternate PartNumber`, `Manufacturer 2`, prefixes alternate/alt/second
+source/substitute) and several MPNs in one cell (`;`, newline, ` / `, ` or `) become vendor
+alternates, never primary roles.
+
+**Fitted/DNP polarity:** for `Fitted`/`Populate`/`Mount` headers yes/1/x = fitted; for
+`DNP`/`DNF`/`Do Not Populate`/`NoPop` headers yes/1/x = **not** fitted. The texts
+"DNP"/"Not Fitted"/"Fitted" keep their meaning under any header. Quantity 0, "DNP"/"Not Fitted"
+in Value or Description, and TI `!PCB…` rows are skipped without lookups.
+
+**Per-board quantity:** an explicit quantity cell wins (`100pcs`, `4 ea`, `12 units` read). A
+blank cell → designator count (`C1-C3, C7` = 4), else `--quantity`, with a note. An unreadable
+explicit cell → status `quantity unreadable` (`demand_unknown`); availability is not judged.
+
+**Row status:** `available`, `stock issues`, `not active`, `not found`, `manufacturer differs`,
+`ambiguous`, `no MPN`, `not checked`, `quantity unreadable`, `not fitted`, `not a part (PCB)`.
+Vendor alternates are looked up when the primary is not active / has stock issues / is not found
+/ manufacturer differs / ambiguous; the first one available or in stock resolves the row (✔).
+Remaining R/C/L problem rows get requirements from the recommended part's own DigiKey record
+(including the inductor rules above), in-stock screening and a DigiKey search.
+
+**`--against DESIGN`** (project, netlist or circuit.json): expected positions per fitted row are
+its designators (else the per-board quantity), each schematic part allocated once across all
+rows: (1) declared designator holding the same identity or same R/C/L value, (2) reference or
+alternate MPN elsewhere, (3) R/C/L value + package size, (4) a conflicting part at the declared
+designator, labelled "designator only (could be unrelated)". Identity is manufacturer + MPN.
+Position results: `same part`, `vendor alternate`, `same MPN, manufacturer not confirmed`,
+`same MPN, other manufacturer`, `substituted` (R/C/L screened against the reference part's
+DigiKey ratings → match / possible / rejected; others "compare datasheets and pinout"),
+`value differs`, `positions missing`, `not in your schematic`. The worst position decides the
+row. Every substitution carries the reference-design re-verification note.
+
+**Exit code:** 0 only when every row is available / not fitted / not a part **and** every
+`--against` row is `same part` or `vendor alternate`; otherwise 2; 3 for invalid input.
+Outputs: `parts-list.md`, `parts-list.json`, `parts-list.csv` (adds DigiKey PNs, references,
+vendor alternates, best alternative). LCSC/JLCPCB columns need their API keys; vendor alternates
+are checked on DigiKey only.
 
 ## Selection request, schema 1
 
@@ -275,6 +345,8 @@ request states what it needs; the condition is never discarded to manufacture a 
   check is unknown with the reason (`tested at Vgs=10V, required at 4.5V`). Unlisted
   conditions (Id here) are shown but not compared. Without `at`, the check is unknown.
 - **Ranges** (`-55°C ~ 150°C (TJ)`): `"op": "covers", "value": [-40, 125], "unit": "°C"`
+- **One of several texts**: `{"parameter": "Shielding", "op": "in", "value": ["Shielded", "Semi-Shielded"]}`
+  (no unit; used for semi-shielded inductor baselines)
   passes when the catalog range contains the requested one. Optional `"qualifier": "TJ"`
   requires that suffix. eq/min/max on a range stay unknown.
 - **Suffixes** (`5.8A (Ta), 30A (Tc)`): `"qualifier": "Ta"` picks one value; without it
