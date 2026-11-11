@@ -4,7 +4,7 @@ Checks that each MPN exists on DigiKey, is Active, and matches the value, rating
 you declared. Can then fill **empty** Manufacturer fields for you. Needs DigiKey keys
 ([Setup](00-setup.md#keys)).
 
-[← All guides](../USER_GUIDE.md) · Commands: `digikey-fetch`, `digikey-check`, `tools/fill_fields.py`
+[← All guides](../USER_GUIDE.md) · Commands: `digikey-fetch`, `digikey-check`, `fill-manufacturer`
 
 ## Run it
 
@@ -37,22 +37,32 @@ manufacturer evidence for circuit-specific properties.
 ## Fill empty Manufacturer fields
 
 `digikey-check` suggests a manufacturer for every part with an empty field.
-`fill_fields.py` writes those suggestions into the schematic:
+`fill-manufacturer` writes those suggestions into the schematic. It takes the newest
+`<project>_report_R<n>` by itself (`run` prints the count and the command in `summary.md`):
 
 ```sh
-python3 tools/fill_fields.py runs/board-001-dk/digikey.json ~/projects/board            # preview
-python3 tools/fill_fields.py runs/board-001-dk/digikey.json ~/projects/board --apply    # write
+python3 -m kicad_checker fill-manufacturer ~/projects/board            # preview
+python3 -m kicad_checker fill-manufacturer ~/projects/board --apply    # write (close KiCad first)
 ```
 
 | Option | Use |
 | --- | --- |
-| `--prefer "Murata Electronics"` | Pick a name when DigiKey suggests several (repeatable) |
-| `--field NAME` | Fill another field (default `Manufacturer`) |
+| `--report R` | Use this report folder or `digikey.json` instead of the newest one |
+| `--prefer "Murata Electronics"` | Pick a name when DigiKey lists several (repeatable) |
 | `--backup` | Keep `*.kicad_sch.bak-<time>` copies |
 
-Safety: never overwrites a value, previews unless `--apply`, edits only the active design
-(root sheet + its sub-sheets, never `.history/`), refuses while KiCad has the file open. Check
-the result with `git diff` in your design repo, then extract again.
+When DigiKey lists several names for one MPN, `kicad_checker/manufacturer_aliases.json` decides:
+`same_company` merges spellings of one company (`Yageo America` → `YAGEO`), and
+`family_preference` picks by reference prefix (R/C/L/FB: `Murata Electronics` over
+`Murata Power Solutions`). Anything else is skipped until you pass `--prefer`. Every chosen
+name says why in the preview.
+
+Safety: never overwrites a value; previews unless `--apply`; the symbol's MPN must still match
+the MPN DigiKey was asked about (a renumbered or changed part is skipped); edits only the active
+design (root sheet + its sub-sheets, never `.history/`); refuses while KiCad has the file open.
+Then `git diff` in your design repo, **Update PCB from Schematic (F8)**, and run the checks again.
+
+`tools/fill_fields.py DIGIKEY_JSON PROJECT [--apply]` still works and does the same.
 
 ## Gotchas
 

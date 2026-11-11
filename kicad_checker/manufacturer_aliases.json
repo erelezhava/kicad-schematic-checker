@@ -1,0 +1,26 @@
+{
+  "_about": "How fill-manufacturer picks one name when DigiKey lists several for the same MPN. Edit freely; names are matched without case.",
+  "same_company": {
+    "Yageo America": "YAGEO",
+    "Yageo": "YAGEO",
+    "Murata": "Murata Electronics",
+    "Murata Electronics North America": "Murata Electronics",
+    "Panasonic": "Panasonic Electronic Components"
+  },
+  "family_preference": [
+    {
+      "refs": [
+        "C",
+        "R",
+        "L",
+        "FB"
+      ],
+      "names": [
+        "Murata Electronics",
+        "Murata Power Solutions Inc."
+      ],
+      "choose": "Murata Electronics",
+      "why": "R/C/L parts are Murata Electronics; Murata Power Solutions makes power modules"
+    }
+  ]
+}

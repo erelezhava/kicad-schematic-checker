@@ -88,12 +88,26 @@ def to_markdown(res: Result, board: Board, setup: dict) -> str:
         out += ["", "## Reference copper islands", "",
                 "Each reference net's fills are split into regions at necks narrower than the island `neck_mm`. "
                 "Regions are joined by vias and through pads. The largest region of each layer in the main group "
-                "is that layer's plane; every other region is an island.", "",
+                "is that layer's plane if it covers at least `full_plane_fraction` of the board; every other region "
+                "is a patch (a partial plane or an island) and is checked for stitching.", "",
                 "| Net | Regions | Islands | Main group area (mm²) | Plane per layer (mm²) |",
                 "| --- | --- | --- | --- | --- |"]
         for net, st in res.islands.items():
             planes = ", ".join(f"{l} {a:g}" for l, a in st.get("planes", {}).items())
             out.append(f"| {net} | {st['regions']} | {st['islands']} | {st['main_area_mm2']:g} | {planes} |")
+        rows = [pt for st in res.islands.values() for pt in st.get("patches", [])]
+        if rows:
+            out += ["", "### Patch stitching", "",
+                    "Every partial reference plane (patch) a selected trace runs over, and how it is stitched to "
+                    "the main plane. A full plane covers at least `full_plane_fraction` of the board.", "",
+                    "| Net | Layer | Area (mm²) | Centre | Tie vias | Ties / cm² | Farthest trace point to a tie (mm) "
+                    "| Nets over it (mm) | Result |",
+                    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+            for pt in sorted(rows, key=lambda r: (r["status"] == "ok", r["ties"])):
+                far = "-" if pt["farthest_trace_to_tie_mm"] is None else f"{pt['farthest_trace_to_tie_mm']:.1f}"
+                nets = ", ".join(f"{n} {L:g}" for n, L in pt["nets"].items())
+                out.append(f"| {pt['net']} | {pt['layer']} | {pt['area_mm2']:g} | ({pt['centre'][0]:g}, {pt['centre'][1]:g}) "
+                           f"| {pt['ties']} | {pt['ties_per_cm2']:g} | {far} | {nets} | {pt['status']} |")
     out += ["", "## Nets", "", "| Net | Class | Layers | Length (mm) | No reference | Edge over void | PWR only | Margin | Layer changes OK | Return-via profile | References (mm) |",
             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for net, st in sorted(res.net_stats.items(), key=lambda kv: (-kv[1]["unreferenced"], kv[0])):

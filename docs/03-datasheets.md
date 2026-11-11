@@ -20,7 +20,10 @@ doesn't state; add `--all` when you need them.
 
 1. **Project docs:** `docs/`, `Docs/`, `datasheets/` next to the root schematic, subfolders
    included, hidden folders such as `.history` skipped. A PDF matches when its name contains
-   the MPN, its name equals DigiKey's datasheet file name, or its text lists the MPN.
+   the MPN, its name equals DigiKey's datasheet file name, or its text lists the MPN. Last, a
+   file named after the part family matches: `DS_stm32h743vi.pdf` for `STM32H743VIH6` (a prefix
+   of at least 8 characters and ¾ of the MPN; the ordering-code suffix is not checked).
+   `run` searches `docs/` next to the `.kicad_pro` and in every parent folder up to the git root.
 2. **Shared cache:** `cache/datasheets/` (PDFs stored by hash, with extracted text).
 3. **Download** from DigiKey's datasheet link (run `digikey-fetch` first): https first, 60 s
    limit, real PDFs only.

@@ -133,6 +133,21 @@ def match_local(mpn, url, pdfs, cache_dir):
         return by_text or by_name, "ambiguous"
     if len(by_url) == 1:
         return by_url[0], f"same file name as the DigiKey datasheet ({wanted})"
+    # Family datasheets are often named after the part without the ordering suffix
+    # (DS_stm32h743vi.pdf for STM32H743VIH6): accept a file name holding a long prefix of the MPN.
+    shortest = max(8, -(-len(key) * 3 // 4))
+    family = {}
+    for path in pdfs:
+        stem = compact(path.stem)
+        n = next((n for n in range(len(key) - 1, shortest - 1, -1) if key[:n] in stem), 0)
+        if n:
+            family[path] = key[:n]
+    best = max(family.values(), key=len, default="")
+    hits = [p for p, k in family.items() if k == best]
+    if len(hits) == 1:
+        return hits[0], f"file name matches the part family {best} (ordering-code suffix not checked)"
+    if len(hits) > 1:
+        return hits, "ambiguous"
     return None, None
 
 

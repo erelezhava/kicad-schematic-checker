@@ -112,7 +112,7 @@ result is a set of intervals along the trace:
 | `empty_plane`, `unfilled_zone` | error / warning | plane layer with no reference fill; reference zone with no fill |
 | `hatched_reference` | warning | reference zone is hatched: not a solid plane |
 | `tracks_on_plane` | info | signal nets routed on a `gnd`/`pwr` layer cut the plane |
-| `return_via_missing` | profile: error (`high_speed`) / warning (`low_speed`) | at a layer change the reference moves to the same net on another layer, with no via of that net within the profile distance |
+| `return_via_missing` | profile: error (`high_speed`) / warning (`low_speed`); always warning inside a BGA area | at a layer change the reference moves to the same net on another layer, with no via of that net within the profile distance |
 | `return_via_shared` | warning | one return via serves more signal vias than the profile's `max_share` |
 | `reference_net_change` | warning | at a layer change the reference moves to a different net, e.g. GND → +3V3 |
 | `island_floating` | error | the reference copper under the trace is not connected to the rest of its net at all |
@@ -158,6 +158,13 @@ track, just past the antipad: via or pad radius + zone clearance + 0.25 mm from 
 | a shared (layer, net), e.g. F.Cu and In2.Cu (sig) both over In1 GND | OK: the shared plane carries the return |
 | same net, different layers, e.g. GND In1 → GND In4 | needs a **return via**: a via or through pad of that net within the profile distance |
 | different nets, e.g. GND → +3V3 | warning `reference_net_change`: no conductive return path |
+
+**BGA areas.** Between BGA balls there is no room for a dedicated return via. A footprint is a
+BGA when a pad has Fabrication Property "BGA pad" or the library name contains `BGA` (4+ SMD
+pads); its area is the ball field grown by one pitch, so the outer row's dog-bone vias are
+inside (`refplane/bga.py`). There `return_via_missing` is a warning instead of an error, and
+`return_via_missing`, `return_via_shared` and `reference_net_change` messages start with
+`BGA area U1 (pitch 0.8 mm): ...`. The return path is then the nearest GND ball's fan-out via.
 | one side unreferenced | nothing extra (the trace check already reports it) |
 
 A return via only counts if it does all three:
@@ -223,11 +230,12 @@ The per-net table also lists each net's **reference profile**: how many mm of it
 line run over each (layer, net), e.g. `In1.Cu/GND 24.6, In2.Cu/GND 6.5`. It also shows how
 many of its layer changes passed.
 
-### Reference copper islands
+### Reference patches and islands: how well is the copper under a trace stitched?
 
-The plane check only sees the copper directly under a trace. That copper can be a pour island
-joined to the rest of its net by a thin neck or a single via, so the return current has to
-detour. The island check (`refplane/islands.py`) works per reference net:
+The plane check only sees the copper directly under a trace. That copper can be a small GND
+plane on one layer, or a pour island. It might be joined to the rest of its net by a thin
+neck, a single via, or not at all, and then the return current has to detour. The patch
+check (`refplane/islands.py`) works per reference net:
 
 1. **Regions.** Each fill polygon a selected trace runs over is rasterised (cell about
    `neck_mm`/6) and eroded by `neck_mm`/2. Cores of at least a quarter of `min_area_mm2` are
@@ -236,29 +244,60 @@ detour. The island check (`refplane/islands.py`) works per reference net:
 2. **Ties.** A via or through pad of the net that is tied into regions on two layers (solid,
    or thermal spokes) joins them. A neck, or a track of the net between two regions, is a
    weak link.
-3. **Main group.** The via-tied group with the largest copper area is the net's main group.
-   The largest region of each layer in it is that layer's plane. Every other region is an
-   island. Outer-layer pours count for ties, but only regions on reference layers are
-   reported.
-4. **Islands under selected traces** (centre line, at least `min_length_mm`) are reported as
-   `island_floating`, `island_neck`, `island_weak_tie` or `island_tie_far`. In the SVG they
-   are rings on the trace's layer, centred on the island.
+3. **Full planes and patches.** The via-tied group with the largest copper area is the net's
+   main group.
+   - **Full plane:** the largest region of a layer in the main group, if it covers at least
+     `full_plane_fraction` (default 0.5) of the board outline.
+   - **Patch:** every other region, either a partial plane or an island. Patches must earn
+     their ties. This applies on any layer: a little GND plane on a `gnd` or `pwr` layer is a
+     patch too.
+   - **Hybrid layers** (signals plus pours) never hold a full plane while the net has one on
+     a `gnd`/`pwr` layer.
+   - **No full plane:** if the net has none anywhere (e.g. a 2-layer board), its largest region
+     is the plane.
+
+   Outer-layer pours count for ties, but only regions on reference layers are reported.
+4. **Patches under selected traces** (centre line, at least `min_length_mm`) are reported:
+
+| Finding | Severity | When |
+| --- | --- | --- |
+| `island_floating` | error | no path at all to the main group |
+| `island_neck` | warning | reaches the main group only through a neck narrower than `neck_mm`, or a track |
+| `island_weak_tie` | **error** if a `high_speed` net runs over it, warning if only `low_speed` nets do | fewer than `min_ties` (default 2) tie vias or pads. One via is never enough |
+| `island_tie_far` | warning | part of the trace is farther than `max_tie_distance_mm` from the patch's nearest tie via |
+
+The profile (`high_speed` or `low_speed`) is the same one the return-via rules use.
+
+**Patch stitching table.** `report.md` lists every patch a selected trace runs over, whether
+or not it passes, so you can judge the stitching yourself:
+
+- net and layer, area, and centre;
+- number of tie vias, and ties per cm²;
+- the farthest trace point from a tie;
+- the nets over it, and the result.
+
+The same rows are in `report.json` under `islands.<net>.patches`. Use the table to choose
+`min_ties` and `max_tie_distance_mm` for your boards. In the SVG, patch findings are rings on
+the trace's layer, centred on the patch.
 
 Settings go under `islands` in `defaults.json` or `<board>.refplane.json`:
 
 | Key | Default | |
 | --- | --- | --- |
+| `full_plane_fraction` | 0.5 | a pour smaller than this share of the board is a patch, not a full plane |
+| `min_ties` | 2 | fewer tie vias or pads than this gives `island_weak_tie` |
+| `max_tie_distance_mm` | 5.0 | trace over a patch farther than this from a tie gives `island_tie_far` |
 | `neck_mm` | 1.0 | copper narrower than this splits a pour into regions |
 | `min_area_mm2` | 4.0 | smaller pieces are absorbed into their neighbours |
-| `min_ties` | 2 | fewer tie vias or pads than this gives `island_weak_tie` |
-| `max_tie_distance_mm` | 5.0 | trace over an island farther than this from a tie gives `island_tie_far` |
-| `min_length_mm` | 0.5 | islands a trace only clips are ignored |
+| `min_length_mm` | 0.5 | patches a trace only clips are ignored |
 | `enabled` | true | `--no-islands` turns the check off for one run |
 
-The report lists, for each reference net, the regions, the islands and the plane area per
-layer. Not modelled: copper joined only through SMD pads of a component, and narrow necks
-inside the main plane itself, where a slot of antipads cuts it into two big halves that are
-each well tied.
+Not modelled:
+
+- copper joined only through SMD pads of a component;
+- narrow necks inside a full plane, where a slot of antipads cuts it into two big halves that
+  are each well tied;
+- via inductance. The tie count and distance are the proxy for it.
 
 ### Margin
 

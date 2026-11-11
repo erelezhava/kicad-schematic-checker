@@ -715,7 +715,7 @@ class RealBoardFixTests(unittest.TestCase):
         res = run(b, demo_config(b))
         svg = report.to_svg(res, b, "F.Cu", ["In1.Cu"], {"/CLK"}, {"GND"}, {"+3V3"})
         self.assertIn("F.Cu over In1.Cu", svg)
-        self.assertEqual(svg.count("<title>via "), 3)                 # LED, CLK, GND stitch via
+        self.assertEqual(svg.count("<title>via "), 7)                 # LED, CLK, 5 GND stitch vias
         self.assertIn('stroke="#2e7d32"', svg)                         # GND via outlined green
         self.assertIn("trace edge over a void (warning)", svg)
         vb = [float(x) for x in svg.split('viewBox="')[1].split('"')[0].split()]
@@ -872,14 +872,31 @@ class IslandTests(unittest.TestCase):
 
     def test_island_tied_by_one_via(self):
         f, _ = self.run_case(self.halves() + self.plane2() + self.via(16, 10))
-        self.assertEqual([(x.severity, x.kind) for x in f], [("warning", "island_weak_tie")])
+        self.assertEqual([(x.severity, x.kind) for x in f], [("error", "island_weak_tie")])   # high_speed net
         self.assertIn("only 1 via", f[0].message)
+
+    def test_weak_tie_is_warning_for_low_speed_nets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            b = read_board(make_board(Path(tmp), self.halves() + self.plane2() + self.via(16, 10) + self.TRACE))
+            res = run(b, Config(roles=parse_roles("sig,gnd,gnd,sig", b), gnd_nets={"GND"}, pwr_nets=set(), nets={"SIG"},
+                                stitch=rules_with({"Default": "low_speed"})))
+            f = [x for x in res.findings if x.kind.startswith("island")]
+            self.assertEqual([(x.severity, x.kind) for x in f], [("warning", "island_weak_tie")])
+
+    def test_patch_stitching_table(self):
+        f, res = self.run_case(self.halves() + self.plane2() + "".join(self.via(16, y) for y in (3, 8, 13, 17)))
+        self.assertEqual(f, [])
+        (patch,) = res.islands["GND"]["patches"]
+        self.assertEqual((patch["layer"], patch["ties"], patch["status"]), ("In1.Cu", 4, "ok"))
+        self.assertLessEqual(patch["farthest_trace_to_tie_mm"], 5.0)
+        self.assertAlmostEqual(patch["ties_per_cm2"], 4 / 1.33, places=1)
+        self.assertEqual(patch["nets"], {"SIG": 14.0})
 
     def test_island_ties_far_from_the_trace(self):
         body = self.halves() + self.plane2() + self.via(16, 1.5) + self.via(17, 1.5) + self.via(18, 1.5)
         f, _ = self.run_case(body)
         self.assertEqual([x.kind for x in f], ["island_tie_far"])
-        self.assertRegex(f[0].message, r"15\.\d mm from the island's nearest tie via")
+        self.assertRegex(f[0].message, r"15\.\d mm from the patch's nearest tie via")
         f, _ = self.run_case(body, islands={"max_tie_distance_mm": 20})
         self.assertEqual(f, [])
 
@@ -935,5 +952,119 @@ class IslandTests(unittest.TestCase):
         self.assertFalse([f for f in json.loads(out2.getvalue())["findings"] if f["kind"].startswith("island")])
 
 
+class HybridLayerTests(unittest.TestCase):
+    """4-layer sig+pwr / GND / +5V pour with a small GND patch / sig (asked 2026-10-30)."""
+
+    @staticmethod
+    def R(x0, y0, x1, y1):
+        return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+    @staticmethod
+    def gvia(x, y):
+        return f'(via (at {x} {y}) (size 0.6) (drill 0.3) (layers "F.Cu" "B.Cu") (net 1))'
+
+    def base(self):
+        return (zone(1, "GND", "In1.Cu", self.R(0.5, 0.5, 19.5, 19.5))
+                + zone(1, "GND", "In2.Cu", self.R(0.5, 0.5, 8, 19.5))       # little GND plane on L3
+                + zone(3, "+5V", "In2.Cu", self.R(8.5, 0.5, 19.5, 19.5)))   # power pour on L3
+
+    def run_case(self, body, roles="hybrid,gnd,hybrid,sig", end=7):
+        trace = f'(segment (start 3 10) (end {end} 10) (width 0.2) (layer "B.Cu") (net 2))'
+        with tempfile.TemporaryDirectory() as tmp:
+            b = read_board(make_board(Path(tmp), body + trace))
+            res = run(b, Config(roles=parse_roles(roles, b), gnd_nets={"GND"}, pwr_nets={"+5V"}, nets={"SIG"}))
+            return [(f.severity, f.kind) for f in res.findings if f.kind != "reference_margin"], res
+
+    def test_patch_on_hybrid_layer_must_be_tied(self):
+        k, _ = self.run_case(self.base() + self.gvia(2, 3))
+        self.assertEqual(k, [("error", "island_weak_tie")])      # SIG is high_speed: one via is not enough
+        k, _ = self.run_case(self.base())
+        self.assertEqual(k, [("error", "island_floating")])
+
+    def test_patch_stitched_along_the_trace_is_clean(self):
+        vias = "".join(self.gvia(2, y) for y in (6, 10, 14)) + self.gvia(7, 7) + self.gvia(7, 13)
+        k, res = self.run_case(self.base() + vias)
+        self.assertEqual(k, [])
+        self.assertEqual(res.net_stats["SIG"]["references"], {"In2.Cu/GND": 4.0})
+
+    def test_patch_stitched_only_at_its_corners_is_tie_far(self):
+        k, _ = self.run_case(self.base() + self.gvia(2, 3) + self.gvia(2, 17))
+        self.assertEqual(k, [("warning", "island_tie_far")])
+
+    def test_trace_leaving_the_patch_for_the_power_pour(self):
+        vias = "".join(self.gvia(2, y) for y in (6, 10, 14)) + self.gvia(7, 7) + self.gvia(7, 13)
+        k, res = self.run_case(self.base() + vias, end=15)
+        self.assertIn(("error", "no_reference"), k)            # 0.5 mm gap between the GND patch and +5V
+        self.assertIn(("warning", "pwr_reference"), k)         # 6.5 mm over +5V
+        msg = [f.message for f in res.findings if f.kind == "no_reference"][0]
+        self.assertIn("crosses split between GND and +5V on In2.Cu", msg)
+
+    def test_small_patch_on_a_gnd_layer_is_checked_too(self):
+        # 2026-11-04: a little GND plane is a patch on any layer, not only on hybrid layers
+        k, _ = self.run_case(self.base() + self.gvia(2, 3), roles="hybrid,gnd,gnd,sig")
+        self.assertEqual(k, [("error", "island_weak_tie")])
+
+    def test_full_plane_on_a_gnd_layer_is_not_checked(self):
+        full = (zone(1, "GND", "In1.Cu", self.R(0.5, 0.5, 19.5, 19.5)) + zone(1, "GND", "In2.Cu", self.R(0.5, 0.5, 19.5, 19.5)))
+        k, _ = self.run_case(full + self.gvia(2, 3), roles="hybrid,gnd,gnd,sig")
+        self.assertEqual(k, [])
+
+    def test_two_layer_board_hybrid_pour_is_the_plane(self):
+        body = zone(1, "GND", "B.Cu", self.R(0.5, 0.5, 19.5, 19.5))
+        with tempfile.TemporaryDirectory() as tmp:
+            b = read_board(make_board(Path(tmp), body + '(segment (start 3 10) (end 15 10) (width 0.2) (layer "F.Cu") (net 2))',
+                                      layers=("F.Cu", "B.Cu"), h=(1.5,)))
+            res = run(b, Config(roles=parse_roles("sig,hybrid", b), gnd_nets={"GND"}, pwr_nets=set(), nets={"SIG"}))
+            self.assertFalse([f for f in res.findings if f.kind.startswith("island") or f.kind == "no_reference"])
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+def bga_footprint(x, y, lib="Package_BGA:Test_2x2_P0.8mm", prop=""):
+    pads = "".join(f'(pad "{n}" smd circle (at {dx} {dy}) (size 0.4 0.4) (layers "F.Cu" "F.Mask") {prop} (net 0 ""))'
+                   for n, dx, dy in (("A1", -0.4, -0.4), ("A2", 0.4, -0.4), ("B1", -0.4, 0.4), ("B2", 0.4, 0.4)))
+    return f'(footprint "{lib}" (layer "F.Cu") (at {x} {y}) (property "Reference" "U9") {pads})'
+
+
+class BgaAreaTests(unittest.TestCase):
+    """Return vias cannot be added between BGA balls: findings there are warnings and say so."""
+
+    def run_with(self, extra):
+        names = ["HS_P", "HS_N", "HS_CLK"]
+        nets = "".join(f'(net {10 + i} "{n}")' for i, n in enumerate(names))
+        body = nets + zone(1, "GND", "In1.Cu", SQUARE) + zone(1, "GND", "In2.Cu", SQUARE)
+        for i, (x, n) in enumerate(zip([4, 5.5, 7], names)):
+            body += (f'(segment (start {x} 10) (end {x} 4) (width 0.2) (layer "F.Cu") (net {10 + i}))'
+                     f'(segment (start {x} 10) (end {x} 16) (width 0.2) (layer "B.Cu") (net {10 + i}))'
+                     f'(via (at {x} 10) (size 0.6) (drill 0.3) (layers "F.Cu" "B.Cu") (net {10 + i}))')
+        body += '(via (at 4.75 10) (size 0.6) (drill 0.3) (layers "F.Cu" "B.Cu") (net 1))' + extra
+        with tempfile.TemporaryDirectory() as tmp:
+            b = read_board(make_board(Path(tmp), body))
+            res = run(b, Config(roles=parse_roles("sig,gnd,gnd,sig", b), gnd_nets={"GND"}, pwr_nets=set(),
+                                nets=set(names)))
+            return [f for f in res.findings if f.kind == "return_via_missing"], b
+
+    def test_outside_bga_stays_error(self):
+        f, _ = self.run_with("")
+        self.assertEqual([(x.net, x.severity) for x in f], [("HS_CLK", "error")])
+        self.assertNotIn("BGA", f[0].message)
+
+    def test_inside_bga_by_library_name_is_warning(self):
+        f, b = self.run_with(bga_footprint(7, 10))
+        self.assertEqual([(x.net, x.severity) for x in f], [("HS_CLK", "warning")])
+        self.assertIn("BGA area U9 (pitch 0.8 mm)", f[0].message)
+        self.assertIn("nearest GND ball via", f[0].message)
+
+    def test_bga_by_fabrication_property(self):
+        f, _ = self.run_with(bga_footprint(7, 10, lib="Custom:Ball_Field", prop="(property pad_prop_bga)"))
+        self.assertEqual([x.severity for x in f], ["warning"])
+
+    def test_area_is_ball_field_plus_one_pitch(self):
+        from refplane.bga import bga_areas
+        _, b = self.run_with(bga_footprint(7, 10))
+        (area,) = bga_areas(b)
+        self.assertEqual((area.ref, area.balls, area.pitch), ("U9", 4, 0.8))
+        for got, want in zip(area.box, (5.8, 8.8, 8.2, 11.2)):
+            self.assertAlmostEqual(got, want)

@@ -4,16 +4,17 @@ Reviews a saved KiCad design, helps you source its parts, and checks the PCB aga
 limits. Plain Python commands; every run writes reports into a new folder. Same results
 whether you run it yourself or through Claude, ChatGPT/Codex or a local Ollama model.
 
-**It never** edits your schematic (except the opt-in `fill_fields.py`), places orders, approves
+**It never** edits your schematic (except the opt-in `fill-manufacturer`), places orders, approves
 a substitution, or turns missing data into a pass.
 
 ## Pick your task
 
 | I want to… | Guide | Network |
 | --- | --- | --- |
+| **Run every check at once, results in my project folder** (`<project>_report_R0`, full log) | [13. Run all](docs/13-run-all.md) | optional |
 | Install it, add my keys, try the demo | [0. Setup](docs/00-setup.md) | — |
 | Find missing or contradictory Manufacturer / MPN / Description | [1. Schematic check](docs/01-schematic-check.md) | no |
-| Check each MPN exists, is Active, matches value and package; fill empty Manufacturer fields | [2. DigiKey check](docs/02-digikey-check.md) | yes |
+| Check each MPN exists, is Active, matches value and package; fill empty Manufacturer fields (`fill-manufacturer`) | [2. DigiKey check](docs/02-digikey-check.md) | yes |
 | Collect datasheet PDFs for every part | [3. Datasheets](docs/03-datasheets.md) | optional |
 | Check datasheet requirements (pin connections, cap values, pin counts) | [4. Rules review](docs/04-rules-review.md) | no |
 | **Know whether I can build N boards from our stock** | [5. Inventory check](docs/05-inventory-check.md) | optional |
@@ -21,12 +22,16 @@ a substitution, or turns missing data into a pass.
 | Find parts by my own criteria, check one part, check a BOM's market stock | [7. Parts search](docs/07-parts-search.md) | optional |
 | **Check a recommended parts list** (vendor reference BOM, approved parts) on DigiKey | [12. Parts list](docs/12-parts-list.md) | optional |
 | **Copy a reference design**: check its BOM first, then compare my schematic with it (`--against`) | [12. Parts list](docs/12-parts-list.md#after-copying-check-your-schematic-against-the-reference-bom) | optional |
+| **Check the MCU's pins against my STM32CubeMX .ioc** (swapped lines, unwired or unconfigured pins) | [14. MCU pins](docs/14-mcu-pins.md) | no |
 | **Check the PCB against JLCPCB manufacturing limits** | [8. JLCPCB rules](docs/08-jlcpcb-rules.md) | no |
 | **Check every trace runs over an unbroken reference plane** | [11. Reference plane](docs/11-reference-plane.md) | no |
 | Run any of this through an AI assistant | [9. AI assistants](docs/09-ai-assistants.md) | — |
 | Understand a result, an exit code or an error | [10. Results & troubleshooting](docs/10-results-troubleshooting.md) | — |
 
 ## Typical flow for a new board
+
+Fastest: `python3 -m kicad_checker run <project>` does all of the below in one go
+([13. Run all](docs/13-run-all.md)). Step by step:
 
 ```text
  schematic                                     PCB
@@ -44,7 +49,8 @@ a substitution, or turns missing data into a pass.
 1. Save in KiCad before running anything: only saved files are read.
 2. Run every command from this folder as `python3 -m kicad_checker <command>` (or
    `python3 -m jlcpcb_rules …`, `python3 -m refplane …`). `--help` lists all options.
-3. Every report needs a **new** `--output runs/<name>` folder; nothing is overwritten.
+3. Every report goes into a **new** folder; nothing is overwritten. `run` numbers them for you
+   (`<project>_report_R0`, `_R1` … next to the `.kicad_pro`); single commands take `--output runs/<name>`.
 4. Keys live in `.env`, stock in `stock/`, reports in `runs/`. None of them go into git.
 5. Exit code `0` means "nothing open in what was checked", never "design approved".
 

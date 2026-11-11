@@ -213,3 +213,19 @@ class CliTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FamilyFileNameTests(unittest.TestCase):
+    def test_family_prefix_in_file_name(self):
+        import tempfile
+        from kicad_checker.datasheets import match_local
+        with tempfile.TemporaryDirectory() as tmp:
+            pdf = Path(tmp) / "DS_stm32h743vi.pdf"
+            pdf.write_bytes(b"%PDF-1.4\n")
+            other = Path(tmp) / "M24C02_other.pdf"
+            other.write_bytes(b"%PDF-1.4\n")
+            found, why = match_local("STM32H743VIH6", None, [pdf, other], Path(tmp) / "cache")
+            self.assertEqual(found, pdf)
+            self.assertIn("part family STM32H743VI", why)
+            found, _ = match_local("M24C02-WMN6TP", None, [other], Path(tmp) / "cache")
+            self.assertIsNone(found)  # 'M24C02' is too short a prefix to trust

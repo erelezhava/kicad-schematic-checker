@@ -124,6 +124,10 @@ def build() -> str:
     t += via(LED_VIA, 6, "v-led")
     t += via(CLK_VIA, 5, "v-clk")
     t += via(GND_STITCH, 1, "v-gnd")
+    # In2's GND half (x > 20.5) covers under half the board, so it is a patch, not a full plane:
+    # stitch it to In1 along the B.Cu traces that use it (CLK, LED), as a good design would.
+    for i, at in enumerate(((23, 13), (28, 13), (36, 22), (32, 26))):
+        t += via(at, 1, f"v-gnd-stitch-{i}")
     t += zone(1, "GND", "In1.Cu", in1_fill, rect(0.5, 0.5, 39.5, 29.5), IN1_CLR)
     t += zone(2, "+3V3", "In2.Cu", in2_pwr, rect(0.5, 0.5, 20, 29.5), IN2_CLR)
     t += zone(1, "GND", "In2.Cu", in2_gnd, rect(20.5, 0.5, 39.5, 29.5), IN2_CLR)

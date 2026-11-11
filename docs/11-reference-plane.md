@@ -66,6 +66,29 @@ python3 -m refplane check board.kicad_pro -y --layers sig,gnd,pwr,sig \
 A signal layer is checked against the layers directly above and below it. A layer next to a PWR
 plane is still checked: its traces get PWR-reference warnings instead of being skipped.
 
+**Small GND planes and hybrid stackups.** Example: a 4L `hybrid,gnd,hybrid,sig` board where
+L1 is signals plus power, and L3 is a +5V pour with a small GND plane under some L4 signals.
+The same applies to a small GND plane on any layer, also one marked `gnd` or `pwr`. A pour
+counts as a full plane only if it covers at least half the board (`full_plane_fraction`).
+Anything smaller is a **patch**, and its stitching is checked:
+
+| On L4 | Result |
+| --- | --- |
+| trace over the GND patch, patch stitched near the trace | clean |
+| patch with no via | `island_floating` error |
+| patch with 1 via | `island_weak_tie`: **error** for `high_speed` nets, warning for `low_speed` |
+| patch with vias, but over 5 mm from part of the trace | `island_tie_far` warning |
+| trace over the +5V pour | `pwr_reference` warning |
+| trace crossing from the patch onto +5V | `no_reference` error, "crosses split between GND and +5V" |
+
+`report.md` has a **Patch stitching** table for every patch under a checked trace, whether or
+not it passes. It shows tie vias, ties per cm², and the farthest trace point from a tie. Use it
+to decide how many vias you want, then set `min_ties` and `max_tie_distance_mm` under `islands`
+in `defaults.json` or `board.refplane.json`.
+
+The report's "References" column shows how many mm each net runs over each plane, e.g.
+`In2.Cu/GND 5.0, In2.Cu/+5V 6.5`. L1 traces are checked against L2 GND as usual.
+
 ## Power rails
 
 Routed supply traces (+3V3, +5V, VCC…, and any non-GND net with a copper pour) are skipped:
@@ -115,7 +138,7 @@ asks how it is tied to the main plane:
 | --- | --- | --- |
 | `island_floating` (error) | not connected to the main plane at all | tie it in with vias, or remove it |
 | `island_neck` | reaches the plane only through a neck under 1 mm, or a track | add vias inside the island, or widen the neck |
-| `island_weak_tie` | tied by only one via | add vias inside the island |
+| `island_weak_tie` | tied by only one via: error for high-speed nets, warning for low-speed | add vias inside the patch, along the trace |
 | `island_tie_far` | part of the trace is over 5 mm from the island's nearest tie via | add vias along the trace |
 
 The limits are under `islands` in `refplane/defaults.json` (`neck_mm`, `min_ties`,
@@ -135,9 +158,9 @@ it reports nothing; the report still lists the regions it found per net.
 | warning | `pwr_reference` | OK if decoupled: put a cap between PWR and GND near the layer change |
 | warning | `reference_margin` | A void or edge is within 3H beside the trace: fine for slow nets, review for fast ones |
 | info | `tracks_on_plane` | Signal routing on a plane layer cuts the plane |
-| error / warning | `return_via_missing` | The signal via moves the reference to another GND layer: add a GND via within the ring (dashed ring in the SVG). Error for `high_speed`, warning for `low_speed` |
+| error / warning | `return_via_missing` | The signal via moves the reference to another GND layer: add a GND via within the ring (dashed ring in the SVG). Error for `high_speed`, warning for `low_speed`. Under a BGA always a warning, marked `BGA area <ref>`: no via fits between the balls, so check the nearest GND ball via |
 | warning | `return_via_shared` | Too many signal vias share one GND via: add one, or spread the signal vias |
-| warning | `reference_net_change` | The reference changes from GND to a power net at this via: keep the net on layers that share a GND reference |
+| warning | `reference_net_change` | The reference changes from GND to a power net at this via: keep the net on layers that share a GND reference. Marked `BGA area <ref>` when under a BGA |
 | error / warning | `island_*` | The trace runs over a ground island that is floating, on a neck, tied by one via, or tied too far away (see above) |
 
 Coordinates are KiCad board millimetres, so you can go straight to them in KiCad.

@@ -13,6 +13,10 @@ looked up on every layer the net leaves on, just beyond the via's antipad:
   different net        e.g. GND -> +3V3: no conductive return path at all;
                        warning `reference_net_change`
 
+Inside a BGA ball field (refplane.bga) no dedicated return via fits between the balls:
+`return_via_missing` there is always a warning, and every layer-change finding there
+(`return_via_missing`, `return_via_shared`, `reference_net_change`) names the BGA area.
+
 Return vias may be shared. Signal vias are assigned to return vias so that
 the load is spread (most constrained signal via first). When a return via
 ends up serving more signal vias than a profile's max_share allows, a warning
@@ -24,6 +28,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
+from .bga import area_at, bga_areas
 from .check import Config, Finding, LayerPlan
 from .pcb import Board
 
@@ -110,6 +115,7 @@ def check_transitions(board: Board, cfg: Config, plans: list[LayerPlan], ref_lay
     transitions: list[tuple[str, _Node]] = []
     bad_nodes: set[int] = set()
     tied_cache: dict[tuple[int, str, str], bool] = {}
+    areas = bga_areas(board)
 
     def nc(net):
         return ",".join(cfg.netclass_of.get(net, ["Default"]))
@@ -130,8 +136,10 @@ def check_transitions(board: Board, cfg: Config, plans: list[LayerPlan], ref_lay
                     same = [(a, b) for a in ra for b in rb if a[1] == b[1]]
                     if not same:
                         bad_nodes.add(id(node))
+                        area = area_at(areas, node.at)
                         findings.append(Finding(
                             "warning", "reference_net_change",
+                            (f"BGA area {area.ref}: " if area else "") +
                             f"{net} {node.label} at {node.where()} {la} -> {lb}: reference changes from {_fmt(ra)} "
                             f"to {_fmt(rb)}; no conductive return path between "
                             f"{'/'.join(sorted({n for _, n in ra}))} and {'/'.join(sorted({n for _, n in rb}))}",
@@ -165,7 +173,13 @@ def check_transitions(board: Board, cfg: Config, plans: list[LayerPlan], ref_lay
         if r.nearest_bad:
             d, n = r.nearest_bad
             msg += f"; the {n.label} {d:.2f} mm away does not reach or is not tied into both {r.r1} and {r.r2}"
-        findings.append(Finding(r.rule.severity, "return_via_missing", msg, net=r.net, netclass=nc(r.net),
+        severity = r.rule.severity
+        area = area_at(areas, r.node.at)
+        if area:
+            severity = "warning"
+            msg = (f"BGA area {area.ref} (pitch {area.pitch:g} mm): no room for a dedicated return via between "
+                   f"balls; check the nearest {r.ref_net} ball via. " + msg)
+        findings.append(Finding(severity, "return_via_missing", msg, net=r.net, netclass=nc(r.net),
                                 layer=r.la, ref_layers=[r.r1, r.r2], start=r.node.at, end=r.node.at,
                                 via_layers=[r.la, r.lb], radius=r.rule.distance_mm, profile=r.rule.name))
 
@@ -196,8 +210,10 @@ def check_transitions(board: Board, cfg: Config, plans: list[LayerPlan], ref_lay
         nets = sorted({r.net for r in rs})
         limit = min(r.rule.max_share for r in over)
         layers = sorted({l for r in rs for l in (r.la, r.lb)}, key=board.copper_layers.index)
+        area = area_at(areas, rv.at)
         findings.append(Finding(
             "warning", "return_via_shared",
+            (f"BGA area {area.ref}: " if area else "") +
             f"{rv.net} {rv.label} at {rv.where()} is the return via for {n_users} signal vias "
             f"({', '.join(nets)}); {', '.join(sorted({r.rule.name for r in over}))} allows {limit}. "
             f"Add a {rv.net} via near the signal vias or spread them out",

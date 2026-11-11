@@ -6,7 +6,7 @@ Checks a saved KiCad design for incomplete or contradictory part data and for vi
 
 - Needs **Python 3.10+** and **KiCad 10** (`kicad-cli`). No Python packages.
 - Optional: **`pdftotext`** (`sudo apt install poppler-utils`) for datasheet text search, and your own **DigiKey API keys** for catalog checks.
-- Never edits your design. The one helper that can (`tools/fill_fields.py`) is opt-in and previews first.
+- Never edits your design during a check. The one command that can (`fill-manufacturer`) is opt-in and previews first.
 
 ## What it checks
 
@@ -36,8 +36,8 @@ With DigiKey keys (see [Credentials](#credentials-and-caches)):
 ```sh
 python3 -m kicad_checker digikey-fetch runs/board-001/circuit.json                         # online, cached
 python3 -m kicad_checker digikey-check runs/board-001/circuit.json --output runs/board-001-dk
-python3 tools/fill_fields.py runs/board-001-dk/digikey.json ~/projects/board               # preview
-python3 tools/fill_fields.py runs/board-001-dk/digikey.json ~/projects/board --apply       # fill empty Manufacturer fields
+python3 -m kicad_checker fill-manufacturer ~/projects/board --report runs/board-001-dk           # preview
+python3 -m kicad_checker fill-manufacturer ~/projects/board --report runs/board-001-dk --apply   # fill empty Manufacturer fields
 python3 -m kicad_checker datasheet-fetch runs/board-001/circuit.json --output runs/board-001-ds
 ```
 
@@ -61,6 +61,7 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stoc
 
 | Command | Network | Purpose |
 | --- | --- | --- |
+| `run PROJECT [--checks …] [--offline] [-y]` | optional | All checks (schematic, DigiKey, JLCPCB rules + DRC, refplane, MCU pins vs CubeMX, datasheets) into `<project>_report_R<n>/` next to the `.kicad_pro`, with `summary.md` and full `run.log`. See [docs/13](docs/13-run-all.md) |
 | `extract PROJECT --output DIR` | no | Netlist, pins, fields and ERC via `kicad-cli`; identification and description audits |
 | `import-netlist NETLIST.xml --output DIR` | no | Same audits from an exported netlist (no ERC, no freshness check) |
 | `digikey-fetch CIRCUIT [--refresh]` | yes | Look up every unique MPN once and cache it |
@@ -70,9 +71,10 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stoc
 | `parts-bom CIRCUIT --output DIR [--boards N] [--online]` | optional | Stock audit grouped by manufacturer/MPN; demand from populated reference count |
 | `inventory-check DESIGN --stock FILE --output DIR [--boards N] [--alternatives-for R27,C2]` | optional | Compare the BOM with your stock CSV/XLSX (e.g. JLCPCB inventory); asks boards, market check, and which lines get R/C/L alternatives |
 | `parts-list LIST --output DIR [--online] [--boards N] [--stock FILE] [--against DESIGN] [--dry-run]` | optional | Check a recommended parts list or vendor reference BOM on DigiKey (lifecycle, stock, vendor alternates, R/C/L alternatives); `--against` compares your schematic with it; `--dry-run` shows the column mapping only. See [docs/12](docs/12-parts-list.md) |
+| `mcu-pins CIRCUIT --ioc FILE --output DIR [--ref U1]` | no | STM32CubeMX pin configuration vs the MCU's schematic nets. See [docs/14](docs/14-mcu-pins.md) |
 | `datasheet-fetch CIRCUIT --output DIR [--docs DIR] [--offline] [--all]` | optional | Locate a datasheet PDF per active part (`--all` adds R/C/L) |
 | `review CIRCUIT --rules R --evidence E --output DIR` | no | Evaluate rules; options `--snapshot`, `--docs-root`, `--digikey-cache cache/digikey` |
-| `tools/fill_fields.py DIGIKEY_JSON PROJECT [--prefer NAME] [--apply]` | no | Fill **empty** Manufacturer fields from DigiKey suggestions |
+| `fill-manufacturer PROJECT [--report R] [--prefer NAME] [--apply]` | no | Fill **empty** Manufacturer fields from DigiKey (newest `<project>_report_R<n>` by default; `tools/fill_fields.py` is the same tool) |
 
 **PCB manufacturability (JLCPCB):** `python3 -m jlcpcb_rules install BOARD.kicad_pro` writes
 KiCad 10 custom DRC rules generated from JLCPCB's capability table for the board's stackup;
@@ -86,7 +88,8 @@ layer: antipads, cutouts, split crossings, plane edges, stale fills. See
 
 ## Outputs
 
-Each run writes into its own new folder under `runs/` (git-ignored):
+Each single command writes into its own new folder under `runs/` (git-ignored). `run` writes
+`<project>_report_R<n>/` next to the project instead ([docs/13](docs/13-run-all.md)):
 
 | File | Content |
 | --- | --- |
@@ -142,9 +145,9 @@ Exact-MPN keyword search (API v4). A contradiction in value, category, ratings o
 
 Search order per MPN: PDFs in the project's `Docs/`, `docs/`, `datasheets/`… (subfolders included, hidden folders like `.history` skipped). A file matches when its name contains the MPN, its name equals DigiKey's datasheet file name, or its text lists the MPN. Then the cache, then a download from DigiKey's link (https first, 60 s limit, real PDFs only). Two matching local files → `needs_review`. A failed download tells you the URL to fetch by hand.
 
-### fill_fields.py
+### fill-manufacturer
 
-Fills only **empty** Manufacturer fields, reusing an existing empty field such as `Manufacturer_Name`. It edits only the active design (root sheet and its sub-sheets, never `.history`), refuses while KiCad has the file open, and previews unless `--apply` is given. Check the result with `git diff` in your design repo.
+Fills only **empty** Manufacturer fields (the symbol's MPN must still match the DigiKey lookup; several names resolved by `kicad_checker/manufacturer_aliases.json` or `--prefer`), reusing an existing empty field such as `Manufacturer_Name`. It edits only the active design (root sheet and its sub-sheets, never `.history`), refuses while KiCad has the file open, and previews unless `--apply` is given. Check the result with `git diff` in your design repo.
 
 ### Rules and evidence (`review`)
 

@@ -65,7 +65,14 @@ class FillFieldsTests(unittest.TestCase):
         again = self.run_tool("--prefer", "Murata Electronics")
         self.assertIn("Preview only: 0 change(s)", again.stdout)                    # idempotent
 
-    def test_several_names_need_a_choice(self):
+    def test_murata_pair_on_capacitors_uses_the_family_rule(self):
+        proc = self.run_tool("--apply")
+        self.assertIn("family rule", proc.stdout)
+        self.assertEqual(self.sch.read_text().count('"Murata Electronics"'), 2)
+
+    def test_unrelated_names_need_a_choice(self):
+        report = {"results": [{"reference": "C37", "suggested_fields": {"Manufacturer": ["Murata Electronics", "TDK Corporation"]}}]}
+        (self.base / "report.json").write_text(json.dumps(report))
         proc = self.run_tool("--apply")
         self.assertIn("choose one with --prefer", proc.stdout)
         self.assertNotIn("Murata", self.sch.read_text())

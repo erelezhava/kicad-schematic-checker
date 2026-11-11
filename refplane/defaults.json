@@ -11,11 +11,14 @@
   },
 
   "islands": {
-    "_about": "Reference-copper islands under selected traces: floating (error), reached only through a neck or track (warning), tied by fewer than min_ties vias (warning), or trace farther than max_tie_distance_mm from the island's nearest tie via (warning).",
+    "_about": "Patches (partial planes and islands) of reference copper under selected traces: floating (error), reached only through a neck or track (warning), tied by fewer than min_ties vias (error for high_speed nets, warning for low_speed), or trace farther than max_tie_distance_mm from the patch's nearest tie via (warning).",
     "enabled": true,
     "neck_mm": 1.0,
     "min_area_mm2": 4.0,
     "min_ties": 2,
+    "_min_ties_about": "Fewer tie vias than this on a patch under a trace: error when a high_speed net runs over it, warning when only low_speed nets do. The patch stitching table in report.md shows ties, ties/cm2 and the farthest trace point from a tie for every patch, to help decide the number.",
+    "full_plane_fraction": 0.5,
+    "_full_plane_about": "A pour counts as a full plane (not checked for stitching) only if it covers at least this fraction of the board outline. A smaller GND plane on any layer is a patch.",
     "max_tie_distance_mm": 5.0,
     "min_length_mm": 0.5,
     "max_cells": 400000

@@ -1,11 +1,15 @@
 import argparse
+import logging
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from . import datasheets, digikey
+from . import cubemx, fill
+from . import run as run_all
 from .sourcing import cli as sourcing_cli
 from .sourcing import bom as sourcing_bom
 from .sourcing import inventory_cli as sourcing_inventory
@@ -15,6 +19,9 @@ from .description import description_audit, description_markdown, owner_actions,
 from .core import digest, erc_summary, identification, identification_markdown, markdown, parse_netlist, read_json, review, write_json
 
 
+log = logging.getLogger("kicad_checker")
+
+
 def new_output(path):
     path = Path(path).resolve()
     path.mkdir(parents=True, exist_ok=False)
@@ -22,7 +29,13 @@ def new_output(path):
 
 
 def run_kicad(executable, args):
+    start = time.monotonic()
+    log.info("exec: %s %s", executable, " ".join(args))
     result = subprocess.run([executable, *args], capture_output=True, text=True, timeout=120)
+    log.info("exit %s after %.1f s", result.returncode, time.monotonic() - start)
+    for name, text in (("stdout", result.stdout), ("stderr", result.stderr)):
+        if text.strip():
+            log.debug("%s:\n%s", name, text.rstrip())
     if result.returncode:
         raise ValueError(f"KiCad command failed ({result.returncode}): {result.stderr or result.stdout}")
     return result.stdout.strip()
@@ -48,14 +61,15 @@ def write_owner_actions(identified, described, out, digikey_report=None):
         print(f"Owner actions: {len(actions)} components need fields filled or corrected — see {out / 'owner-actions.md'}")
 
 
-def extract(args):
+def extract(args, allow_inside_project=False):
+    """allow_inside_project: only for `run`, which writes <project>_report_R<n>/ next to the project."""
     source = Path(args.project).resolve()
     if source.suffix == ".kicad_pro":
         source = source.with_suffix(".kicad_sch")
     if source.suffix != ".kicad_sch" or not source.is_file():
         raise ValueError("Provide a root .kicad_sch or matching .kicad_pro file")
     output = Path(args.output).resolve()
-    if output == source.parent or source.parent in output.parents:
+    if output == source.parent or (source.parent in output.parents and not allow_inside_project):
         raise ValueError("Choose an output directory outside the source project")
     executable = shutil.which("kicad-cli")
     if not executable:
@@ -97,6 +111,9 @@ def main(argv=None):
     sourcing_bom.add_command(sub)
     sourcing_inventory.add_command(sub)
     sourcing_partslist.add_command(sub)
+    run_all.add_command(sub)
+    fill.add_command(sub)
+    cubemx.add_command(sub)
     command = sub.add_parser("extract", help="Export saved project connectivity and ERC without editing the design")
     command.add_argument("project")
     command.add_argument("--output", required=True, help="New directory outside the source project")
@@ -129,6 +146,12 @@ def main(argv=None):
     command.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "run":
+            return run_all.run(args)
+        if args.command == "fill-manufacturer":
+            return fill.run(args)
+        if args.command == "mcu-pins":
+            return cubemx.run(args)
         if args.command == "parts-list":
             return sourcing_partslist.run(args)
         if args.command == "inventory-check":

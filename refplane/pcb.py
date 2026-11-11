@@ -48,6 +48,8 @@ class Pad:
     size: tuple[float, float] = (0.0, 0.0)
     angle: float = 0.0           # absolute pad orientation, degrees (KiCad stores it absolute)
     shape: str = ""
+    footprint: str = ""          # library id, e.g. "Package_BGA:..."
+    fab: str = ""                # pad Fabrication Property, e.g. "pad_prop_bga"
 
     def on_layer(self, layer: str) -> bool:
         return self.through or layer in self.layers or ("*.Cu" in self.layers)
@@ -264,7 +266,9 @@ def read_board(path: str | Path) -> Board:
                 layers=[l for l in (lay[1:] if lay else []) if isinstance(l, str)],
                 ref=ref, number=str(pad[1]) if len(pad) > 1 else "",
                 size=(w, h), angle=float(pat[3]) if len(pat) > 3 and is_number(pat[3]) else 0.0,
-                shape=str(pad[3]) if len(pad) > 3 and isinstance(pad[3], str) else ""))
+                shape=str(pad[3]) if len(pad) > 3 and isinstance(pad[3], str) else "",
+                footprint=fp[1] if len(fp) > 1 and isinstance(fp[1], str) else "",
+                fab=str(value(pad, "property") or "")))
 
     # Zones and their fills
     for z in children(pcb, "zone"):

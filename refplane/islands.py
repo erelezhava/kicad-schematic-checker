@@ -36,7 +36,9 @@ DEFAULTS = {
     "enabled": True,
     "neck_mm": 1.0,               # copper narrower than this splits a polygon into regions
     "min_area_mm2": 4.0,          # a region must have at least this much core area to stand alone
-    "min_ties": 2,                # fewer vias/pads than this tying an island to the plane: warning
+    "min_ties": 2,                # fewer vias/pads than this tying a patch to the plane: error for high_speed
+                                  # nets over it, warning for low_speed (one tie is never enough)
+    "full_plane_fraction": 0.5,   # a pour is a full plane only if it covers this much of the board outline
     "max_tie_distance_mm": 5.0,   # trace over an island farther than this from its nearest tie
     "min_length_mm": 0.5,         # ignore islands a selected trace crosses for less than this
     "max_cells": 400000,          # raster size cap per polygon (resolution is coarsened to fit)
@@ -390,15 +392,34 @@ def check_islands(board: Board, cfg: Config, plans: list[LayerPlan], settings: d
         main = max(area_s, key=area_s.get)
         main_region = max((rg for rg in regions if find_s(rg.rid) == main), key=lambda r: r.area)
         main_any = find_a(main_region.rid)
-        # the plane of each layer: its largest region inside the main group. Everything else is an island.
+        # The plane of each layer: its largest region inside the main group, if that region is a
+        # full plane (covers at least full_plane_fraction of the board). Everything else is a patch
+        # (a partial plane or an island) and must earn its ties:
+        #  - a small GND plane on one layer, even on a gnd/pwr layer, is a patch;
+        #  - on a hybrid layer (signals + pours) no pour is a plane while the net has a plane on a
+        #    gnd/pwr layer;
+        #  - if the net has no full plane at all (e.g. a 2-layer board), its largest region is the plane.
+        main_regions = [rg for rg in regions if find_s(rg.rid) == main]
+        plane_layers = {rg.layer for rg in main_regions if roles.get(rg.layer) in ("gnd", "pwr")}
+        bx = board.outline_bbox
+        board_area = (bx[2] - bx[0]) * (bx[3] - bx[1]) if bx else None
+        min_plane = opt["full_plane_fraction"] * board_area if board_area else 0.0
         principal: dict[str, Region] = {}
-        for rg in regions:
-            if find_s(rg.rid) == main and (rg.layer not in principal or rg.area > principal[rg.layer].area):
+        for rg in main_regions:
+            if plane_layers and rg.layer not in plane_layers and roles.get(rg.layer) == "hybrid":
+                continue
+            if rg.area < min_plane:
+                continue
+            if rg.layer not in principal or rg.area > principal[rg.layer].area:
                 principal[rg.layer] = rg
+        if not principal:
+            principal[main_region.layer] = main_region
         planes = {rg.rid for rg in principal.values()}
+        patches: list[dict] = []
         summary[net] = {"regions": len(regions), "islands": len(regions) - len(planes),
                         "main_area_mm2": round(area_s[main], 1),
-                        "planes": {l: round(rg.area, 1) for l, rg in sorted(principal.items())}}
+                        "planes": {l: round(rg.area, 1) for l, rg in sorted(principal.items())},
+                        "patches": patches}
 
         # which regions do selected traces run over (centre line), and how far from ties
         over: dict[int, dict[str, list[tuple[float, float]]]] = {}
@@ -422,32 +443,46 @@ def check_islands(board: Board, cfg: Config, plans: list[LayerPlan], settings: d
             common = dict(net=", ".join(sorted(lengths)), netclass=classes, layer=rg.layer, ref_layers=[rg.layer],
                           start=rg.centre, end=rg.centre, via_layers=sig_layers,
                           radius=min(5.0, max(0.5, math.sqrt(rg.area / math.pi))))
+            rules = cfg.stitch_rules()
+            profs = {n: rules.rule_for(n, cfg.netclass_of.get(n, ["Default"])) for n in lengths}
+            weak_sev = "error" if any(r.severity == "error" for r in profs.values()) else "warning"
+            ties = sorted({(round(x, 3), round(y, 3)) for x, y in rg.ties})
+            far = (max(min(math.dist((x, y), tie) for tie in ties) for pts in by_net.values() for x, y, *_ in pts)
+                   if ties else None)
+            stat = {"net": net, "layer": rg.layer, "area_mm2": round(rg.area, 1),
+                    "centre": [round(rg.centre[0], 2), round(rg.centre[1], 2)], "ties": len(ties),
+                    "ties_per_cm2": round(len(ties) / (rg.area / 100.0), 2) if rg.area else 0.0,
+                    "farthest_trace_to_tie_mm": round(far, 2) if far is not None else None,
+                    "nets": {n: round(L, 2) for n, L in sorted(lengths.items())},
+                    "profiles": sorted({r.name for r in profs.values()}), "status": "ok"}
+            patches.append(stat)
+            n_before = len(findings)
             if find_s(rid) == main:
-                n_ties = len({(round(x, 3), round(y, 3)) for x, y in rg.ties})
+                n_ties = len(ties)
                 if n_ties < opt["min_ties"]:
                     findings.append(Finding(
-                        "warning", "island_weak_tie",
-                        f"{nets_txt} over a {net} island on {rg.layer} {where}: tied to the main {net} by only {n_ties} via/pad(s); "
-                        f"the return current has to funnel through it. Add {net} vias in the island", **common))
-                elif rg.ties:
-                    far = max(min(math.dist((x, y), tie) for tie in rg.ties)
-                              for pts in by_net.values() for x, y, *_ in pts)
+                        weak_sev, "island_weak_tie",
+                        f"{nets_txt} over a {net} patch on {rg.layer} {where}: tied to the main {net} by only {n_ties} via/pad(s); "
+                        f"the return current has to funnel through it. Add {net} vias in the patch, along the trace", **common))
+                elif ties:
                     if far > opt["max_tie_distance_mm"]:
                         findings.append(Finding(
                             "warning", "island_tie_far",
-                            f"{nets_txt} over a {net} island on {rg.layer} {where}: part of the trace is {far:.1f} mm from the island's "
-                            f"nearest tie via (limit {opt['max_tie_distance_mm']:g} mm)", **common))
+                            f"{nets_txt} over a {net} patch on {rg.layer} {where}: part of the trace is {far:.1f} mm from the patch's "
+                            f"nearest tie via (limit {opt['max_tie_distance_mm']:g} mm); add {net} vias along the trace", **common))
             elif find_a(rid) == main_any:
                 weak = sorted(rg.links, key=lambda l: l[2])
                 desc = "; ".join(f"{'a neck' if k == 'neck' else 'a track'} about {w:.2f} mm wide at "
                                  f"({at[0]:.2f}, {at[1]:.2f})" for _, k, w, at in weak[:2]) or "a weak link"
                 findings.append(Finding(
                     "warning", "island_neck",
-                    f"{nets_txt} over a {net} island on {rg.layer} {where}: no via ties it to the main {net}; it reaches the plane only "
+                    f"{nets_txt} over a {net} patch on {rg.layer} {where}: no via ties it to the main {net}; it reaches the plane only "
                     f"through {desc}", **common))
             else:
                 findings.append(Finding(
                     "error", "island_floating",
                     f"{nets_txt} over {net} copper on {rg.layer} {where}: it is not connected to the main {net} at all "
                     f"(no via, pad, neck or track), so it carries no return current", **common))
+            if len(findings) > n_before:
+                stat["status"] = findings[-1].kind
     return findings, summary
