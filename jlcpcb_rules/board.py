@@ -84,6 +84,8 @@ class BoardInfo:
     has_stackup: bool = False
     default_via_filled: bool = False
     default_via_capped: bool = False
+    default_tenting: dict = field(default_factory=lambda: {"front": True, "back": True})
+    mask_expansion: float = 0.0          # board setup: solder mask expansion (pad_to_mask_clearance)
     vias: list[dict] = field(default_factory=list)
     pads: list[dict] = field(default_factory=list)
 
@@ -228,6 +230,11 @@ def read_board(path: str | Path) -> BoardInfo:
     if setup is not None:
         info.default_via_filled = _value(setup, "filling") == "yes"
         info.default_via_capped = _value(setup, "capping") == "yes"
+        tent = _tenting(_child(setup, "tenting"))
+        if tent is not None:
+            info.default_tenting = {k: (True if v is None else v) for k, v in tent.items()}
+        m = _value(setup, "pad_to_mask_clearance")
+        info.mask_expansion = float(m) if _is_number(m) else 0.0
     stackup = _child(setup, "stackup") if setup else None
     if stackup:
         info.has_stackup = True
@@ -254,7 +261,7 @@ def read_board(path: str | Path) -> BoardInfo:
             if isinstance(item, list) and item and item[0].startswith("fp_") and _value(item, "layer") == "Edge.Cuts":
                 pts += [_to_board(fx, fy, rot, x, y) for x, y in _shape_points(item)]
         for pad in _children(fp, "pad"):
-            info.pads.append(_pad_summary(fp, pad))
+            info.pads.append(_pad_summary(fp, pad, fx, fy, rot))
     if pts:
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         info.outline_bbox = (min(xs), min(ys), max(xs), max(ys))
@@ -271,11 +278,15 @@ def _via_summary(via) -> dict:
     size = _value(via, "size")
     drill = _value(via, "drill")
     at = _child(via, "at")
+    layers = _child(via, "layers")
     return {
         "type": kind,
         "at": _xy(at) if at else None,
         "diameter": float(size) if _is_number(size) else None,
         "hole": float(drill) if _is_number(drill) else None,
+        "net": _net(via),
+        "layers": [l for l in layers[1:] if isinstance(l, str)] if layers else [],
+        "tenting": _tenting(_child(via, "tenting")),     # None or {"front": bool|None, "back": ...}
         "backdrill": _child(via, "backdrill") is not None,
         "post_machining": _has_post_machining(via),
     }
@@ -286,7 +297,35 @@ def _has_post_machining(node) -> bool:
                for key in ("front_post_machining", "back_post_machining"))
 
 
-def _pad_summary(fp, pad) -> dict:
+def _net(node) -> str | None:
+    """Net name: KiCad 10 writes (net "GND"), older files (net 3 "GND")."""
+    n = _child(node, "net")
+    if n is None or len(n) < 2:
+        return None
+    if len(n) >= 3:
+        return n[2] or None
+    return None if _is_number(n[1]) else (n[1] or None)
+
+
+def _tenting(node) -> dict | None:
+    """Tenting per side: True/False, None = follow the board setup. Handles
+    (tenting (front yes) (back no)), (tenting front back) and (tenting none)."""
+    if node is None:
+        return None
+    out: dict = {"front": None, "back": None}
+    for item in node[1:]:
+        if isinstance(item, list) and len(item) > 1 and item[0] in out:
+            out[item[0]] = {"yes": True, "no": False}.get(item[1])
+        elif item in out:
+            out[item] = True
+        elif item == "none":
+            out = {"front": False, "back": False}
+    if all(isinstance(i, str) for i in node[1:]) and node[1:] and "none" not in node[1:]:
+        out = {k: (v is True) for k, v in out.items()}  # atom form lists only the tented sides
+    return out
+
+
+def _pad_summary(fp, pad, fx=0.0, fy=0.0, rot=0.0) -> dict:
     ref = None
     for prop in _children(fp, "property"):
         if len(prop) > 2 and prop[1] == "Reference":
@@ -299,6 +338,11 @@ def _pad_summary(fp, pad) -> dict:
         hole = min(nums) if nums else None
         slot = "oval" in drill[1:]
     at, size = _child(pad, "at"), _child(pad, "size")
+    layers = _child(pad, "layers")
+    local = _xy(at) if at else (0.0, 0.0)
+    angle = float(at[3]) if at is not None and len(at) > 3 and _is_number(at[3]) else 0.0
+    pad_m, fp_m = _value(pad, "solder_mask_margin"), _value(fp, "solder_mask_margin")
+    rr = _value(pad, "roundrect_rratio")
     return {
         "ref": ref,
         "footprint": fp[1] if len(fp) > 1 and isinstance(fp[1], str) else "",
@@ -306,7 +350,13 @@ def _pad_summary(fp, pad) -> dict:
         "type": pad[2] if len(pad) > 2 else None,
         "shape": pad[3] if len(pad) > 3 and isinstance(pad[3], str) else None,
         "at": _xy(at) if at else None,                      # footprint-relative
+        "xy": _to_board(fx, fy, rot, *local),               # board coordinates
+        "angle": angle,                                     # absolute pad orientation, degrees
         "size": _xy(size) if size else None,
+        "net": _net(pad),
+        "layers": [l for l in layers[1:] if isinstance(l, str)] if layers else [],
+        "rratio": float(rr) if _is_number(rr) else 0.25,
+        "mask_margin": float(pad_m) if _is_number(pad_m) else float(fp_m) if _is_number(fp_m) else None,
         "fab_property": _value(pad, "property"),
         "hole": hole,
         "slot": slot,

@@ -52,6 +52,9 @@ Decided to pay for something? Silence just that: `--accept small_via,via_in_pad`
 Board size, thickness and layer count; finish restrictions; castellated holes, HDI, backdrill,
 gold fingers; drill-step rounding (a 0.16 mm hole is drilled at 0.2 mm — is the ring still OK?);
 and per-BGA fanout feasibility (pad gap, ENIG need, tracks between balls, cheapest fanout).
+Vias beside SMD pads: same net closer than 0.1 mm when tented (`via_pad`), a mask strip below
+the JLC dam when untented (`via_mask`, solder wicking), and untented vias within 0.15 mm of
+another net's pad (`via_bridge`). Each location (pad, net, gap, via position) is listed.
 `--json` for scripts.
 
 ## Your own rules

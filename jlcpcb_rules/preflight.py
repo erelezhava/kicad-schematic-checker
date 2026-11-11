@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import math
 from collections import Counter
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from . import viapad
 from .board import BoardInfo
 from .generator import _Builder, read_profile_line
 from .profile import Profile, load_capabilities
 
+MAX_ITEMS_SHOWN = 12
 COMPARED = ("layers", "outer_oz", "inner_oz", "thickness", "finish", "mask_color")
 
 
@@ -19,6 +21,7 @@ class Finding:
     severity: str  # error | warning | info
     code: str
     message: str
+    items: list = field(default_factory=list)  # per-location details (via/pad checks)
 
 
 def run(info: BoardInfo, profile: Profile, caps: dict | None = None,
@@ -26,8 +29,8 @@ def run(info: BoardInfo, profile: Profile, caps: dict | None = None,
     c = caps or load_capabilities()
     out: list[Finding] = []
 
-    def add(sev, code, msg):
-        out.append(Finding(sev, code, msg))
+    def add(sev, code, msg, items=None):
+        out.append(Finding(sev, code, msg, items or []))
 
     p = profile
     # Layers
@@ -165,6 +168,7 @@ def run(info: BoardInfo, profile: Profile, caps: dict | None = None,
         _bga(info, p, c, add)
     except ValueError as exc:  # unsupported stackup, already reported above
         add("info", "skipped", f"drill-step and BGA checks skipped: {exc}")
+    _via_to_pad(info, p, c, add)
 
     # Rules file
     if rules_path is not None:
@@ -189,6 +193,32 @@ def run(info: BoardInfo, profile: Profile, caps: dict | None = None,
                     add("info", "rules", f"{rules_path.name} matches the board stackup "
                         f"(tier {installed.tier})")
     return out
+
+
+def _via_to_pad(info: BoardInfo, p: Profile, c: dict, add) -> None:
+    """Vias beside SMD pads: wicking (same net) and bridging (different net, untented)."""
+    dam = _Builder(p, c).mask_dam()
+    found = viapad.check(info, c, dam)
+    same_min = c["assembly"]["via_to_smd_pad_same_net_tented"]
+    diff_min = c["clearance"]["smd_pad_to_pad_diff_net"]
+    if found["same_tented"]:
+        rows = found["same_tented"]
+        add("warning", "via_pad", f"{len(rows)} tented vias closer than {same_min:g} mm (copper) to an SMD pad "
+            "of the same net: solder can reach the via at the pad edge. Move the via out.", rows)
+    if found["same_untented"]:
+        rows = found["same_untented"]
+        add("warning", "via_mask", f"{len(rows)} untented vias beside a same-net SMD pad with a mask strip "
+            f"under the {dam:g} mm JLC dam: JLC removes the strip and the via wicks solder off the pad. "
+            "Tent the via or move it to the gap shown.", rows)
+    if found["diff_untented"]:
+        rows = found["diff_untented"]
+        add("warning", "via_bridge", f"{len(rows)} untented vias closer than {diff_min:g} mm (copper) to an SMD "
+            "pad of another net: an exposed via acts as a pad (JLC SMD pad-to-pad minimum). "
+            "Tent the via or move it.", rows)
+    if not any(found.values()):
+        add("info", "via_pad", "vias beside SMD pads: no wicking or bridging risk found "
+            f"(same net tented >= {same_min:g} mm, untented mask dam >= {dam:g} mm, "
+            f"other net untented >= {diff_min:g} mm)")
 
 
 def round_up_to_step(hole: float, step: float) -> float:
@@ -304,6 +334,10 @@ def format_text(findings: list[Finding], profile: Profile) -> str:
     lines = ["JLCPCB preflight", "Detected: " + "; ".join(profile.notes), ""]
     for f in sorted(findings, key=lambda f: order[f.severity]):
         lines.append(f"[{f.severity.upper():7}] {f.code:<12} {f.message}")
+        shown = f.items[:MAX_ITEMS_SHOWN]
+        lines += [f"{'':22}- {viapad.describe(i)}" for i in shown]
+        if len(f.items) > len(shown):
+            lines.append(f"{'':22}- ... {len(f.items) - len(shown)} more in preflight JSON")
     n = Counter(f.severity for f in findings)
     lines += ["", f"{n.get('error', 0)} errors, {n.get('warning', 0)} warnings"]
     return "\n".join(lines)

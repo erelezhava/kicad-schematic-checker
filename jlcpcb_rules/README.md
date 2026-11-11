@@ -83,6 +83,15 @@ Once you have decided to pay for an option, silence just that one with `--accept
   - the cheapest fanout that fits: dog-bone with free vias, dog-bone with paid small vias, via-in-pad (filled + capped), or HDI microvias
   
   Each result is printed next to JLC's pitch guide (0.8 / 0.65 / 0.5 / 0.4 mm).
+- **Via beside an SMD pad** (`jlcpcb_rules/viapad.py`). Copper gap is via ring edge to pad edge; tenting is read per via (else Board Setup), mask expansion per pad (else Board Setup). A via whose centre is inside the pad is left to the via-in-pad DRC rule.
+
+  | Code | Case | Warns when |
+  | --- | --- | --- |
+  | `via_pad` | same net, tented via | copper gap < 0.1 mm (`assembly.via_to_smd_pad_same_net_tented`; team practice, JLC publishes no same-net rule) |
+  | `via_mask` | same net, untented via | mask strip (gap − via expansion − pad expansion) < JLC mask dam: JLC removes the strip and the via wicks solder |
+  | `via_bridge` | different net, untented via | copper gap < 0.15 mm (JLC SMD pad-to-pad): an exposed via behaves as a pad |
+
+  Different nets with a tented via stay with the DRC: via hole to copper 0.2 mm **and** copper to copper (0.09 mm on 4L 1 oz), whichever is stricter. Every location is listed in `preflight --json` (`items`). Make the JLC order's via covering match the design (tented vias in KiCad → order "Tented").
 
 ## How it fits KiCad's rule engine (read this before editing)
 

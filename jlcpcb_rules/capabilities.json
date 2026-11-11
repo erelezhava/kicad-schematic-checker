@@ -248,5 +248,9 @@
     "hasl_not_hdi_from_layers": 6,
     "osp_not_single_sided": true,
     "plated_edge_requires": "ENIG"
+  },
+  "assembly": {
+    "_about": "Assembly practice used by the preflight, not a JLC-published limit. JLC publishes no same-net via-to-pad rule; this is the minimum copper gap from a tented via ring to an SMD pad of the same net.",
+    "via_to_smd_pad_same_net_tented": 0.1
   }
 }
