@@ -64,7 +64,7 @@ python3 -m kicad_checker inventory-check ~/projects/board/board.kicad_pro --stoc
 | `run PROJECT [--checks …] [--offline] [-y]` | optional | All checks (schematic, DigiKey, JLCPCB rules + DRC, refplane, MCU pins vs CubeMX, datasheets) into `<project>_report_R<n>/` next to the `.kicad_pro`, with `summary.md` and full `run.log`. See [docs/13](docs/13-run-all.md) |
 | `extract PROJECT --output DIR` | no | Netlist, pins, fields and ERC via `kicad-cli`; identification and description audits |
 | `import-netlist NETLIST.xml --output DIR` | no | Same audits from an exported netlist (no ERC, no freshness check) |
-| `digikey-fetch CIRCUIT [--refresh]` | yes | Look up every unique MPN once and cache it |
+| `digikey-fetch CIRCUIT [--refresh] [--max-age DAYS]` | yes | Look up every unique MPN and cache it; answers older than 30 days and failed lookups are asked again |
 | `digikey-check CIRCUIT --output DIR` | no | Compare cached DigiKey data with the schematic |
 | `parts-search REQUEST.json --output DIR [--online] [--replace MPN]` | optional | Search any catalog category; screen supplied requirements and count distinct stocked candidates |
 | `parts-stock MPN --manufacturer NAME --output DIR [--online]` | optional | Exact-part stock and lifecycle, suppliers kept separate |

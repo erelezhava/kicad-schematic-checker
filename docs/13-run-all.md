@@ -54,6 +54,11 @@ them.
 - JLCPCB: rules are generated **into the report** and DRC runs on a temporary copy of the board
   with those rules. Your own `<board>.kicad_dru` is not created or changed. Install the rules into
   KiCad with `python3 -m jlcpcb_rules install` when you want them there.
+  The copy gets the project's `fp-lib-table` / `sym-lib-table` with `${KIPRJMOD}` pointing at
+  your real project folder, so project-local footprint libraries are still found. Violations you
+  excluded in KiCad are listed as a count and not added to the errors or warnings.
+- Documents and CubeMX files are searched in the project folder and its parents up to the git
+  root. Without a git repository: the project folder and the one above it. Never the home folder.
 - refplane: if you answer its questions interactively it may offer to save them to
   `<board>.refplane.json` next to the board, as it does when run on its own.
 

@@ -9,6 +9,8 @@ readable by any AI assistant and runnable with the Python standard library.
   `AGENT_GUIDE.md` describes the separate schematic-review workflow and source policy.
 - Verify changes with `python3 -m unittest discover -s tests`. Tests are offline;
   mock HTTP and credentials. Never make supplier calls as part of a unit test.
+  `ruff check .` must pass too (settings in `pyproject.toml`); GitHub Actions runs both on
+  Python 3.10 to 3.14 (`.github/workflows/tests.yml`).
 - The sourcing CLI is offline by default. `--online` explicitly requests fresh,
   read-only supplier requests. Document which integrations were actually tested live.
 - Never display `.env`, secrets, authorization headers, credential exports, or

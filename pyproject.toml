@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kicad-schematic-checker"
+dynamic = ["version"]
+description = "Checks for KiCad designs: part data, DigiKey cross-check, JLCPCB rules, reference planes, MCU pins"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []          # standard library only; KiCad's kicad-cli is found at run time
+# No licence chosen yet: add a LICENSE file and a `license` entry here before publishing.
+
+[project.scripts]
+kicad-check = "kicad_checker.cli:main"
+refplane = "refplane.cli:main"
+jlcpcb-rules = "jlcpcb_rules.cli:main"
+
+[tool.setuptools]
+packages = ["kicad_checker", "kicad_checker.sourcing", "refplane", "jlcpcb_rules"]
+
+[tool.setuptools.dynamic]
+version = { attr = "kicad_checker.__version__" }
+
+[tool.setuptools.package-data]
+kicad_checker = ["*.json"]
+refplane = ["*.json"]
+jlcpcb_rules = ["*.json", "presets/*.kicad_dru"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 140
+extend-exclude = ["archive", "runs", "cache"]
+
+[tool.ruff.lint]
+select = ["F", "E9"]       # real errors: unused or undefined names, syntax

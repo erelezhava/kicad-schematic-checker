@@ -7,6 +7,14 @@ import re
 _TOKEN = re.compile(r'\(|\)|"(?:[^"\\]|\\.)*"|[^\s()"]+')
 
 
+_ESCAPES = {"n": "\n", "t": "\t", "r": "\r"}
+
+
+def _unescape(body: str) -> str:
+    """KiCad string escapes (\\" \\\\ \\n). Non-ASCII text is left exactly as written."""
+    return re.sub(r"\\(.)", lambda m: _ESCAPES.get(m.group(1), m.group(1)), body, flags=re.S)
+
+
 def parse_sexpr(text: str):
     """Parse S-expression text into nested lists. Strings lose their quotes."""
     stack: list[list] = [[]]
@@ -20,8 +28,7 @@ def parse_sexpr(text: str):
             node = stack.pop()
             stack[-1].append(node)
         elif tok.startswith('"'):
-            stack[-1].append(bytes(tok[1:-1], "utf-8").decode("unicode_escape")
-                             if "\\" in tok else tok[1:-1])
+            stack[-1].append(_unescape(tok[1:-1]) if "\\" in tok else tok[1:-1])
         else:
             stack[-1].append(tok)
     if len(stack) != 1:

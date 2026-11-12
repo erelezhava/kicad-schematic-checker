@@ -177,7 +177,7 @@ class CacheAndClientTests(unittest.TestCase):
         circuit = {"components": {"R1": part("R1", "10k", MPN="AF0402FR-0710KL"), "R2": part("R2", "10k", MPN="AF0402FR-0710KL")}}
         with tempfile.TemporaryDirectory() as folder:
             summary = digikey.fetch(circuit, folder, client, log=lambda *_: None)
-            self.assertEqual(summary, {"fetched": 1, "cached": 0, "errors": 0})  # one call per unique MPN
+            self.assertEqual(summary, {"fetched": 1, "cached": 0, "errors": 0, "not_attempted": 0})  # one call per unique MPN
             self.assertEqual(sum(url.endswith("/token") for _, url in calls), 2)  # re-authenticated after 401
             again = digikey.fetch(circuit, folder, client, log=lambda *_: None)
             self.assertEqual(again["cached"], 1)

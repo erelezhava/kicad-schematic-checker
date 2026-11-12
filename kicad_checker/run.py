@@ -21,12 +21,10 @@ The design files are only read. Exit code: 0 nothing open, 1 a check failed, 2 o
 from __future__ import annotations
 
 import argparse
-import contextlib
 import datetime as _dt
 import io
 import json
 import logging
-import os
 import platform
 import re
 import shutil
@@ -38,9 +36,9 @@ import traceback
 from collections import Counter
 from pathlib import Path
 
-from . import credentials, digikey
+from . import credentials
 from .core import digest, read_json, write_json
-from .paths import CHECKER_ROOT
+from .paths import CHECKER_ROOT, search_folders
 
 STEPS = ("schematic", "digikey", "jlcpcb", "refplane", "mcu_pins", "datasheets")
 FOLDERS = {"schematic": "01_schematic", "digikey": "02_digikey", "jlcpcb": "03_jlcpcb", "refplane": "04_refplane",
@@ -93,8 +91,8 @@ def next_report_dir(pro: Path) -> Path:
 # --------------------------------------------------------------------------- logging
 
 def _secrets() -> list[str]:
-    """Values of every configured credential (names from .env.example), longest first."""
-    names = set()
+    """Values of every configured credential (known names plus .env.example), longest first."""
+    names = set(credentials.KNOWN_KEYS)
     example = CHECKER_ROOT / ".env.example"
     if example.is_file():
         for line in example.read_text(encoding="utf-8").splitlines():
@@ -205,8 +203,6 @@ def step_schematic(ctx) -> tuple[int, list[str]]:
     ident = read_json(out / "identification.json")["coverage"]
     desc = read_json(out / "description.json")["coverage"]
     erc = read_json(out / "erc-summary.json")
-    owner = (out / "owner-actions.md").read_text(encoding="utf-8")
-    n_owner = len(re.findall(r"^#{2,3} ", owner, re.M))
     erc_err = sum(n for k, n in erc["counts"].items() if k.startswith("error:"))
     erc_warn = sum(n for k, n in erc["counts"].items() if k.startswith("warning:"))
     notes = [f"identification: {_fmt(ident)}", f"description: {_fmt(desc)}",
@@ -243,7 +239,7 @@ def _fill_hint(ctx, report_file: Path) -> list[str]:
     """How many empty Manufacturer fields DigiKey can fill, and the command (nothing is written)."""
     from . import fill
     try:
-        plans, lines, total = fill.plan(ctx["pro"], read_json(report_file))
+        _plans, lines, total = fill.plan(ctx["pro"], read_json(report_file))
     except (OSError, ValueError) as exc:
         log.info("fill-manufacturer preview failed: %s", exc)
         return []
@@ -290,25 +286,38 @@ def step_jlcpcb(ctx) -> tuple[int, list[str]]:
     return max(code, drc_code), notes + drc_notes
 
 
-def _drc(pcb: Path, rules: Path, out: Path) -> tuple[int, list[str]]:
-    cli = _kicad_cli()
-    if not cli:
-        return 2, ["DRC not run: kicad-cli not found"]
-    with tempfile.TemporaryDirectory(prefix="kicad-drc-") as tmp:
-        tmp = Path(tmp)
-        for suffix in (".kicad_pcb", ".kicad_pro", ".kicad_prl"):
-            if pcb.with_suffix(suffix).is_file():
-                shutil.copy2(pcb.with_suffix(suffix), tmp / (pcb.stem + suffix))
-        shutil.copy2(rules, tmp / (pcb.stem + ".kicad_dru"))
-        cmd = [cli, "pcb", "drc", "--severity-all", "--format", "json", "--output", str(out / "drc.json"),
-               str(tmp / pcb.name)]
-        _logged_run(cmd, timeout=600)
-    if not (out / "drc.json").is_file():
-        return 3, ["DRC failed: kicad-cli wrote no report, see run.log"]
-    data = read_json(out / "drc.json")
-    rows = Counter()
-    worst: dict = {}
+PROJECT_TABLES = ("fp-lib-table", "sym-lib-table")
+
+
+def copy_for_drc(pcb: Path, rules: Path, tmp: Path) -> Path:
+    """Copy what DRC needs into `tmp` and put the JLC rules next to the copy.
+
+    The project's library tables come along with ${KIPRJMOD} replaced by the real project
+    folder, so project-local footprint libraries still resolve from the temporary copy and
+    KiCad's library checks report the board, not the missing folder.
+    """
+    for suffix in (".kicad_pcb", ".kicad_pro", ".kicad_prl"):
+        if pcb.with_suffix(suffix).is_file():
+            shutil.copy2(pcb.with_suffix(suffix), tmp / (pcb.stem + suffix))
+    project_dir = pcb.parent.resolve().as_posix()
+    for name in PROJECT_TABLES:
+        table = pcb.parent / name
+        if table.is_file():
+            text = table.read_text(encoding="utf-8", errors="replace")
+            text = text.replace("${KIPRJMOD}", project_dir).replace("$(KIPRJMOD)", project_dir)
+            (tmp / name).write_text(text, encoding="utf-8")
+    shutil.copy2(rules, tmp / (pcb.stem + ".kicad_dru"))
+    return tmp / pcb.name
+
+
+def summarize_drc(data: dict) -> dict:
+    """Group kicad-cli DRC violations into one row per rule. Violations the designer excluded in
+    KiCad are counted apart and never as errors or warnings."""
+    rows, worst, excluded = Counter(), {}, 0
     for v in data.get("violations", []):
+        if v.get("excluded") or v.get("severity") == "exclusion":
+            excluded += 1
+            continue
         desc = v.get("description", "")
         m = re.search(r";?\s*actual (-?[0-9.]+) mm", desc)
         desc = re.sub(r";?\s*actual -?[0-9.]+ mm", "", desc)  # one row per rule, not per measured value
@@ -316,14 +325,32 @@ def _drc(pcb: Path, rules: Path, out: Path) -> tuple[int, list[str]]:
         rows[k] += 1
         if m:
             worst[k] = min(worst.get(k, float("inf")), float(m.group(1)))
-    unconnected = len(data.get("unconnected_items", []))
+    unconnected = [u for u in data.get("unconnected_items", []) if not u.get("excluded")]
+    excluded += len(data.get("unconnected_items", [])) - len(unconnected)
     sev = Counter()
     for (s, _, _), n in rows.items():
         sev[s] += n
+    return {"rows": rows, "worst": worst, "severity": sev, "unconnected": len(unconnected), "excluded": excluded}
+
+
+def _drc(pcb: Path, rules: Path, out: Path) -> tuple[int, list[str]]:
+    cli = _kicad_cli()
+    if not cli:
+        return 2, ["DRC not run: kicad-cli not found (put it on PATH or set KICAD_CLI)"]
+    with tempfile.TemporaryDirectory(prefix="kicad-drc-") as tmp:
+        board = copy_for_drc(pcb, rules, Path(tmp))
+        cmd = [cli, "pcb", "drc", "--severity-all", "--format", "json", "--output", str(out / "drc.json"), str(board)]
+        _logged_run(cmd, timeout=600)
+    if not (out / "drc.json").is_file():
+        return 3, ["DRC failed: kicad-cli wrote no report, see run.log"]
+    summary = summarize_drc(read_json(out / "drc.json"))
+    rows, worst, sev, unconnected = summary["rows"], summary["worst"], summary["severity"], summary["unconnected"]
     lines = ["# DRC with JLCPCB rules", "",
              f"Board: `{pcb.name}`, rules: `{rules.name}` (applied to a temporary copy; the project was not changed).", "",
-             f"- errors: {sev.get('error', 0)}", f"- warnings: {sev.get('warning', 0)}", f"- unconnected items: {unconnected}", "",
-             "| Severity | Type | Description | Count | Worst actual |", "| --- | --- | --- | --- | --- |"]
+             f"- errors: {sev.get('error', 0)}", f"- warnings: {sev.get('warning', 0)}", f"- unconnected items: {unconnected}"]
+    if summary["excluded"]:
+        lines.append(f"- excluded in KiCad by the designer (not counted above): {summary['excluded']}")
+    lines += ["", "| Severity | Type | Description | Count | Worst actual |", "| --- | --- | --- | --- | --- |"]
     order = {"error": 0, "warning": 1}
     for (s, t, d), n in sorted(rows.items(), key=lambda kv: (order.get(kv[0][0], 2), -kv[1])):
         w = f"{worst[(s, t, d)]:g} mm" if (s, t, d) in worst else ""
@@ -331,7 +358,8 @@ def _drc(pcb: Path, rules: Path, out: Path) -> tuple[int, list[str]]:
     (out / "drc.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"DRC: {sev.get('error', 0)} errors, {sev.get('warning', 0)} warnings, {unconnected} unconnected")
     code = 1 if sev.get("error") else 2 if (sev.get("warning") or unconnected) else 0
-    return code, [f"DRC (JLC rules): {sev.get('error', 0)} errors, {sev.get('warning', 0)} warnings, {unconnected} unconnected"]
+    return code, [f"DRC (JLC rules): {sev.get('error', 0)} errors, {sev.get('warning', 0)} warnings, {unconnected} unconnected"
+                  + (f", {summary['excluded']} excluded" if summary["excluded"] else "")]
 
 
 def step_refplane(ctx) -> tuple[int, list[str]]:
@@ -406,12 +434,9 @@ def step_mcu_pins(ctx) -> tuple[int, list[str]]:
 def step_datasheets(ctx) -> tuple[int, list[str]]:
     from . import datasheets
     circuit = _circuit(ctx)
-    folders, folder = [], ctx["pro"].parent
-    for _ in range(4):  # docs/ next to the project and up to the repository root
+    folders = []
+    for folder in search_folders(ctx["pro"].parent):  # docs/ next to the project and up to the repository root
         folders += datasheets.project_doc_folders(folder)
-        if (folder / ".git").exists() or folder.parent == folder:
-            break
-        folder = folder.parent
     out = ctx["root"] / FOLDERS["datasheets"]
     print(f"$ python3 -m kicad_checker datasheet-fetch {circuit} --output {out}"
           + "".join(f" --docs {f}" for f in folders) + (" --offline" if ctx["offline"] else ""))
@@ -424,6 +449,10 @@ def step_datasheets(ctx) -> tuple[int, list[str]]:
     missing = [r["mpn"] for r in report["results"] if r["status"] != "found"]
     if missing:
         notes.append("missing: " + ", ".join(missing[:8]) + (" ..." if len(missing) > 8 else ""))
+    weak = [r["mpn"] for r in report["results"] if r.get("verify")]
+    if weak:
+        notes.append(f"{len(weak)} matched by document text or family name only, confirm it is the right PDF: "
+                     + ", ".join(weak[:8]) + (" ..." if len(weak) > 8 else ""))
     return (0 if not missing else 2), notes
 
 

@@ -16,7 +16,7 @@ from kicad_checker.cli import main
 from kicad_checker.sourcing.cli import jlc_observations, lcsc_observations
 from kicad_checker.sourcing.jlc_auth import JLCPCBAuthenticator
 from kicad_checker.sourcing.lcsc import LCSCStock, auth_headers
-from kicad_checker.sourcing.providers import DigiKeyCatalog, JLCPCBStock, digikey_offers, load_offers
+from kicad_checker.sourcing.providers import DigiKeyCatalog, JLCPCBStock, load_offers
 from kicad_checker.sourcing.requirements import package_matches, validate_request
 from kicad_checker.sourcing.service import fresh, markdown, search_report, stock_report
 

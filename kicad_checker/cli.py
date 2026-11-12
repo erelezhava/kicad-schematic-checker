@@ -7,7 +7,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from . import datasheets, digikey
+from . import __version__, datasheets, digikey
 from . import cubemx, fill
 from . import run as run_all
 from .sourcing import cli as sourcing_cli
@@ -71,9 +71,11 @@ def extract(args, allow_inside_project=False):
     output = Path(args.output).resolve()
     if output == source.parent or (source.parent in output.parents and not allow_inside_project):
         raise ValueError("Choose an output directory outside the source project")
-    executable = shutil.which("kicad-cli")
+    from refplane.cli import find_kicad_cli  # the one finder: KICAD_CLI, PATH, usual install folders
+    executable = find_kicad_cli()
     if not executable:
-        raise ValueError("Install KiCad and put kicad-cli on PATH")
+        raise ValueError("kicad-cli not found: install KiCad and put kicad-cli on PATH, or set the KICAD_CLI "
+                         "environment variable to its full path")
     # Record the active design (root sheet, referenced sub-sheets, project file) to detect
     # edits during extraction and stale reviews. KiCad's .history copies are not the design.
     inputs = design_files(source)
@@ -104,8 +106,21 @@ def extract(args, allow_inside_project=False):
     return 0
 
 
+def _utf8_console():
+    """Reports use characters such as ≥, µ and →. A console or pipe with a legacy code page
+    (Windows cp1252) must not turn them into a crash."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if (stream.encoding or "").lower().replace("-", "") != "utf8":
+                stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass  # a replaced stream (tests, the run log tee): leave it alone
+
+
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="KiCad schematic checker v0.1 — portable evidence-based review")
+    _utf8_console()
+    parser = argparse.ArgumentParser(description=f"KiCad schematic checker v{__version__} — portable evidence-based review")
+    parser.add_argument("--version", action="version", version=f"kicad-schematic-checker {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
     sourcing_cli.add_commands(sub)
     sourcing_bom.add_command(sub)
@@ -132,6 +147,8 @@ def main(argv=None):
     command.add_argument("circuit")
     command.add_argument("--cache", default=str(digikey.DEFAULT_CACHE), help=f"Cache folder (default {digikey.DEFAULT_CACHE})")
     command.add_argument("--refresh", action="store_true", help="Query again even when a cached entry exists")
+    command.add_argument("--max-age", type=float, default=digikey.MAX_AGE_DAYS, metavar="DAYS",
+                         help=f"Ask again for cached answers older than this (default {digikey.MAX_AGE_DAYS}; 0 = keep any age)")
     command = sub.add_parser("datasheet-fetch", help="Find each part's datasheet: project docs first, shared cache, then download")
     command.add_argument("circuit")
     command.add_argument("--output", required=True)
@@ -173,8 +190,10 @@ def main(argv=None):
         if args.command == "digikey-fetch":
             circuit = read_json(args.circuit)
             client = digikey.DigiKeyClient(*digikey.load_credentials())
-            summary = digikey.fetch(circuit, Path(args.cache), client, refresh=args.refresh)
-            print(f"DigiKey: fetched={summary['fetched']}, already cached={summary['cached']}, errors={summary['errors']}; cache {Path(args.cache).resolve()}")
+            summary = digikey.fetch(circuit, Path(args.cache), client, refresh=args.refresh, max_age_days=args.max_age)
+            print(f"DigiKey: fetched={summary['fetched']}, already cached={summary['cached']}, errors={summary['errors']}"
+                  + (f", not asked (rate limit)={summary['not_attempted']}" if summary["not_attempted"] else "")
+                  + f"; cache {Path(args.cache).resolve()}")
             return 3 if summary["errors"] else 0
         if args.command == "datasheet-fetch":
             circuit = read_json(args.circuit)

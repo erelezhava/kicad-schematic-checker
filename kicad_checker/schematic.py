@@ -26,7 +26,11 @@ class Node:
         return [i for i in self.items if isinstance(i, tuple) and i[0] == "str"]
 
 
+_ESCAPES = {"n": "\n", "t": "\t", "r": "\r"}
+
+
 def parse(text):
+    """Parse a .kicad_sch. A damaged file (cut off, unbalanced) raises ValueError, never IndexError."""
     stack, root, i, n = [], None, 0, len(text)
     while i < n:
         c = text[i]
@@ -37,37 +41,45 @@ def parse(text):
             stack.append(node)
             i += 1
         elif c == ")":
+            if not stack:
+                raise ValueError("not a valid KiCad schematic: unexpected ')'")
             node = stack.pop()
             node.end = i + 1
             if not stack:
                 root = node
             i += 1
+        elif c.isspace():
+            i += 1
+        elif not stack:
+            raise ValueError("not a KiCad schematic")
         elif c == '"':
             j, buf = i + 1, []
-            while text[j] != '"':
-                if text[j] == "\\":
-                    buf.append(text[j + 1])
+            while j < n and text[j] != '"':
+                if text[j] == "\\" and j + 1 < n:
+                    buf.append(_ESCAPES.get(text[j + 1], text[j + 1]))
                     j += 2
                 else:
                     buf.append(text[j])
                     j += 1
+            if j >= n:
+                raise ValueError("not a valid KiCad schematic: text is cut off inside a string")
             stack[-1].items.append(("str", "".join(buf), i, j + 1))
             i = j + 1
-        elif c.isspace():
-            i += 1
         else:
             j = i
             while j < n and not text[j].isspace() and text[j] not in '()"':
                 j += 1
             stack[-1].items.append(("atom", text[i:j], i, j))
             i = j
+    if stack:
+        raise ValueError("not a valid KiCad schematic: the file is cut off (unbalanced parentheses)")
     if root is None or root.head != "kicad_sch":
         raise ValueError("not a KiCad schematic")
     return root
 
 
 def quote(value):
-    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n") + '"'
 
 
 def key(name):

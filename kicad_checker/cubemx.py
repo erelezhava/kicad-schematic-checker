@@ -5,14 +5,20 @@
 For every pin CubeMX assigns (signal and optional GPIO label) the schematic net on that pin is
 compared, and every port pin the schematic connects is checked against CubeMX:
 
-  fail          a configured pin sits on a power or ground net (a driven output there is a short)
+  fail          a pin CubeMX drives (GPIO_Output, UART TX, MCO) is tied to a supply rail or ground
+  needs_review  configured with a signal of unknown direction but tied to a rail
   needs_review  configured in CubeMX but unconnected in the schematic
                 net name does not resemble the CubeMX signal or label (a lead, not a verdict:
                 e.g. UART TX/RX or SPI MISO/MOSI swapped, or just a different naming style)
                 connected in the schematic to a signal net but not configured in CubeMX
                 pin assigned in CubeMX that the schematic symbol does not have (package mismatch)
   pass          configured pin connected to a net whose name matches the signal or label
-  info          unused port pin tied to a power or ground net (common for unused pins)
+  info          unused port pin, or an input (GPIO_Input, ADC, EXTI, RX), tied to a rail:
+                normal for straps and supply sensing
+
+A net is a rail when another pin on it is a power pin in the schematic (pin type power_in /
+power_out), or when its name is exactly a rail name (GND, VDD, +3V3 ...). A name that merely
+contains one (VBAT_SENSE, VDD_EN, +3V3_PG) is an ordinary signal.
 
 Only port pins (PA0..PK15) are compared; power, NRST, BOOT0 and VCAP are left to datasheet rules.
 """
@@ -23,9 +29,14 @@ import re
 from pathlib import Path
 
 from .core import read_json, write_json
+from .paths import search_folders
 
-PORT_PIN = re.compile(r"^P([A-K])(\d{1,2})")
-POWER_NET = re.compile(r"(^|/)(GND\w*|VSS\w*|AGND|DGND|PGND|VDD\w*|VCC\w*|VBAT\w*|V?\+\d[\w.]*|\+\w+|\d+V\d*)$", re.I)
+# PC2_C / PC3_C (STM32H7) are separate pins from PC2 / PC3: the suffix is part of the pin.
+PORT_PIN = re.compile(r"^P([A-K])(\d{1,2})(_C(?![A-Za-z0-9]))?")
+# Exact rail names only. Used when the schematic gives no pin types for the net.
+RAIL_NAME = re.compile(r"(^|/)(GND[AD]?\d?|[ADP]GND|VSS[A-Z]?|VDD[A-Z]?|VCC[A-Z]?|VBAT|VBUS|"
+                       r"\+?\d+V\d*[A-Z]?|\+\d+\.\d+V)$", re.I)
+POWER_PIN_TYPES = ("power_in", "power_out")
 # Name variants treated as equal when comparing a net with a CubeMX signal or label.
 SYNONYMS = [(r"QUADSPI", "QSPI"), (r"OCTOSPI", "OSPI"), (r"BANK", "BK"), (r"D\+|DP\b", "DP"),
             (r"D-|DM\b", "DM"), (r"JTMS-SWDIO|JTMS_SWDIO", "SWDIO"), (r"JTCK-SWCLK|JTCK_SWCLK", "SWCLK"),
@@ -52,7 +63,7 @@ def read_ioc(path) -> dict:
         m = PORT_PIN.match(name)
         if not m or attr not in ("Signal", "Mode", "GPIO_Label"):
             continue
-        pin = f"P{m.group(1)}{int(m.group(2))}"
+        pin = _pin_key(m)
         entry = pins.setdefault(pin, {"ioc_name": name})
         entry[{"Signal": "signal", "Mode": "mode", "GPIO_Label": "label"}[attr]] = v
     pins = {p: e for p, e in pins.items() if e.get("signal")}
@@ -60,17 +71,17 @@ def read_ioc(path) -> dict:
     return {"mcu": mcu, "pins": pins, "path": str(path)}
 
 
+def _pin_key(m: re.Match) -> str:
+    return f"P{m.group(1)}{int(m.group(2))}{'_C' if m.group(3) else ''}"
+
+
 def find_ioc(project_file) -> list[Path]:
-    """.ioc files in the KiCad project folder and up to the repository root (max 3 levels)."""
-    start = Path(project_file).resolve().parent
-    found, folder = [], start
-    for _ in range(4):
+    """.ioc files in the KiCad project folder and up to the repository root (see paths.search_folders)."""
+    found = []
+    for folder in search_folders(Path(project_file).resolve().parent):
         found += [p for p in folder.rglob("*.ioc")
                   if not any(part.startswith(".") or re.search(r"_report_R\d+$", part)
                              for part in p.relative_to(folder).parts)]
-        if (folder / ".git").exists() or folder.parent == folder:
-            break
-        folder = folder.parent
     return sorted(set(found))
 
 
@@ -107,20 +118,45 @@ def find_mcu(circuit: dict, ioc: dict, ref: str | None = None) -> str:
 
 
 def mcu_pins(circuit: dict, ref: str) -> dict:
-    """{"PA11": {"ball": "C10", "symbol_name": "PA11", "net": "...", "connected": bool, "others": n}}."""
+    """{"PA11": {"ball": "C10", "symbol_name": "PA11", "net": "...", "connected": bool, "rail": bool, "others": n}}."""
     comp = circuit["components"][ref]
-    members = {n["name"]: len(n.get("nodes", [])) for n in circuit.get("nets", [])}
+    nodes = {n["name"]: n.get("nodes", []) for n in circuit.get("nets", [])}
     out = {}
     for ball, info in (comp.get("symbol_pins") or {}).items():
         m = PORT_PIN.match(info.get("name") or "")
         if not m:
             continue
-        pin = f"P{m.group(1)}{int(m.group(2))}"
+        pin = _pin_key(m)
         net = (comp.get("pins") or {}).get(ball, {}).get("net")
-        connected = bool(net) and not net.startswith("unconnected-") and members.get(net, 1) > 1
+        members = nodes.get(net, [])
+        connected = bool(net) and not net.startswith("unconnected-") and (len(members) > 1 if net in nodes else False)
         out[pin] = {"ball": ball, "symbol_name": info.get("name"), "net": net, "connected": connected,
-                    "others": max(members.get(net, 1) - 1, 0) if net else 0}
+                    "rail": connected and is_rail(net, members, ref, ball),
+                    "others": max(len(members) - 1, 0) if net else 0}
     return out
+
+
+def is_rail(net: str, nodes: list[dict], ref: str, ball: str) -> bool:
+    """A supply rail or ground: another pin on the net is a power pin, or the name is exactly a rail name."""
+    for node in nodes:
+        if (node.get("ref"), node.get("pin")) == (ref, ball):
+            continue
+        if str(node.get("pintype", "")).split("+")[0] in POWER_PIN_TYPES:
+            return True
+    return bool(RAIL_NAME.search(net or ""))
+
+
+def drives(signal: str) -> bool:
+    """CubeMX signals that certainly drive the pin."""
+    s = (signal or "").upper()
+    return s == "GPIO_OUTPUT" or s.endswith(("_TX", "_TXD")) or s.startswith("RCC_MCO")
+
+
+def senses(signal: str) -> bool:
+    """CubeMX signals that certainly only read the pin."""
+    s = (signal or "").upper()
+    return (s in ("GPIO_INPUT", "GPIO_ANALOG") or s.startswith(("ADC", "GPXTI", "COMP", "SYS_WKUP", "RTC_TAMP"))
+            or s.endswith(("_RX", "_RXD", "_VBUS")))
 
 
 # --------------------------------------------------------------------------- comparison
@@ -159,8 +195,20 @@ def name_match(net: str, signal: str, label: str | None) -> tuple[bool, str]:
     return False, "net name does not resemble the CubeMX signal or label"
 
 
+def _pair_c_pins(cfg_pins: dict, sch_pins: dict) -> dict:
+    """Symbols and CubeMX do not always agree on the _C suffix (PC2_C on one side, PC2 on the other).
+    When only one of the two names exists on each side they are the same pin: use the CubeMX name."""
+    out = dict(sch_pins)
+    for pin in cfg_pins:
+        other = pin[:-2] if pin.endswith("_C") else pin + "_C"
+        if pin not in out and other in out and other not in cfg_pins:
+            out[pin] = out.pop(other)
+    return out
+
+
 def compare(ioc: dict, pins: dict) -> list[dict]:
     rows = []
+    pins = _pair_c_pins(ioc["pins"], pins)
     for pin in sorted(set(ioc["pins"]) | set(pins), key=_pin_order):
         cfg, sch = ioc["pins"].get(pin), pins.get(pin)
         row = {"pin": pin, "ball": sch["ball"] if sch else None, "net": sch["net"] if sch else None,
@@ -171,12 +219,18 @@ def compare(ioc: dict, pins: dict) -> list[dict]:
                                                      "pin (different package or symbol?)")
         elif cfg and not sch["connected"]:
             row.update(status="needs_review", reason="configured in CubeMX, unconnected in the schematic")
-        elif cfg and POWER_NET.search(sch["net"] or ""):
-            row.update(status="fail", reason=f"configured as {cfg['signal']} but tied to {sch['net']}")
+        elif cfg and sch["rail"] and drives(cfg["signal"]):
+            row.update(status="fail", reason=f"configured as {cfg['signal']} (drives the pin) but tied to the rail "
+                                             f"{sch['net']}: a short when the output is at the other level")
+        elif cfg and sch["rail"] and senses(cfg["signal"]):
+            row.update(status="info", reason=f"input {cfg['signal']} tied to {sch['net']} (strap or supply sense)")
+        elif cfg and sch["rail"]:
+            row.update(status="needs_review", reason=f"configured as {cfg['signal']} but tied to the rail {sch['net']}: "
+                                                     "check the direction, a driven output here is a short")
         elif cfg:
             ok, why = name_match(sch["net"], cfg["signal"], cfg.get("label"))
             row.update(status="pass" if ok else "needs_review", reason=why)
-        elif sch["connected"] and POWER_NET.search(sch["net"] or ""):
+        elif sch["connected"] and sch["rail"]:
             row.update(status="info", reason=f"not configured in CubeMX; tied to {sch['net']}")
         elif sch["connected"]:
             row.update(status="needs_review", reason="connected in the schematic, not configured in CubeMX")
@@ -188,7 +242,7 @@ def compare(ioc: dict, pins: dict) -> list[dict]:
 
 def _pin_order(pin: str):
     m = PORT_PIN.match(pin)
-    return (m.group(1), int(m.group(2))) if m else (pin, 0)
+    return (m.group(1), int(m.group(2)), bool(m.group(3))) if m else (pin, 0, False)
 
 
 def check(circuit: dict, ioc_path, ref: str | None = None) -> dict:

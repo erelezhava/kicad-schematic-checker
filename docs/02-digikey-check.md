@@ -18,8 +18,17 @@ python3 -m kicad_checker digikey-check runs/board-001/circuit.json --output runs
 
 Open `runs/board-001-dk/digikey.md`.
 
-`digikey-fetch --refresh` re-downloads parts already in the cache. Use it before a build
-review: lifecycle and stock change.
+What `digikey-fetch` asks DigiKey again, without any option:
+
+- answers older than 30 days (lifecycle and stock change); `--max-age DAYS` changes the limit,
+  `--max-age 0` keeps any age. `digikey.md` states the age of the data it used.
+- lookups that failed last time (HTTP 401, 429, 5xx). A failure is never kept as an answer.
+
+`--refresh` asks again for every part. If a renewal fails, the older good answer is kept.
+
+Rate limit (HTTP 429): the tool waits once when DigiKey asks for a short pause. If the limit
+is still hit, typically the daily quota, it stops and reports how many parts were not asked.
+Run it again later; what is already cached stays.
 
 ## What it checks
 
@@ -60,6 +69,8 @@ name says why in the preview.
 Safety: never overwrites a value; previews unless `--apply`; the symbol's MPN must still match
 the MPN DigiKey was asked about (a renumbered or changed part is skipped); edits only the active
 design (root sheet + its sub-sheets, never `.history/`); refuses while KiCad has the file open.
+Every changed file is checked to still parse and then replaced in one step, so an interrupted
+run cannot leave a half-written schematic; line endings stay as they were (also on Windows).
 Then `git diff` in your design repo, **Update PCB from Schematic (F8)**, and run the checks again.
 
 `tools/fill_fields.py DIGIKEY_JSON PROJECT [--apply]` still works and does the same.
@@ -68,7 +79,8 @@ Then `git diff` in your design repo, **Update PCB from Schematic (F8)**, and run
 
 - `DigiKey credentials missing` — fill `.env`. Results stay `unknown`, never "pass".
 - `DigiKey lists <MPN> under <X>, not <Y>` — fix the Manufacturer spelling in KiCad.
-- The daily quota is per DigiKey app. The cache means each MPN costs one call, across all
-  projects.
+- The daily quota is per DigiKey app. The cache means each MPN costs one call per 30 days,
+  across all projects.
+- `DigiKey lookup failed (HTTP ...)` in the report: run `digikey-fetch` again, it retries those.
 
 **Next:** [3. Collect datasheets](03-datasheets.md) or [5. Check stock](05-inventory-check.md)

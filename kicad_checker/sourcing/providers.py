@@ -32,7 +32,7 @@ MANUFACTURER_SUFFIXES = {"inc", "incorporated", "corp", "corporation", "co", "co
                          "plc", "gmbh", "ag", "sa", "nv", "bv", "srl", "spa", "kk", "oy", "ab", "technologies",
                          "technology", "electronics", "electronic", "semiconductor", "semiconductors", "components",
                          "international", "group", "holdings", "industries", "usa", "america", "north", "europe", "the",
-                         "elektronik", "corporation"}
+                         "elektronik"}
 # Reviewed brand/short-name aliases (key after suffix removal -> canonical key).
 MANUFACTURER_ALIASES = {"ti": "texas instruments", "st": "stmicroelectronics", "stmicro": "stmicroelectronics",
                         "adi": "analog devices", "on": "onsemi", "on semiconductor": "onsemi", "on semi": "onsemi",

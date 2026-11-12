@@ -1,6 +1,5 @@
 """`kicad_checker fill-manufacturer`: report discovery, alias rules, MPN guard, run summary hint."""
 
-import argparse
 import io
 import json
 import shutil

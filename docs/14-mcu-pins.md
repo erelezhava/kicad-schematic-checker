@@ -23,13 +23,21 @@ The MCU is the part whose MPN/Value matches the `.ioc` (`Mcu.CPN`, or `Mcu.Name`
 
 | Status | When |
 | --- | --- |
-| fail | a pin CubeMX configures sits on a power or ground net |
+| fail | a pin CubeMX **drives** (`GPIO_Output`, `..._TX`, MCO) is tied to a supply rail or ground |
+| needs_review | a pin with a signal of unknown direction (timer channel, SPI line …) is tied to a rail |
 | needs_review | configured in CubeMX, unconnected in the schematic |
 | needs_review | net name does not resemble the CubeMX signal or GPIO label, or names the opposite role (net `..._TX` on a `UARTx_RX` pin) |
 | needs_review | connected to a signal net in the schematic, not configured in CubeMX |
 | needs_review | CubeMX uses a pin the symbol does not have (package/symbol mismatch) |
-| info | unused pin tied to a power or ground net |
+| info | unused pin, or an **input** (`GPIO_Input`, ADC, EXTI, `..._RX`), tied to a rail: straps and supply sensing are normal |
 | pass | configured and connected to a net whose name matches the signal or label |
+
+A net is a rail when another pin on it is a power pin in the schematic (pin type power input or
+power output), or when its name is exactly a rail name (`GND`, `VDD`, `+3V3` …). A name that only
+contains one (`VBAT_SENSE`, `VDD_EN`, `+3V3_PG`) is an ordinary signal and is compared by name.
+
+STM32H7 `PC2_C` / `PC3_C` are kept apart from `PC2` / `PC3`. If the symbol and CubeMX disagree
+only on the suffix (one side has `PC2_C`, the other only `PC2`), they are treated as the same pin.
 
 Name matching ignores case, separators and the sheet path, and treats common variants as equal
 (QUADSPI = QSPI, BANK = BK, D+ = DP, D- = DM, NCS/NSS = CS, SCK = CLK, USART = UART). A name

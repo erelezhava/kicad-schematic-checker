@@ -9,7 +9,7 @@ Get the tool running on your machine, with your own keys. Ten minutes, once.
 | Need | Required? | Why |
 | --- | --- | --- |
 | Python 3.10+ | yes | Runs everything. Standard library only: no `pip install` |
-| KiCad 10 with `kicad-cli` on PATH | for `.kicad_pro` input | Reads the saved project. Not needed if you pass an exported netlist or `circuit.json` |
+| KiCad 10 with `kicad-cli` | for `.kicad_pro` input | Reads the saved project. Found on PATH or in the usual install folder (Linux, macOS, Windows); otherwise set `KICAD_CLI` to its full path. Not needed if you pass an exported netlist or `circuit.json` |
 | `pdftotext` | optional | Datasheet text search: `sudo apt install poppler-utils` |
 | DigiKey API keys | optional | Catalog checks, stock, alternatives. Without them those results stay `unknown` |
 | LCSC / JLCPCB API keys | optional | LCSC and JLCPCB stock columns (not yet tested live) |
@@ -25,6 +25,13 @@ mkdir -p stock                             # stock exports go here (git-ignored)
 ```
 
 Check KiCad: `kicad-cli version` should print 10.x.
+
+Optional, to run it from any folder: `pip install -e .` in the checker folder (or
+`pipx install .`) adds the commands `kicad-check`, `refplane` and `jlcpcb-rules`;
+`kicad-check run ~/projects/board` is then the same as `python3 -m kicad_checker run ...`.
+An editable install (`-e`) keeps `.env` and `cache/` in the checker folder. A plain install
+keeps the cache in `~/.cache/kicad_checker` (or `KICAD_CHECKER_CACHE`) and reads keys from
+`~/.config/kicad_checker/credentials.env` or the environment.
 
 ## Keys
 

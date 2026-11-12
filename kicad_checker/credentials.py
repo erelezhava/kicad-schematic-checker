@@ -12,6 +12,11 @@ import os
 from pathlib import Path
 
 REPO_ENV = Path(__file__).resolve().parents[1] / ".env"
+# Every credential the tools read. Used to keep their values out of logs even when .env.example
+# is not next to the code (an installed copy).
+KNOWN_KEYS = ("DIGIKEY_CLIENT_ID", "DIGIKEY_CLIENT_SECRET", "LCSC_APP_KEY", "LCSC_APP_SECRET",
+              "JLCPCB_APP_ID", "JLCPCB_ACCESS_KEY", "JLCPCB_SECRET_KEY", "MOUSER_API_KEY",
+              "NEXAR_CLIENT_ID", "NEXAR_CLIENT_SECRET")
 USER_ENV = Path.home() / ".config" / "kicad_checker" / "credentials.env"
 
 

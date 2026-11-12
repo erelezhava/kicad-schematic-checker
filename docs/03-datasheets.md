@@ -24,6 +24,12 @@ doesn't state; add `--all` when you need them.
    file named after the part family matches: `DS_stm32h743vi.pdf` for `STM32H743VIH6` (a prefix
    of at least 8 characters and ¾ of the MPN; the ordering-code suffix is not checked).
    `run` searches `docs/` next to the `.kicad_pro` and in every parent folder up to the git root.
+   A design that is not in a git repository gets only its own folder and the one above it. The
+   home folder is never searched, so `~/Documents` is not mistaken for project documents.
+
+   A match by text or by family name does not tie the file to this exact part (an application
+   note or an MCU datasheet can mention another part's number). Those rows read
+   `found (verify)`: open the PDF once and confirm it.
 2. **Shared cache:** `cache/datasheets/` (PDFs stored by hash, with extracted text).
 3. **Download** from DigiKey's datasheet link (run `digikey-fetch` first): https first, 60 s
    limit, real PDFs only.

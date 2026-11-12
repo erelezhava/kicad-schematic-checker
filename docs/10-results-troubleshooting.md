@@ -43,7 +43,7 @@ design that wasn't copied exactly.
 | `… already exists (reports are never overwritten)` | Use a new `--output` folder |
 | `No live source hashes. Use --snapshot …` | `review` on an imported netlist: add `--snapshot` |
 | `--boards is required when not running in a terminal` | Add `--boards N` |
-| `kicad-cli not found` | Install KiCad 10 and put `kicad-cli` on PATH, or pass a netlist / `circuit.json` |
+| `kicad-cli not found` | Install KiCad 10 and put `kicad-cli` on PATH, or set `KICAD_CLI` to its full path, or pass a netlist / `circuit.json` |
 | `Project changed during export; save it and retry` | Save in KiCad, run again |
 | `No header row with a quantity column …` | `--column quantity="<header>" --column mpn="<header>"` |
 | `DigiKey credentials missing` | Fill `.env` ([Setup](00-setup.md#keys)). Results stay `unknown` |

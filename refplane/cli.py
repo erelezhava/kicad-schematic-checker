@@ -6,6 +6,8 @@ import argparse
 import datetime as _dt
 import json
 import math
+import os
+import re
 import shutil
 import subprocess
 import sys
@@ -13,7 +15,7 @@ import tempfile
 from pathlib import Path
 
 from . import report
-from .check import (REF_ROLES, ROLES, TRACE_ROLES, Config, format_roles, guess_ref_nets, guess_roles,
+from .check import (ROLES, TRACE_ROLES, Config, format_roles, guess_ref_nets, guess_roles,
                     parse_roles, run)
 from .pcb import Board, read_board
 from .project import load_netclasses, wildcard_match
@@ -36,16 +38,27 @@ def resolve_board(path: Path) -> Path:
     return path
 
 
-def find_kicad_cli(explicit: str | None) -> str | None:
+def find_kicad_cli(explicit: str | None = None) -> str | None:
+    """kicad-cli to use: --kicad-cli, then the KICAD_CLI environment variable, then PATH, then the
+    usual install folders (newest KiCad first on Windows). The one finder for every tool in this repo."""
     if explicit:
         return explicit
+    env = os.environ.get("KICAD_CLI")
+    if env:
+        return env
     found = shutil.which("kicad-cli")
     if found:
         return found
+
+    def version(path: Path):
+        return tuple(int(n) for n in re.findall(r"\d+", path.parent.parent.name))
+
+    windows = []
+    for base in (os.environ.get("ProgramFiles"), os.environ.get("ProgramW6432"), r"C:\Program Files"):
+        if base and Path(base, "KiCad").is_dir():
+            windows += sorted(Path(base, "KiCad").glob("*/bin/kicad-cli.exe"), key=version, reverse=True)
     for cand in ("/usr/bin/kicad-cli", "/usr/local/bin/kicad-cli",
-                 "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli",
-                 r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe",
-                 r"C:\Program Files\KiCad\9.0\bin\kicad-cli.exe"):
+                 "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli", *map(str, windows)):
         if Path(cand).exists():
             return cand
     return None
@@ -442,7 +455,19 @@ def cmd_info(args) -> int:
     return 0
 
 
+def _utf8_console() -> None:
+    """Reports use characters such as ≥, µ and →. A console or pipe with a legacy code page
+    (Windows cp1252) must not turn them into a crash."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if (stream.encoding or "").lower().replace("-", "") != "utf8":
+                stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass  # a replaced stream (tests, the run log tee): leave it alone
+
+
 def main(argv=None) -> int:
+    _utf8_console()
     ap = argparse.ArgumentParser(prog="python3 -m refplane",
                                  description="Check that routed nets run over an unbroken reference plane")
     sub = ap.add_subparsers(dest="cmd", required=True)

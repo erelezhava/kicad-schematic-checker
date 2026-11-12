@@ -36,6 +36,8 @@ API = "https://api.digikey.com"
 LOCALE = {"X-DIGIKEY-Locale-Site": "US", "X-DIGIKEY-Locale-Language": "en", "X-DIGIKEY-Locale-Currency": "USD"}
 CACHE_SCHEMA = 1
 DEFAULT_CACHE = CACHE_ROOT / "digikey"
+MAX_AGE_DAYS = 30        # digikey-fetch asks again for answers older than this (lifecycle changes)
+RATE_LIMIT_WAIT = 90     # longest pause (s) honoured after HTTP 429; a longer Retry-After stops the fetch
 ACTIVE = {"active"}
 
 
@@ -53,6 +55,7 @@ class DigiKeyClient:
         self.client_id, self.secret, self.api = client_id, secret, api
         self.min_interval, self.opener = min_interval, opener
         self.token, self.last_call = None, 0.0
+        self.retry_after = None  # seconds asked for by the last HTTP 429 (Retry-After header), if any
 
     def _request(self, request):
         wait = self.min_interval - (time.monotonic() - self.last_call)
@@ -65,6 +68,8 @@ class DigiKeyClient:
         except urllib.error.HTTPError as error:
             with error:
                 text = error.read().decode(errors="replace")
+                if error.code == 429:
+                    self.retry_after = _seconds((error.headers or {}).get("Retry-After"))
             try:
                 body = json.loads(text)
             except json.JSONDecodeError:
@@ -78,7 +83,8 @@ class DigiKeyClient:
                                          headers={"Content-Type": "application/x-www-form-urlencoded"})
         status, data = self._request(request)
         if status != 200 or "access_token" not in data:
-            raise ValueError(f"DigiKey authentication failed (HTTP {status}): {data.get('error_description') or data.get('detail') or data}")
+            reason = data.get("error_description") or data.get("detail") or data.get("title") or "no reason given"
+            raise ValueError(f"DigiKey authentication failed (HTTP {status}): {str(reason)[:200]}")
         self.token = data["access_token"]
 
     def categories(self, retried=False):
@@ -115,9 +121,18 @@ class DigiKeyClient:
             self.token = None
             return self.keyword(mpn, retried=True, limit=limit, offset=offset, filters=filters, sort=sort)
         if status == 429 and not retried:
-            time.sleep(60)
-            return self.keyword(mpn, retried=True, limit=limit, offset=offset, filters=filters, sort=sort)
+            wait = 60 if self.retry_after is None else self.retry_after
+            if wait <= RATE_LIMIT_WAIT:  # a short burst limit: wait once. A daily quota is not worth waiting for.
+                time.sleep(wait)
+                return self.keyword(mpn, retried=True, limit=limit, offset=offset, filters=filters, sort=sort)
         return status, body
+
+
+def _seconds(value):
+    try:
+        return max(0.0, float(value))
+    except (TypeError, ValueError):
+        return None
 
 
 # --- cache ------------------------------------------------------------------------
@@ -173,20 +188,60 @@ def circuit_mpns(circuit):
     return mpns
 
 
-def fetch(circuit, cache_dir, client, refresh=False, log=print):
-    summary = {"fetched": 0, "cached": 0, "errors": 0}
-    for mpn in circuit_mpns(circuit):
-        if not refresh and load(cache_dir, mpn) is not None:
+def entry_age_days(entry, now=None):
+    """Age of a cache entry in days; None when it carries no readable fetched_at."""
+    try:
+        fetched = datetime.fromisoformat(str(entry.get("fetched_at")))
+    except (TypeError, ValueError):
+        return None
+    if fetched.tzinfo is None:
+        fetched = fetched.replace(tzinfo=timezone.utc)
+    return ((now or datetime.now(timezone.utc)) - fetched).total_seconds() / 86400
+
+
+def usable(entry, max_age_days=MAX_AGE_DAYS, now=None):
+    """A cached answer fetch may keep: a successful lookup that is not older than max_age_days.
+
+    Failed lookups (401, 429, 5xx ...) stay in the cache so the report can say why a part has no
+    data, but they are never treated as an answer: the next fetch asks again.
+    max_age_days None or 0 = any age.
+    """
+    if entry is None or entry.get("http_status") != 200:
+        return False
+    if not max_age_days:
+        return True
+    age = entry_age_days(entry, now)
+    return age is not None and age <= max_age_days
+
+
+def fetch(circuit, cache_dir, client, refresh=False, log=print, max_age_days=MAX_AGE_DAYS):
+    summary = {"fetched": 0, "cached": 0, "errors": 0, "not_attempted": 0}
+    mpns = list(circuit_mpns(circuit))
+    for index, mpn in enumerate(mpns):
+        old = load(cache_dir, mpn)
+        if not refresh and usable(old, max_age_days):
             summary["cached"] += 1
             continue
         status, body = client.keyword(mpn)
-        entry = store(cache_dir, mpn, status, body)
         if status == 200:
+            entry = store(cache_dir, mpn, status, body)
             summary["fetched"] += 1
             log(f"{mpn}: {len(entry['exact_matches'])} exact match(es)")
+            continue
+        summary["errors"] += 1
+        if old is not None and old.get("http_status") == 200:
+            # keep the older good answer rather than replace it with an error
+            log(f"{mpn}: HTTP {status}; keeping the answer of {old.get('fetched_at')}")
         else:
-            summary["errors"] += 1
+            entry = store(cache_dir, mpn, status, body)
             log(f"{mpn}: HTTP {status} {entry.get('error')}")
+        if status == 429:
+            # Still limited after the one wait in keyword(): the remaining parts would fail the same way.
+            summary["not_attempted"] = sum(1 for m in mpns[index + 1:]
+                                           if refresh or not usable(load(cache_dir, m), max_age_days))
+            log(f"DigiKey rate limit reached (HTTP 429): stopped, {summary['not_attempted']} part(s) not asked. "
+                "Run digikey-fetch again later; answers already cached are kept.")
+            break
     return summary
 
 
@@ -391,7 +446,8 @@ def audit_component(ref, component, cache_dir):
         return item
     item["fetched_at"] = entry.get("fetched_at")
     if entry.get("http_status") != 200:
-        item.update(status="needs_review", reason=f"DigiKey lookup failed (HTTP {entry.get('http_status')}): {entry.get('error')}")
+        item.update(status="needs_review", reason=f"DigiKey lookup failed (HTTP {entry.get('http_status')}): {entry.get('error')}. "
+                                                   "Run digikey-fetch again; failed lookups are retried")
         return item
     products = [p for p in entry.get("exact_matches", []) if mpn_key(p.get("ManufacturerProductNumber", "")) == mpn_key(mpn)]
     if not products:
@@ -457,8 +513,13 @@ def audit_component(ref, component, cache_dir):
 
 def digikey_audit(circuit, cache_dir):
     results = [audit_component(ref, component, cache_dir) for ref, component in sorted(circuit["components"].items())]
+    stamps = sorted(r["fetched_at"] for r in results if r.get("fetched_at"))
+    oldest_days = entry_age_days({"fetched_at": stamps[0]}) if stamps else None
     return {
         "schema_version": 1,
+        "data_age": {"oldest": stamps[0] if stamps else None, "newest": stamps[-1] if stamps else None,
+                     "oldest_days": round(oldest_days, 1) if oldest_days is not None else None,
+                     "max_age_days": MAX_AGE_DAYS},
         "scope": ("Exact-MPN DigiKey catalog data (cached) compared with the saved schematic: identity, lifecycle, "
                   "category, package vs footprint size, and for R/C/L value and ratings vs Value, Description and "
                   "rating fields. Distributor catalog data, not manufacturer evidence; a pass does not establish suitability."),
@@ -475,6 +536,12 @@ def digikey_markdown(report, heading=1):
 
     lines = ["#" * heading + " DigiKey cross-check", "", report["scope"], ""]
     lines.extend(f"- {status}: {count}" for status, count in report["coverage"].items())
+    age = report.get("data_age") or {}
+    if age.get("oldest"):
+        old = age.get("oldest_days") is not None and age["oldest_days"] > age.get("max_age_days", MAX_AGE_DAYS)
+        lines.extend(["", f"DigiKey answers fetched between {age['oldest']} and {age['newest']}."
+                      + (f" **The oldest is {age['oldest_days']:.0f} days old: lifecycle status may have changed; "
+                         "run digikey-fetch (online) to renew.**" if old else "")])
     lines.extend(["", "| Component | MPN | DigiKey | Status | Reason |", "| --- | --- | --- | --- | --- |"])
     for item in report["results"]:
         dk = item.get("digikey") or {}

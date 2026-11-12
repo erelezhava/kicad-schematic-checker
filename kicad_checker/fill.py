@@ -15,6 +15,8 @@ Safety rules:
     stated family rule) or --prefer; otherwise skipped for the owner to choose
   * edits only the active design (root sheet + referenced sub-sheets), never .history copies
   * refuses to write while KiCad has a schematic open (lock file)
+  * every changed file is checked to still parse, then replaced in one step (temporary file +
+    rename), so an interrupted run cannot leave a half-written schematic; line endings are kept
   * --backup keeps *.kicad_sch.bak-<time>; with the design in git, `git diff` shows every change
 """
 
@@ -22,7 +24,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -100,9 +104,30 @@ def symbol_refs(symbol):
     return refs
 
 
+def read_exact(path: Path) -> str:
+    """File text with its line endings untouched (no newline translation on any platform)."""
+    with open(path, encoding="utf-8", newline="") as handle:
+        return handle.read()
+
+
+def write_atomic(path: Path, text: str) -> None:
+    """Replace `path` in one step: a crash or full disk leaves the old file, never a partial one."""
+    tmp = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    try:
+        with open(tmp, "w", encoding="utf-8", newline="") as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        shutil.copymode(path, tmp)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
 def plan_file(path: Path, wanted: dict, field: str = "Manufacturer"):
     """Return (text, edits, notes). edits = [(start, end, replacement)]."""
-    text = path.read_text(encoding="utf-8")
+    text = read_exact(path)
+    newline = "\r\n" if "\r\n" in text else "\n"
     root = parse(text)
     edits, notes = [], []
     for symbol in root.children("symbol"):  # placed symbols only; lib_symbols is a different node
@@ -126,7 +151,7 @@ def plan_file(path: Path, wanted: dict, field: str = "Manufacturer"):
             notes.append(f"  skip {ref}: already has {field} = {filled[0]!r}")
             continue
         if aliases:  # an empty alias field exists (e.g. Manufacturer_Name ""): fill it in place
-            prop, s = aliases[0]
+            _prop, s = aliases[0]
             edits.append((s[1][2], s[1][3], quote(value)))
             notes.append(f"  set  {ref}: {s[0][1]} = {value!r} (existing empty field){why}")
             continue
@@ -138,7 +163,7 @@ def plan_file(path: Path, wanted: dict, field: str = "Manufacturer"):
         new = (f"\n{indent}(property {quote(field)} {quote(value)}\n{indent}\t{position}"
                f"\n{indent}\t(effects\n{indent}\t\t(font\n{indent}\t\t\t(size 1.27 1.27)\n{indent}\t\t)"
                f"\n{indent}\t\t(hide yes)\n{indent}\t)\n{indent})")
-        edits.append((last.end, last.end, new))
+        edits.append((last.end, last.end, new.replace("\n", newline)))
         notes.append(f"  add  {ref}: {field} = {value!r} (new hidden field){why}")
     return text, edits, notes
 
@@ -202,13 +227,18 @@ def run(args) -> int:
         return 0
     check_locks(plans)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    changed = []
     for path, text, edits in plans:
-        if args.backup:
-            path.with_name(f"{path.name}.bak-{stamp}").write_text(text, encoding="utf-8")
+        new = text
         for start, end, replacement in sorted(edits, reverse=True):
-            text = text[:start] + replacement + text[end:]
-        parse(text)  # refuse to leave a broken file behind
-        path.write_text(text, encoding="utf-8")
+            new = new[:start] + replacement + new[end:]
+        parse(new)  # refuse to leave a broken file behind
+        changed.append((path, text, new))
+    for path, text, new in changed:  # nothing is written until every file has been checked
+        if args.backup:
+            with open(path.with_name(f"{path.name}.bak-{stamp}"), "w", encoding="utf-8", newline="") as handle:
+                handle.write(text)
+        write_atomic(path, new)
     kept = f"; backups *.bak-{stamp}" if args.backup else ""
     print(f"\nWrote {total} change(s) in {len(plans)} file(s){kept}. Review with `git diff`, run Update PCB from "
           "Schematic (F8) in KiCad, then run the checks again.")

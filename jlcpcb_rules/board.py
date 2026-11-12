@@ -14,6 +14,14 @@ from pathlib import Path
 _TOKEN = re.compile(r'\(|\)|"(?:[^"\\]|\\.)*"|[^\s()"]+')
 
 
+_ESCAPES = {"n": "\n", "t": "\t", "r": "\r"}
+
+
+def _unescape(body: str) -> str:
+    """KiCad string escapes (\\" \\\\ \\n). Non-ASCII text is left exactly as written."""
+    return re.sub(r"\\(.)", lambda m: _ESCAPES.get(m.group(1), m.group(1)), body, flags=re.S)
+
+
 def parse_sexpr(text: str):
     """Parse S-expression text into nested lists. Strings lose their quotes."""
     stack: list[list] = [[]]
@@ -27,8 +35,7 @@ def parse_sexpr(text: str):
             node = stack.pop()
             stack[-1].append(node)
         elif tok.startswith('"'):
-            stack[-1].append(bytes(tok[1:-1], "utf-8").decode("unicode_escape")
-                             if "\\" in tok else tok[1:-1])
+            stack[-1].append(_unescape(tok[1:-1]) if "\\" in tok else tok[1:-1])
         else:
             stack[-1].append(tok)
     if len(stack) != 1:
@@ -86,6 +93,7 @@ class BoardInfo:
     default_via_capped: bool = False
     default_tenting: dict = field(default_factory=lambda: {"front": True, "back": True})
     mask_expansion: float = 0.0          # board setup: solder mask expansion (pad_to_mask_clearance)
+    file_version: int | None = None      # (version 20260206): KiCad 10; 2024xxxx: KiCad 8/9
     vias: list[dict] = field(default_factory=list)
     pads: list[dict] = field(default_factory=list)
 
@@ -215,6 +223,11 @@ def read_board(path: str | Path) -> BoardInfo:
     pcb = root[0]
     info = BoardInfo(path=path)
 
+    version = _value(pcb, "version")
+    info.file_version = int(version) if str(version).isdigit() else None
+    # Net table: KiCad 9 and older write (net 12) on vias and tracks and name the net only here.
+    netmap = {str(n[1]): n[2] for n in _children(pcb, "net") if len(n) >= 3}
+
     layers = _child(pcb, "layers")
     if layers:
         for entry in layers[1:]:
@@ -261,17 +274,17 @@ def read_board(path: str | Path) -> BoardInfo:
             if isinstance(item, list) and item and item[0].startswith("fp_") and _value(item, "layer") == "Edge.Cuts":
                 pts += [_to_board(fx, fy, rot, x, y) for x, y in _shape_points(item)]
         for pad in _children(fp, "pad"):
-            info.pads.append(_pad_summary(fp, pad, fx, fy, rot))
+            info.pads.append(_pad_summary(fp, pad, fx, fy, rot, netmap))
     if pts:
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         info.outline_bbox = (min(xs), min(ys), max(xs), max(ys))
 
     for via in _children(pcb, "via"):
-        info.vias.append(_via_summary(via))
+        info.vias.append(_via_summary(via, netmap))
     return info
 
 
-def _via_summary(via) -> dict:
+def _via_summary(via, netmap=None) -> dict:
     kind = "through"
     if len(via) > 1 and via[1] in ("blind", "buried", "micro"):
         kind = via[1]
@@ -284,7 +297,7 @@ def _via_summary(via) -> dict:
         "at": _xy(at) if at else None,
         "diameter": float(size) if _is_number(size) else None,
         "hole": float(drill) if _is_number(drill) else None,
-        "net": _net(via),
+        "net": _net(via, netmap),
         "layers": [l for l in layers[1:] if isinstance(l, str)] if layers else [],
         "tenting": _tenting(_child(via, "tenting")),     # None or {"front": bool|None, "back": ...}
         "backdrill": _child(via, "backdrill") is not None,
@@ -297,14 +310,17 @@ def _has_post_machining(node) -> bool:
                for key in ("front_post_machining", "back_post_machining"))
 
 
-def _net(node) -> str | None:
-    """Net name: KiCad 10 writes (net "GND"), older files (net 3 "GND")."""
+def _net(node, netmap=None) -> str | None:
+    """Net name. KiCad 10 writes (net "GND"); older files (net 3 "GND") on pads and (net 3) on
+    vias and tracks, where the name comes from the board's net table."""
     n = _child(node, "net")
     if n is None or len(n) < 2:
         return None
     if len(n) >= 3:
         return n[2] or None
-    return None if _is_number(n[1]) else (n[1] or None)
+    if _is_number(n[1]):
+        return (netmap or {}).get(str(n[1])) or None
+    return n[1] or None
 
 
 def _tenting(node) -> dict | None:
@@ -325,7 +341,7 @@ def _tenting(node) -> dict | None:
     return out
 
 
-def _pad_summary(fp, pad, fx=0.0, fy=0.0, rot=0.0) -> dict:
+def _pad_summary(fp, pad, fx=0.0, fy=0.0, rot=0.0, netmap=None) -> dict:
     ref = None
     for prop in _children(fp, "property"):
         if len(prop) > 2 and prop[1] == "Reference":
@@ -353,7 +369,7 @@ def _pad_summary(fp, pad, fx=0.0, fy=0.0, rot=0.0) -> dict:
         "xy": _to_board(fx, fy, rot, *local),               # board coordinates
         "angle": angle,                                     # absolute pad orientation, degrees
         "size": _xy(size) if size else None,
-        "net": _net(pad),
+        "net": _net(pad, netmap),
         "layers": [l for l in layers[1:] if isinstance(l, str)] if layers else [],
         "rratio": float(rr) if _is_number(rr) else 0.25,
         "mask_margin": float(pad_m) if _is_number(pad_m) else float(fp_m) if _is_number(fp_m) else None,

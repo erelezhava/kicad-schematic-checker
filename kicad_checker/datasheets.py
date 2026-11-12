@@ -36,6 +36,8 @@ DOC_FOLDER_NAMES = {"docs", "doc", "documents", "documentation", "datasheets", "
 MAX_BYTES = 60 * 1024 * 1024
 READ_TIMEOUT = 20   # seconds without any data
 TOTAL_SECONDS = 60  # hard limit per file
+# match_local() reasons that do not tie the file to this exact part
+WEAK_REASONS = ("document text lists the MPN", "file name matches the part family")
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) kicad-checker datasheet fetch"
 
 
@@ -187,7 +189,10 @@ def _fetch(url, partial, opener, deadline, total_seconds):
 
 
 def candidate_urls(url):
-    """https first for an http:// link (many sites stall or block plain http), then the original."""
+    """https first for an http:// link (many sites stall or block plain http), then the original.
+    Anything that is not a web address (file:, ftp: ...) gives no candidates."""
+    if not url.startswith(("//", "http://", "https://")):
+        return []
     if url.startswith("//"):
         return ["https:" + url]
     if url.startswith("http://"):
@@ -199,6 +204,8 @@ def download(url, cache_dir, mpn, opener=urllib.request.urlopen, total_seconds=T
     """Download a PDF into the cache. Returns (entry, None) or (None, reason)."""
     if not url:
         return None, "DigiKey lists no datasheet URL"
+    if not candidate_urls(url):
+        return None, "the DigiKey datasheet link is not an http(s) address"
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     partial = cache_dir / f".download-{hashlib.sha256(url.encode()).hexdigest()[:12]}.part"
@@ -267,6 +274,8 @@ def find_datasheets(circuit, cache_dir=DEFAULT_CACHE, digikey_cache=digikey.DEFA
                         + ". Keep one or rename the right one to contain the MPN")
         elif found:
             item.update(status="found", source="project_docs", path=str(found), sha256=sha256_file(found), reason=reason)
+            if reason.startswith(WEAK_REASONS):
+                item["verify"] = True  # the PDF mentions the part or its family; it may be about another part
         elif (hit := cached(cache_dir, mpn)):
             item.update(status="found", source="cache", path=str(cache_dir / hit["file"]), sha256=hit["sha256"],
                         reason=f"downloaded earlier from {hit['url']}")
@@ -292,6 +301,7 @@ def find_datasheets(circuit, cache_dir=DEFAULT_CACHE, digikey_cache=digikey.DEFA
         "cache_dir": str(cache_dir),
         "pdftotext": pdftotext_available(),
         "coverage": {s: sum(r["status"] == s for r in results) for s in ("found", "needs_review", "missing")},
+        "found_to_verify": sum(1 for r in results if r.get("verify")),
         "results": results,
     }
 
@@ -307,8 +317,12 @@ def datasheets_markdown(report):
         lines.extend(["`pdftotext` is not installed, so PDFs were matched by file name only "
                       "(install poppler-utils for text matching).", ""])
     lines.extend(f"- {status}: {count}" for status, count in report["coverage"].items())
+    if report.get("found_to_verify"):
+        lines.extend(["", f"{report['found_to_verify']} of the found PDFs matched only by document text or family name "
+                      "(`found (verify)` below): open them and confirm they are the datasheet of that part."])
     lines.extend(["", "| MPN | Parts | Status | Source | File | Why |", "| --- | --- | --- | --- | --- | --- |"])
     for item in report["results"]:
-        lines.append("| " + " | ".join(cell(v) for v in (item["mpn"], ", ".join(item["references"]), item["status"],
+        lines.append("| " + " | ".join(cell(v) for v in (item["mpn"], ", ".join(item["references"]),
+                                                         item["status"] + (" (verify)" if item.get("verify") else ""),
                                                          item.get("source"), item.get("path"), item.get("reason"))) + " |")
     return "\n".join(lines) + "\n"

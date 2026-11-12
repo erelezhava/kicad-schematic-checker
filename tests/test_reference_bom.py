@@ -13,7 +13,7 @@ from kicad_checker.cli import main
 from kicad_checker.sourcing.partslist import count_references
 from kicad_checker.sourcing.stockfile import alternate_of, load_stock, parse_fitted
 from kicad_checker.sourcing.providers import DigiKeyCatalog
-from tests.test_partslist import RES, product
+from tests.test_partslist import product
 
 TI_BOM = """Designator,Quantity,Value,Description,PackageReference,PartNumber,Manufacturer,Alternate PartNumber,Alternate Manufacturer
 !PCB1,1,,Printed Circuit Board,,LP5912EVM,Any,-,-

@@ -146,7 +146,19 @@ def cmd_presets(args) -> int:
     return 0
 
 
+def _utf8_console() -> None:
+    """Reports use characters such as ≥, µ and →. A console or pipe with a legacy code page
+    (Windows cp1252) must not turn them into a crash."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if (stream.encoding or "").lower().replace("-", "") != "utf8":
+                stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass  # a replaced stream (tests, the run log tee): leave it alone
+
+
 def main(argv=None) -> int:
+    _utf8_console()
     ap = argparse.ArgumentParser(prog="python3 -m jlcpcb_rules",
                                  description="JLCPCB manufacturing rules for KiCad 10")
     sub = ap.add_subparsers(dest="cmd", required=True)
